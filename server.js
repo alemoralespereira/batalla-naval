@@ -27,7 +27,9 @@ io.on("connection", (socket) => {
         socket.emit("player", { id: socket.id, index: players.length - 1 });
     }
 
+    // Si ya hay dos jugadores, iniciar la partida
     if (players.length === 2) {
+        console.log("🎮 El juego ha comenzado. Jugadores:", players);
         io.emit("gameStart", players);
         io.to(players[turn]).emit("yourTurn");
     }
@@ -60,6 +62,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
 });
-
 
 
