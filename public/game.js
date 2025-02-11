@@ -23,7 +23,6 @@ class BattleGame extends Phaser.Scene {
 
         this.socket.on("gameStart", (players) => {
             console.log("🎮 El juego ha comenzado. Jugadores:", players);
-
             if (players.length === 2) {
                 this.isMyTurn = this.playerIndex === 0;
                 this.updateTurnMessage();
