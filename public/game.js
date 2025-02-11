@@ -30,9 +30,8 @@ class BattleGame extends Phaser.Scene {
             }
         });
 
-        this.socket.on("yourTurn", () => {
-            console.log("✅ Es tu turno.");
-            this.isMyTurn = true;
+        this.socket.on("yourTurn", (isMyTurn) => {
+            this.isMyTurn = isMyTurn;
             this.updateTurnMessage();
         });
 

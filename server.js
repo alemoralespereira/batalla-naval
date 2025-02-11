@@ -27,11 +27,13 @@ io.on("connection", (socket) => {
         socket.emit("player", { id: socket.id, index: players.length - 1 });
     }
 
-    // Si ya hay dos jugadores, iniciar la partida
     if (players.length === 2) {
         console.log("🎮 El juego ha comenzado. Jugadores:", players);
         io.emit("gameStart", players);
-        io.to(players[turn]).emit("yourTurn");
+        
+        // Asignar turno al primer jugador
+        io.to(players[turn]).emit("yourTurn", true);
+        console.log(`✅ Turno asignado a: ${players[turn]}`);
     }
 
     socket.on("shoot", ({ row, col }) => {
@@ -41,7 +43,9 @@ io.on("connection", (socket) => {
 
             // Cambiar turno
             turn = (turn + 1) % 2;
-            io.to(players[turn]).emit("yourTurn");
+            io.to(players[turn]).emit("yourTurn", true);
+            io.to(players[(turn + 1) % 2]).emit("yourTurn", false);
+            console.log(`🔄 Turno cambiado a: ${players[turn]}`);
         }
     });
 
@@ -49,10 +53,9 @@ io.on("connection", (socket) => {
         console.log("❌ Un jugador se ha desconectado:", socket.id);
         players = players.filter((player) => player !== socket.id);
         
-        // Si un jugador se desconecta, reiniciar el juego
         if (players.length < 2) {
             io.emit("playerDisconnected");
-            turn = 0; // Reiniciar turno
+            turn = 0;
         }
     });
 });
@@ -62,5 +65,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
 });
-
-
