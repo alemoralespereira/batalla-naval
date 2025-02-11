@@ -12,12 +12,12 @@ class BattleGame extends Phaser.Scene {
     }
 
     create() {
-        // 🔹 Asegurar conexión con el servidor correcto
+        // 🔹 Conectarse al servidor
         this.socket = io("wss://bismarck.atlassoftware.uy");
 
         this.createGrid();
 
-        // 🔹 Recibir información de asignación de jugador
+        // 🔹 Recibir asignación de jugador
         this.socket.on("player", (data) => {
             console.log(`Jugador asignado: ${data.id}`);
             this.playerIndex = data.index;
@@ -25,15 +25,18 @@ class BattleGame extends Phaser.Scene {
 
         // 🔹 Manejar el inicio del juego
         this.socket.on("gameStart", (players) => {
-            console.log("El juego ha comenzado. Jugadores:", players);
-            this.isMyTurn = this.playerIndex === 0; // Turno inicial para el jugador 0
-            this.updateTurnMessage();
+            console.log("🎮 El juego ha comenzado. Jugadores:", players);
+
+            if (players.length === 2) {
+                this.isMyTurn = this.playerIndex === 0; // Solo el jugador 0 comienza
+                this.updateTurnMessage();
+            }
         });
 
-        // 🔹 Manejar el turno del jugador
+        // 🔹 Cambiar el turno
         this.socket.on("yourTurn", () => {
+            console.log("✅ Es tu turno.");
             this.isMyTurn = true;
-            console.log("Es tu turno.");
             this.updateTurnMessage();
         });
 
@@ -44,7 +47,9 @@ class BattleGame extends Phaser.Scene {
     }
 
     createGrid() {
+        this.tiles = [];
         for (let row = 0; row < this.gridSize; row++) {
+            this.tiles[row] = [];
             for (let col = 0; col < this.gridSize; col++) {
                 let x = col * this.tileSize;
                 let y = row * this.tileSize;
@@ -53,15 +58,19 @@ class BattleGame extends Phaser.Scene {
                     .setOrigin(0, 0)
                     .setInteractive();
 
+                this.tiles[row][col] = tile;
+
                 tile.on("pointerdown", () => {
                     if (this.isMyTurn && !this.attacks.includes(`${row}-${col}`)) {
-                        console.log(`Disparo en fila ${row}, columna ${col}`);
+                        console.log(`🎯 Disparo en fila ${row}, columna ${col}`);
                         this.attacks.push(`${row}-${col}`);
 
                         // 🔹 Enviar disparo al servidor
                         this.socket.emit("shoot", { row, col });
 
-                        // 🔹 Cambiar turno localmente hasta que el servidor lo confirme
+                        // 🔹 Desactivar clics en la celda disparada
+                        tile.removeInteractive();
+                        tile.setTint(0xff0000); // Marcar como disparo
                         this.isMyTurn = false;
                         this.updateTurnMessage();
                     }
@@ -71,20 +80,14 @@ class BattleGame extends Phaser.Scene {
     }
 
     markHit(row, col) {
-        let x = col * this.tileSize;
-        let y = row * this.tileSize;
-        this.add.rectangle(
-            x + this.tileSize / 2,
-            y + this.tileSize / 2,
-            this.tileSize,
-            this.tileSize,
-            0xff0000,
-            0.5
-        );
+        let tile = this.tiles[row][col];
+        if (tile) {
+            tile.setTint(0xff0000);
+        }
     }
 
     updateTurnMessage() {
-        let turnText = this.isMyTurn ? "Tu turno" : "Turno del oponente";
+        let turnText = this.isMyTurn ? "🔥 Tu turno. Dispara!" : "⏳ Turno del oponente...";
         console.log(turnText);
     }
 }
