@@ -25,23 +25,20 @@ io.on("connection", (socket) => {
     socket.on("joinRoom", ({ username, room }) => {
         if (!rooms[room]) return;
 
-        if (rooms[room].length < 2) {
-            rooms[room].push({ id: socket.id, username });
-            socket.join(room);
-            socket.emit("player", { username, room });
-
-            if (rooms[room].length === 2) {
-                io.to(room).emit("gameStart", rooms[room]);
-                io.to(rooms[room][0].id).emit("yourTurn", true);
-                io.to(rooms[room][1].id).emit("yourTurn", false);
-            }
-        } else {
-            socket.emit("roomFull", { message: "La sala está llena, elige otra." });
+        if (rooms[room].length >= 2) {
+            socket.emit("roomFull");
+            return;
         }
-    });
 
-    socket.on("shoot", ({ room, row, col }) => {
-        io.to(room).emit("shotFired", { row, col });
+        rooms[room].push({ id: socket.id, username });
+        socket.join(room);
+        socket.emit("player", { username, room });
+
+        if (rooms[room].length === 2) {
+            io.to(room).emit("gameStart", rooms[room]);
+            io.to(rooms[room][0].id).emit("yourTurn", true);
+            io.to(rooms[room][1].id).emit("yourTurn", false);
+        }
     });
 
     socket.on("disconnect", () => {

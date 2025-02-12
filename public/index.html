@@ -64,6 +64,12 @@
 
             startGame();
         }
+
+        function startGame() {
+            const script = document.createElement("script");
+            script.src = "game.js";
+            document.body.appendChild(script);
+        }
     </script>
 </body>
 </html>

@@ -18,8 +18,12 @@ class BattleGame extends Phaser.Scene {
 
         this.createGrid();
 
-        // Enviar el usuario y la sala al servidor
         this.socket.emit("joinRoom", { username: this.username, room: this.room });
+
+        this.socket.on("roomFull", () => {
+            alert("La sala está llena. Por favor, elige otra.");
+            location.reload();
+        });
 
         this.socket.on("player", (data) => {
             console.log(`🎮 Jugador ${data.username} asignado en la sala ${this.room}`);
@@ -27,6 +31,7 @@ class BattleGame extends Phaser.Scene {
 
         this.socket.on("gameStart", (players) => {
             console.log("🎮 El juego ha comenzado en la sala:", this.room, "con los jugadores:", players);
+            document.getElementById("turno").innerText = "¡El juego ha comenzado!";
         });
 
         this.socket.on("yourTurn", (isMyTurn) => {
@@ -56,7 +61,6 @@ class BattleGame extends Phaser.Scene {
                         tile.removeInteractive();
                         tile.setTint(0xff0000);
                         this.isMyTurn = false;
-                        this.updateTurnMessage();
                     }
                 });
             }
