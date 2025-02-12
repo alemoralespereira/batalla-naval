@@ -5,6 +5,7 @@ class BattleGame extends Phaser.Scene {
         this.tileSize = 50;
         this.attacks = [];
         this.isMyTurn = false;
+        this.room = "";
     }
 
     preload() {
@@ -14,6 +15,12 @@ class BattleGame extends Phaser.Scene {
     create() {
         this.socket = io();
         this.createGrid();
+
+        const username = prompt("Ingrese su nombre de usuario:");
+        const room = prompt("Ingrese la sala (sala1, sala2, sala3):");
+        this.room = room;
+
+        this.socket.emit("joinRoom", { username, room });
 
         this.socket.on("gameStart", () => {
             document.getElementById("turnIndicator").innerHTML = "🔥 Es tu turno!";
@@ -44,7 +51,7 @@ class BattleGame extends Phaser.Scene {
                 tile.on("pointerdown", () => {
                     if (this.isMyTurn && !this.attacks.includes(`${row}-${col}`)) {
                         this.attacks.push(`${row}-${col}`);
-                        this.socket.emit("shoot", { row, col });
+                        this.socket.emit("shoot", { row, col, room: this.room });
                     }
                 });
             }

@@ -7,7 +7,6 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const rooms = { sala1: [], sala2: [], sala3: [] };
 
-// Servir archivos estáticos correctamente
 app.use(express.static("public"));
 app.use("/assets", express.static(__dirname + "/public/assets"));
 
