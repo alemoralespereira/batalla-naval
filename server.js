@@ -13,8 +13,10 @@ const rooms = {
     sala3: []
 };
 
+// Servir archivos estáticos desde "public"
 app.use(express.static(path.join(__dirname, "public")));
 
+// Servir index.html
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -47,15 +49,14 @@ io.on("connection", (socket) => {
         const room = socket.room;
         if (!room || rooms[room].length < 2) return;
 
-        if (socket.id === rooms[room][0]) {
-            io.to(rooms[room][1]).emit("shotFired", { row, col });
-        } else {
-            io.to(rooms[room][0]).emit("shotFired", { row, col });
-        }
+        const opponent = rooms[room].find(id => id !== socket.id);
+        if (!opponent) return;
+
+        io.to(opponent).emit("shotFired", { row, col });
 
         // Cambiar turno
-        const nextTurn = rooms[room].find(id => id !== socket.id);
-        io.to(nextTurn).emit("yourTurn");
+        io.to(opponent).emit("yourTurn");
+        io.to(socket.id).emit("opponentTurn");
     });
 
     socket.on("disconnect", () => {

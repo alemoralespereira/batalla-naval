@@ -9,31 +9,32 @@ class BattleGame extends Phaser.Scene {
 
     preload() {
         this.load.image('water', 'assets/agua.jpg');
-        this.load.image('hit', 'assets/hit.png');
-        this.load.image('miss', 'assets/miss.png');
+        this.load.image('hit', 'assets/hit.png'); // Imagen para impacto
     }
 
     create() {
-        this.socket = window.socket;
+        this.socket = io();
         this.createGrid();
 
-        this.statusText = this.add.text(10, 10, "Esperando jugadores...", {
-            fontSize: '20px',
-            fill: '#ffffff'
+        // Notificación de jugador y sala
+        this.socket.on('playerAssigned', ({ username, room }) => {
+            console.log(`Jugador ${username} asignado en la sala ${room}`);
         });
 
+        // Indicar quién juega
         this.socket.on("yourTurn", () => {
             this.isMyTurn = true;
-            this.statusText.setText("¡Tu turno!");
+            console.log("🔥 Es tu turno!");
         });
 
         this.socket.on("opponentTurn", () => {
             this.isMyTurn = false;
-            this.statusText.setText("Turno del oponente...");
+            console.log("⏳ Turno del oponente...");
         });
 
+        // Disparo recibido
         this.socket.on("shotFired", ({ row, col }) => {
-            this.markShot(row, col);
+            this.markHit(row, col);
         });
     }
 
@@ -41,36 +42,33 @@ class BattleGame extends Phaser.Scene {
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col < this.gridSize; col++) {
                 let x = col * this.tileSize;
-                let y = row * this.tileSize + 50;
+                let y = row * this.tileSize;
                 let tile = this.add.image(x, y, 'water').setOrigin(0, 0).setInteractive();
 
                 tile.on('pointerdown', () => {
                     if (this.isMyTurn && !this.attacks.includes(`${row}-${col}`)) {
-                        console.log(`Disparo en fila ${row}, columna ${col}`);
+                        console.log(`🚀 Disparo en fila ${row}, columna ${col}`);
                         this.attacks.push(`${row}-${col}`);
-                        this.socket.emit("shoot", { row, col });
-                        this.isMyTurn = false;
-                        this.statusText.setText("Esperando respuesta...");
+                        this.socket.emit('shoot', { row, col });
+                        this.isMyTurn = false; // Bloquear clics hasta nuevo turno
                     }
                 });
             }
         }
     }
 
-    markShot(row, col) {
+    markHit(row, col) {
         let x = col * this.tileSize;
-        let y = row * this.tileSize + 50;
-        this.add.image(x, y, 'hit').setOrigin(0, 0);
+        let y = row * this.tileSize;
+        this.add.image(x + this.tileSize / 2, y + this.tileSize / 2, 'hit').setOrigin(0.5);
     }
 }
 
 const config = {
     type: Phaser.AUTO,
     width: 500,
-    height: 550,
+    height: 500,
     scene: BattleGame
 };
 
-function startGame() {
-    new Phaser.Game(config);
-}
+const game = new Phaser.Game(config);
