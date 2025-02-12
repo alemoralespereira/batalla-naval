@@ -1,68 +1,62 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalla Naval</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>Batalla Naval</h1>
+const express = require("express");
+const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
 
-    <!-- Pantalla de inicio -->
-    <div id="setup-screen">
-        <label for="username">Nombre de usuario:</label>
-        <input type="text" id="username" placeholder="Escribe tu nombre">
-        
-        <label for="room">Elige una sala:</label>
-        <select id="room">
-            <option value="sala1">Sala 1</option>
-            <option value="sala2">Sala 2</option>
-            <option value="sala3">Sala 3</option>
-        </select>
+const io = new Server(server);
+const rooms = {
+    sala1: [],
+    sala2: [],
+    sala3: [],
+};
 
-        <button onclick="joinGame()">Unirse</button>
-    </div>
+app.use(express.static("public"));
 
-    <div id="game-container" style="display: none;">
-        <h2 id="turnIndicator">Esperando jugadores...</h2>
-        <div id="game-screen"></div>
-    </div>
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/public/index.html");
+});
 
-    <script>
-        const socket = io();
-        window.room = "";
+io.on("connection", (socket) => {
+    console.log("🔹 Un jugador se ha conectado:", socket.id);
 
-        function joinGame() {
-            const username = document.getElementById("username").value.trim();
-            window.room = document.getElementById("room").value;
+    socket.on("joinRoom", ({ username, room }) => {
+        if (!rooms[room]) return;
 
-            if (!username) {
-                alert("Por favor, ingresa un nombre.");
-                return;
-            }
-
-            document.getElementById("setup-screen").style.display = "none";
-            document.getElementById("game-container").style.display = "block";
-
-            socket.emit("joinRoom", { username, room: window.room });
+        if (rooms[room].length >= 2) {
+            socket.emit("roomFull");
+            return;
         }
 
-        socket.on("roomFull", () => {
-            alert("Esta sala ya está llena. Elige otra.");
-            document.getElementById("setup-screen").style.display = "block";
-            document.getElementById("game-container").style.display = "none";
-        });
+        rooms[room].push(socket.id);
+        socket.join(room);
 
-        socket.on("gameStart", () => {
-            document.getElementById("turnIndicator").innerText = "¡Juego iniciado!";
-            startGame();
-        });
+        if (rooms[room].length === 2) {
+            io.to(room).emit("gameStart");
+            io.to(rooms[room][0]).emit("yourTurn");
+        }
+    });
 
-        socket.on("yourTurn", () => {
-            document.getElementById("turnIndicator").innerText = "🔥 Es tu turno!";
-        });
+    socket.on("shoot", ({ row, col, room }) => {
+        if (!rooms[room] || rooms[room].length < 2) return;
 
-        socket.on("opponentTu
+        io.to(room).emit("shotFired", { row, col });
+
+        const nextTurn = rooms[room][0] === socket.id ? rooms[room][1] : rooms[room][0];
+        io.to(nextTurn).emit("yourTurn");
+        io.to(socket.id).emit("opponentTurn");
+    });
+
+    socket.on("disconnect", () => {
+        Object.keys(rooms).forEach((room) => {
+            rooms[room] = rooms[room].filter(id => id !== socket.id);
+            if (rooms[room].length < 2) {
+                io.to(room).emit("playerDisconnected");
+            }
+        });
+    });
+});
+
+server.listen(3000, () => {
+    console.log("✅ Servidor corriendo en el puerto 3000");
+});
