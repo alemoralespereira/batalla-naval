@@ -4,56 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalla Naval</title>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
-    <script>
-        let socket;
-        window.room = ""; // Almacena la sala seleccionada
-
-        function joinGame() {
-            const username = document.getElementById("username").value.trim();
-            window.room = document.getElementById("roomSelect").value;
-
-            if (!username) {
-                alert("Por favor ingresa un nombre.");
-                return;
-            }
-
-            document.getElementById("join-container").style.display = "none";
-            document.getElementById("game-container").style.display = "block";
-
-            socket = io();
-            socket.emit("joinRoom", { username, room: window.room });
-
-            socket.on("gameStart", () => {
-                document.getElementById("statusMessage").innerText = "¡Juego iniciado!";
-                startGame();
-            });
-
-            socket.on("yourTurn", () => {
-                document.getElementById("statusMessage").innerText = "🔥 Es tu turno!";
-            });
-
-            socket.on("opponentTurn", () => {
-                document.getElementById("statusMessage").innerText = "⏳ Espera al oponente...";
-            });
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
         }
-    </script>
+        #game-container {
+            display: none;
+        }
+        #login-container {
+            margin-top: 50px;
+        }
+        input, select, button {
+            font-size: 16px;
+            margin: 5px;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div id="join-container">
-        <h1>Batalla Naval</h1>
-        <input type="text" id="username" placeholder="Ingresa tu nombre">
-        <select id="roomSelect">
+    <h1>Batalla Naval</h1>
+
+    <div id="login-container">
+        <h2>Ingrese su nombre y seleccione una sala:</h2>
+        <input type="text" id="username" placeholder="Nombre de usuario">
+        <select id="room">
             <option value="sala1">Sala 1</option>
             <option value="sala2">Sala 2</option>
             <option value="sala3">Sala 3</option>
         </select>
         <button onclick="joinGame()">Unirse</button>
     </div>
-    
-    <div id="game-container" style="display: none;">
-        <h2 id="statusMessage">Esperando jugadores...</h2>
+
+    <div id="game-container">
+        <h2 id="turnIndicator">Esperando jugadores...</h2>
+        <div id="game"></div>
     </div>
+
+    <script>
+        const socket = io();
+
+        function joinGame() {
+            const username = document.getElementById('username').value.trim();
+            const room = document.getElementById('room').value;
+            
+            if (!username) {
+                alert("Por favor, ingrese un nombre de usuario.");
+                return;
+            }
+
+            socket.emit('joinRoom', { username, room });
+
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+        }
+    </script>
+    <script src="game.js"></script>
 </body>
 </html>
