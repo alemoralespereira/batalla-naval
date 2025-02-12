@@ -44,7 +44,7 @@ class BattleGame extends Phaser.Scene {
                     if (this.isMyTurn && !this.attacks.has(`${row}-${col}`)) {
                         console.log(`🎯 Disparo en fila ${row}, columna ${col}`);
                         this.attacks.add(`${row}-${col}`);
-                        this.socket.emit('shoot', { row, col, room: window.room }); // Enviar sala
+                        this.socket.emit('shoot', { row, col, room: window.room, shooterId: this.socket.id }); // Enviar sala y quién disparó
                     }
                 });
             }

@@ -47,17 +47,15 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("shoot", ({ row, col, room }) => {
+    socket.on("shoot", ({ row, col, room, shooterId }) => {
         if (!room || !rooms[room] || rooms[room].length < 2) return;
 
-        io.to(room).emit("shotFired", { row, col }); // Emitir a ambos jugadores
+        io.to(room).emit("shotFired", { row, col });
 
-        // Alternar turnos
-        io.to(rooms[room][0]).emit("opponentTurn");
-        io.to(rooms[room][1]).emit("yourTurn");
-
-        // Intercambiar posiciones en el array
-        rooms[room].push(rooms[room].shift());
+        // Alternar turnos correctamente
+        const nextTurn = rooms[room].find(id => id !== shooterId);
+        io.to(nextTurn).emit("yourTurn");
+        io.to(shooterId).emit("opponentTurn");
     });
 
     socket.on("disconnect", () => {
