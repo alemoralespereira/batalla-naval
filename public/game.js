@@ -3,7 +3,7 @@ class BattleGame extends Phaser.Scene {
         super({ key: 'BattleGame' });
         this.gridSize = 10;
         this.tileSize = 50;
-        this.attacks = new Set();  // Usamos un Set para evitar duplicados
+        this.attacks = new Set();  
         this.isMyTurn = false;
     }
 
@@ -16,7 +16,7 @@ class BattleGame extends Phaser.Scene {
         this.createGrid();
         this.createTurnIndicator();
 
-        // Asignar el turno
+        // Recibir notificaciones de turno
         this.socket.on('yourTurn', () => {
             this.isMyTurn = true;
             this.updateTurnIndicator(true);
@@ -44,7 +44,7 @@ class BattleGame extends Phaser.Scene {
                     if (this.isMyTurn && !this.attacks.has(`${row}-${col}`)) {
                         console.log(`🎯 Disparo en fila ${row}, columna ${col}`);
                         this.attacks.add(`${row}-${col}`);
-                        this.socket.emit('shoot', { row, col });
+                        this.socket.emit('shoot', { row, col, room: window.room }); // Enviar sala
                     }
                 });
             }
