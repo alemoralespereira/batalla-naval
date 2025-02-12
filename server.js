@@ -5,13 +5,11 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 
 const io = new Server(server);
-const rooms = {
-    sala1: [],
-    sala2: [],
-    sala3: [],
-};
+const rooms = { sala1: [], sala2: [], sala3: [] };
 
+// Servir archivos estáticos correctamente
 app.use(express.static("public"));
+app.use("/assets", express.static(__dirname + "/public/assets"));
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/public/index.html");
@@ -30,6 +28,8 @@ io.on("connection", (socket) => {
 
         rooms[room].push(socket.id);
         socket.join(room);
+
+        console.log(`🔹 ${username} asignado a la sala ${room}`);
 
         if (rooms[room].length === 2) {
             io.to(room).emit("gameStart");

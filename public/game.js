@@ -14,21 +14,19 @@ class BattleGame extends Phaser.Scene {
     create() {
         this.socket = io();
         this.createGrid();
-        this.createTurnIndicator();
 
-        this.socket.on("gameStart", (turn) => {
-            this.isMyTurn = turn;
-            this.updateTurnIndicator();
+        this.socket.on("gameStart", () => {
+            document.getElementById("turnIndicator").innerHTML = "🔥 Es tu turno!";
         });
 
         this.socket.on("yourTurn", () => {
             this.isMyTurn = true;
-            this.updateTurnIndicator();
+            document.getElementById("turnIndicator").innerHTML = "🔥 Es tu turno!";
         });
 
         this.socket.on("opponentTurn", () => {
             this.isMyTurn = false;
-            this.updateTurnIndicator();
+            document.getElementById("turnIndicator").innerHTML = "⏳ Espera el turno del oponente...";
         });
 
         this.socket.on("shotFired", ({ row, col }) => {
@@ -41,39 +39,16 @@ class BattleGame extends Phaser.Scene {
             for (let col = 0; col < this.gridSize; col++) {
                 let x = col * this.tileSize;
                 let y = row * this.tileSize;
-                let tile = this.add
-                    .image(x, y, "water")
-                    .setOrigin(0, 0)
-                    .setInteractive();
-
+                let tile = this.add.image(x, y, "water").setOrigin(0, 0).setInteractive();
+                
                 tile.on("pointerdown", () => {
                     if (this.isMyTurn && !this.attacks.includes(`${row}-${col}`)) {
-                        console.log(`🎯 Disparo en fila ${row}, columna ${col}`);
                         this.attacks.push(`${row}-${col}`);
-                        this.socket.emit("shoot", {
-                            row,
-                            col,
-                            room: window.room,
-                        });
-                        this.isMyTurn = false;
-                        this.updateTurnIndicator();
+                        this.socket.emit("shoot", { row, col });
                     }
                 });
             }
         }
-    }
-
-    createTurnIndicator() {
-        this.turnText = this.add.text(250, 30, '', {
-            fontSize: '24px',
-            fill: '#ffffff',
-            fontWeight: 'bold'
-        }).setOrigin(0.5);
-    }
-
-    updateTurnIndicator() {
-        this.turnText.setText(this.isMyTurn ? "🔥 Es tu turno!" : "⏳ Turno del oponente...");
-        this.turnText.setColor(this.isMyTurn ? "#00ff00" : "#ff0000");
     }
 
     markHit(row, col) {
