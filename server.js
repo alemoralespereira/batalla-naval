@@ -1,83 +1,68 @@
-const express = require("express");
-const app = express();
-const path = require("path");
-const http = require("http");
-const server = http.createServer(app);
-const { Server } = require("socket.io");
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalla Naval</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Batalla Naval</h1>
 
-const io = new Server(server);
+    <!-- Pantalla de inicio -->
+    <div id="setup-screen">
+        <label for="username">Nombre de usuario:</label>
+        <input type="text" id="username" placeholder="Escribe tu nombre">
+        
+        <label for="room">Elige una sala:</label>
+        <select id="room">
+            <option value="sala1">Sala 1</option>
+            <option value="sala2">Sala 2</option>
+            <option value="sala3">Sala 3</option>
+        </select>
 
-// Estructura de las salas con un máximo de 2 jugadores por sala
-const rooms = {
-    sala1: [],
-    sala2: [],
-    sala3: [],
-};
+        <button onclick="joinGame()">Unirse</button>
+    </div>
 
-// Servir archivos estáticos desde "public"
-app.use(express.static(path.join(__dirname, "public")));
+    <div id="game-container" style="display: none;">
+        <h2 id="turnIndicator">Esperando jugadores...</h2>
+        <div id="game-screen"></div>
+    </div>
 
-// Servir index.html
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+    <script>
+        const socket = io();
+        window.room = "";
 
-io.on("connection", (socket) => {
-    console.log("🔹 Un jugador se ha conectado:", socket.id);
+        function joinGame() {
+            const username = document.getElementById("username").value.trim();
+            window.room = document.getElementById("room").value;
 
-    socket.on("joinRoom", ({ username, room }) => {
-        if (!rooms[room]) {
-            socket.emit("roomNotFound"); // Emitir un evento si la sala no existe
-            return;
-        }
-
-        if (rooms[room].length >= 2) {
-            socket.emit("roomFull");
-            return;
-        }
-
-        rooms[room].push({ id: socket.id, username });
-        socket.join(room);
-        console.log(`👤 ${username} se unió a la ${room}`);
-
-        socket.emit("roomJoined", { room, username });
-        io.to(room).emit("updatePlayers", rooms[room]);
-
-        if (rooms[room].length === 2) {
-            io.to(room).emit("gameStart", rooms[room][0].id);
-            io.to(rooms[room][0].id).emit("yourTurn");
-        }
-    });
-
-    socket.on("shoot", ({ row, col, room }) => {
-        const playerIndex = rooms[room].findIndex((player) => player.id === socket.id);
-
-        if (playerIndex === -1) return; // El jugador no está en la sala
-        if (socket.id !== rooms[room][0].id && socket.id !== rooms[room][1].id) return; // Jugador inválido
-
-        io.to(room).emit("shotFired", { row, col });
-
-        const nextTurn = rooms[room][0].id === socket.id ? rooms[room][1].id : rooms[room][0].id;
-        io.to(nextTurn).emit("yourTurn");
-        io.to(socket.id).emit("opponentTurn"); // Notificar al jugador actual que es el turno del oponente
-    });
-
-    socket.on("disconnect", () => {
-        console.log("❌ Un jugador se ha desconectado:", socket.id);
-
-        Object.keys(rooms).forEach((room) => {
-            rooms[room] = rooms[room].filter((player) => player.id !== socket.id);
-
-            if (rooms[room].length < 2) {
-                io.to(room).emit("playerDisconnected");
-                io.to(room).emit("updatePlayers", rooms[room]); // Notificar al otro jugador
+            if (!username) {
+                alert("Por favor, ingresa un nombre.");
+                return;
             }
-        });
-    });
-});
 
-// Escuchar en el puerto de Railway
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
-});
+            document.getElementById("setup-screen").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+
+            socket.emit("joinRoom", { username, room: window.room });
+        }
+
+        socket.on("roomFull", () => {
+            alert("Esta sala ya está llena. Elige otra.");
+            document.getElementById("setup-screen").style.display = "block";
+            document.getElementById("game-container").style.display = "none";
+        });
+
+        socket.on("gameStart", () => {
+            document.getElementById("turnIndicator").innerText = "¡Juego iniciado!";
+            startGame();
+        });
+
+        socket.on("yourTurn", () => {
+            document.getElementById("turnIndicator").innerText = "🔥 Es tu turno!";
+        });
+
+        socket.on("opponentTu

@@ -1,90 +1,93 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalla Naval</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div id="game-container">
-        <h1>Batalla Naval</h1>
+class BattleGame extends Phaser.Scene {
+    constructor() {
+        super({ key: "BattleGame" });
+        this.gridSize = 10;
+        this.tileSize = 50;
+        this.attacks = [];
+        this.isMyTurn = false;
+    }
 
-        <!-- Pantalla de inicio -->
-        <div id="setup-screen">
-            <label for="username">Nombre de usuario:</label>
-            <input type="text" id="username" placeholder="Escribe tu nombre">
-            
-            <label for="room">Elige una sala:</label>
-            <select id="room">
-                <option value="sala1">Sala 1</option>
-                <option value="sala2">Sala 2</option>
-                <option value="sala3">Sala 3</option>
-            </select>
+    preload() {
+        this.load.image("water", "assets/agua.jpg");
+    }
 
-            <button onclick="joinGame()">Unirse</button>
-        </div>
+    create() {
+        this.socket = io();
+        this.createGrid();
+        this.createTurnIndicator();
 
-        <!-- Mensajes -->
-        <div id="status-message" style="display: none;">
-            <h2 id="game-status">Esperando jugadores...</h2>
-        </div>
+        this.socket.on("gameStart", (turn) => {
+            this.isMyTurn = turn;
+            this.updateTurnIndicator();
+        });
 
-        <!-- Contenedor del juego -->
-        <div id="game-screen" style="display: none;"></div>
-    </div>
+        this.socket.on("yourTurn", () => {
+            this.isMyTurn = true;
+            this.updateTurnIndicator();
+        });
 
-    <script>
-        const socket = io();
-        let playerRoom = null;
-        let playerName = null;
+        this.socket.on("opponentTurn", () => {
+            this.isMyTurn = false;
+            this.updateTurnIndicator();
+        });
 
-        function joinGame() {
-            playerName = document.getElementById("username").value;
-            playerRoom = document.getElementById("room").value;
+        this.socket.on("shotFired", ({ row, col }) => {
+            this.markHit(row, col);
+        });
+    }
 
-            if (!playerName) {
-                alert("Por favor, introduce un nombre de usuario.");
-                return; // Detener la ejecución si no hay nombre de usuario
+    createGrid() {
+        for (let row = 0; row < this.gridSize; row++) {
+            for (let col = 0; col < this.gridSize; col++) {
+                let x = col * this.tileSize;
+                let y = row * this.tileSize;
+                let tile = this.add
+                    .image(x, y, "water")
+                    .setOrigin(0, 0)
+                    .setInteractive();
+
+                tile.on("pointerdown", () => {
+                    if (this.isMyTurn && !this.attacks.includes(`${row}-${col}`)) {
+                        console.log(`🎯 Disparo en fila ${row}, columna ${col}`);
+                        this.attacks.push(`${row}-${col}`);
+                        this.socket.emit("shoot", {
+                            row,
+                            col,
+                            room: window.room,
+                        });
+                        this.isMyTurn = false;
+                        this.updateTurnIndicator();
+                    }
+                });
             }
-
-            socket.emit("joinRoom", { username: playerName, room: playerRoom });
         }
+    }
 
-        socket.on("roomFull", () => {
-            alert("La sala está llena. Elige otra.");
-        });
+    createTurnIndicator() {
+        this.turnText = this.add.text(250, 30, '', {
+            fontSize: '24px',
+            fill: '#ffffff',
+            fontWeight: 'bold'
+        }).setOrigin(0.5);
+    }
 
-        socket.on("roomNotFound", () => {
-            alert("La sala seleccionada no existe.");
-        });
+    updateTurnIndicator() {
+        this.turnText.setText(this.isMyTurn ? "🔥 Es tu turno!" : "⏳ Turno del oponente...");
+        this.turnText.setColor(this.isMyTurn ? "#00ff00" : "#ff0000");
+    }
 
-        socket.on("roomJoined", ({ room, username }) => {
-            playerRoom = room;
-            document.getElementById("setup-screen").style.display = "none";
-            document.getElementById("status-message").style.display = "block";
-            document.getElementById("game-status").innerText = `Esperando jugadores en ${room}...`;
-        });
+    markHit(row, col) {
+        let x = col * this.tileSize;
+        let y = row * this.tileSize;
+        this.add.rectangle(x + this.tileSize / 2, y + this.tileSize / 2, this.tileSize, this.tileSize, 0xff0000, 0.5);
+    }
+}
 
-        socket.on("updatePlayers", (players) => {
-            if (players.length === 2) {
-                document.getElementById("game-status").innerText = "¡Juego iniciado!";
-            }
-        });
+const config = {
+    type: Phaser.AUTO,
+    width: 500,
+    height: 500,
+    scene: BattleGame
+};
 
-        socket.on("gameStart", (firstPlayerId) => {
-            document.getElementById("status-message").style.display = "none";
-            document.getElementById("game-screen").style.display = "block";
-            startGame(firstPlayerId);
-        });
-
-        socket.on("yourTurn", () => {
-            document.getElementById("game-status").innerHTML = "🔥 <strong>Es tu turno!</strong>";
-        });
-    </script>
-
-    <script src="game.js"></script>
-</body>
-</html>
+const game = new Phaser.Game(config);
