@@ -1,78 +1,60 @@
 const express = require("express");
-const app = express();
-const path = require("path");
 const http = require("http");
+const socketIo = require("socket.io");
+
+const app = express();
 const server = http.createServer(app);
-const { Server } = require("socket.io");
+const io = socketIo(server);
 
-const io = new Server(server);
-
-// Estructura de las salas con un máximo de 2 jugadores por sala
 const rooms = {
     sala1: [],
     sala2: [],
     sala3: [],
 };
 
-// Servir archivos estáticos desde "public"
-app.use(express.static(path.join(__dirname, "public")));
-
-// Servir index.html
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+app.use(express.static("public"));
 
 io.on("connection", (socket) => {
-    console.log("🔹 Un jugador se ha conectado:", socket.id);
-
     socket.on("joinRoom", ({ username, room }) => {
-        if (!rooms[room]) return;
-
         if (rooms[room].length >= 2) {
             socket.emit("roomFull");
             return;
         }
 
-        rooms[room].push({ id: socket.id, username });
-        socket.join(room);
-        console.log(`👤 ${username} se unió a la ${room}`);
+        socket.username = username;
+        socket.room = room;
+        rooms[room].push(socket);
 
-        socket.emit("roomJoined", { room, username });
-        io.to(room).emit("updatePlayers", rooms[room]);
+        io.to(socket.id).emit("roomJoined", { room, username });
 
         if (rooms[room].length === 2) {
-            io.to(room).emit("gameStart", rooms[room][0].id);
-            io.to(rooms[room][0].id).emit("yourTurn");
+            startGame(room);
         }
     });
 
     socket.on("shoot", ({ row, col, room }) => {
-        const playerIndex = rooms[room].findIndex((player) => player.id === socket.id);
-
-        if (playerIndex === -1) return; // El jugador no está en la sala
-        if (socket.id !== rooms[room][0].id && socket.id !== rooms[room][1].id) return; // Jugador inválido
-
-        io.to(room).emit("shotFired", { row, col });
-
-        const nextTurn = rooms[room][0].id === socket.id ? rooms[room][1].id : rooms[room][0].id;
-        io.to(nextTurn).emit("yourTurn");
+        const otherPlayer = rooms[room].find((s) => s.id !== socket.id);
+        if (otherPlayer) {
+            otherPlayer.emit("shotFired", { row, col });
+            socket.emit("opponentTurn");
+            otherPlayer.emit("yourTurn");
+        }
     });
 
     socket.on("disconnect", () => {
-        console.log("❌ Un jugador se ha desconectado:", socket.id);
-
-        Object.keys(rooms).forEach((room) => {
-            rooms[room] = rooms[room].filter((player) => player.id !== socket.id);
-
-            if (rooms[room].length < 2) {
-                io.to(room).emit("playerDisconnected");
-            }
-        });
+        if (socket.room && rooms[socket.room]) {
+            rooms[socket.room] = rooms[socket.room].filter((s) => s !== socket);
+        }
     });
 });
 
-// Escuchar en el puerto de Railway
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
+function startGame(room) {
+    rooms[room].forEach((player, index) => {
+        player.emit("gameStart", index === 0);
+        player.emit(index === 0 ? "yourTurn" : "opponentTurn");
+    });
+}
+
+server.listen(3000, () => {
+    console.log("Servidor corriendo en el puerto 3000");
 });

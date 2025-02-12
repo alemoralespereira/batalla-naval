@@ -69,7 +69,7 @@ class BattleGame extends Phaser.Scene {
     }
 
     updateTurnIndicator() {
-        document.getElementById("turnIndicator").innerText = this.isMyTurn ? "🔥 Es tu turno!" : "⏳ Turno del oponente...";
+        document.getElementById("game-status").innerText = this.isMyTurn ? "🔥 Es tu turno!" : "⏳ Turno del oponente...";
     }
 }
 
