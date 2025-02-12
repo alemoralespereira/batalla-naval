@@ -4,67 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalla Naval</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        #game-container {
-            display: none;
-        }
-        #lobby {
-            margin-top: 20px;
-        }
-    </style>
 </head>
-<body>
+<body style="background-color: black; color: white; text-align: center;">
     <h1>Batalla Naval</h1>
-    
     <div id="lobby">
-        <h2>Ingrese su nombre y seleccione una sala</h2>
-        <input type="text" id="username" placeholder="Nombre de usuario">
-        <select id="roomSelect">
+        <h2>Ingresa tu nombre y selecciona una sala:</h2>
+        <input type="text" id="username" placeholder="Tu nombre" />
+        <select id="room">
             <option value="sala1">Sala 1</option>
             <option value="sala2">Sala 2</option>
             <option value="sala3">Sala 3</option>
         </select>
         <button onclick="joinGame()">Unirse</button>
+        <p id="status"></p>
     </div>
-
-    <div id="game-container">
-        <h2 id="status">Esperando jugadores...</h2>
-        <div id="phaser-game"></div>
-    </div>
+    <div id="gameContainer" style="display: none;"></div>
 
     <script>
-        let socket = io();
-        window.socket = socket; // Asegurar que está disponible globalmente
+        const socket = io();
+        window.socket = socket;
 
         function joinGame() {
             const username = document.getElementById("username").value.trim();
-            const room = document.getElementById("roomSelect").value;
-
+            const room = document.getElementById("room").value;
             if (!username) {
-                alert("Por favor, ingrese un nombre de usuario.");
+                alert("Ingresa un nombre válido.");
                 return;
             }
 
             socket.emit("joinRoom", { username, room });
 
-            document.getElementById("lobby").style.display = "none";
-            document.getElementById("game-container").style.display = "block";
+            socket.on("roomFull", () => {
+                document.getElementById("status").innerText = "Sala llena, elige otra.";
+            });
+
+            socket.on("playerAssigned", (data) => {
+                document.getElementById("lobby").style.display = "none";
+                document.getElementById("gameContainer").style.display = "block";
+                console.log(`Jugador ${data.username} asignado a la sala ${data.room}`);
+            });
+
+            socket.on("gameStart", () => {
+                document.getElementById("gameContainer").innerHTML = "";
+                startGame();
+            });
         }
-
-        socket.on("gameStart", () => {
-            document.getElementById("status").innerText = "¡Juego iniciado!";
-            startGame(); // Llamar a la función de game.js para iniciar el tablero
-        });
     </script>
-
     <script src="game.js"></script>
 </body>
 </html>

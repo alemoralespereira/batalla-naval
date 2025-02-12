@@ -9,12 +9,12 @@ class BattleGame extends Phaser.Scene {
 
     preload() {
         this.load.image('water', 'assets/agua.jpg');
-        this.load.image('hit', 'assets/hit.png');  // Imagen para impacto
-        this.load.image('miss', 'assets/miss.png'); // Imagen para fallo
+        this.load.image('hit', 'assets/hit.png');
+        this.load.image('miss', 'assets/miss.png');
     }
 
     create() {
-        this.socket = window.socket; // Usar el socket global de index.html
+        this.socket = window.socket;
         this.createGrid();
 
         this.statusText = this.add.text(10, 10, "Esperando jugadores...", {
@@ -32,8 +32,8 @@ class BattleGame extends Phaser.Scene {
             this.statusText.setText("Turno del oponente...");
         });
 
-        this.socket.on("shotFired", ({ row, col, hit }) => {
-            this.markShot(row, col, hit);
+        this.socket.on("shotFired", ({ row, col }) => {
+            this.markShot(row, col);
         });
     }
 
@@ -41,7 +41,7 @@ class BattleGame extends Phaser.Scene {
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col < this.gridSize; col++) {
                 let x = col * this.tileSize;
-                let y = row * this.tileSize + 50; // Espacio para el texto de estado
+                let y = row * this.tileSize + 50;
                 let tile = this.add.image(x, y, 'water').setOrigin(0, 0).setInteractive();
 
                 tile.on('pointerdown', () => {
@@ -57,11 +57,10 @@ class BattleGame extends Phaser.Scene {
         }
     }
 
-    markShot(row, col, hit) {
+    markShot(row, col) {
         let x = col * this.tileSize;
         let y = row * this.tileSize + 50;
-        let image = hit ? 'hit' : 'miss';
-        this.add.image(x, y, image).setOrigin(0, 0);
+        this.add.image(x, y, 'hit').setOrigin(0, 0);
     }
 }
 
