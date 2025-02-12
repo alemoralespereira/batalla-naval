@@ -24,10 +24,15 @@ class BattleGame extends Phaser.Scene {
         });
 
         this.socket.on("yourTurn", (isMyTurn) => {
-            this.isMyTurn = isMyTurn;
-            console.log(isMyTurn ? "🔥 Es tu turno" : "⏳ Turno del oponente");
-            document.getElementById("turno").innerText = isMyTurn ? "Tu turno" : "Turno del oponente";
-        });
+    this.isMyTurn = isMyTurn;
+    console.log(`⚡ Cambio de turno - Es mi turno? ${isMyTurn}`);
+    
+    document.getElementById("turno").innerText = isMyTurn ? "🔥 Tu turno" : "⏳ Turno del oponente";
+    
+    if (isMyTurn) {
+        console.log("Puedes disparar!");
+    }
+});
 
         this.socket.on("shotFired", ({ row, col }) => {
             this.markHit(row, col);

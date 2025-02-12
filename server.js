@@ -29,8 +29,12 @@ io.on("connection", (socket) => {
 
     if (players.length === 2) {
         io.emit("gameStart", players);
-        io.to(players[turn]).emit("yourTurn", true);
-        io.to(players[(turn + 1) % 2]).emit("yourTurn", false);
+        
+        // Corregir envío de turnos
+        setTimeout(() => {
+            io.to(players[turn]).emit("yourTurn", true);
+            io.to(players[(turn + 1) % 2]).emit("yourTurn", false);
+        }, 1000);
     }
 
     socket.on("shoot", ({ row, col }) => {
