@@ -6,12 +6,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 
 const io = new Server(server);
-
-const rooms = {
-    sala1: [],
-    sala2: [],
-    sala3: []
-};
+const rooms = {}; // Estructura: { sala1: [socket1, socket2], sala2: [...] }
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -23,46 +18,39 @@ io.on("connection", (socket) => {
     console.log("🔹 Un jugador se ha conectado:", socket.id);
 
     socket.on("joinRoom", ({ username, room }) => {
-        if (!rooms[room]) {
-            socket.emit("error", "Sala no válida.");
-            return;
-        }
-
+        if (!rooms[room]) rooms[room] = [];
+        
         if (rooms[room].length >= 2) {
-            socket.emit("error", "La sala está llena.");
+            socket.emit("roomFull");
             return;
         }
 
-        socket.username = username;
-        socket.room = room;
         rooms[room].push(socket.id);
-
         socket.join(room);
-
-        io.to(room).emit("waitingForPlayers", rooms[room]);
+        console.log(`📌 ${username} asignado a la sala ${room}`);
 
         if (rooms[room].length === 2) {
-            io.to(room).emit("gameStart", rooms[room]);
-            io.to(rooms[room][0]).emit("yourTurn");
+            io.to(room).emit("gameStart");
+            io.to(rooms[room][0]).emit("yourTurn"); // El primer jugador empieza
         }
     });
 
-    socket.on("shoot", ({ row, col, room, shooterId }) => {
-        if (!room || !rooms[room] || rooms[room].length < 2) return;
+    socket.on("shoot", ({ row, col, room }) => {
+        if (!rooms[room]) return;
 
         io.to(room).emit("shotFired", { row, col });
 
-        // Alternar turnos correctamente
-        const nextTurn = rooms[room].find(id => id !== shooterId);
-        io.to(nextTurn).emit("yourTurn");
-        io.to(shooterId).emit("opponentTurn");
+        let currentTurn = rooms[room].indexOf(socket.id);
+        let nextTurn = (currentTurn + 1) % 2;
+
+        io.to(rooms[room][nextTurn]).emit("yourTurn");
+        io.to(rooms[room][currentTurn]).emit("opponentTurn");
     });
 
     socket.on("disconnect", () => {
-        const room = socket.room;
-        if (room && rooms[room]) {
+        for (let room in rooms) {
             rooms[room] = rooms[room].filter(id => id !== socket.id);
-            io.to(room).emit("playerDisconnected");
+            if (rooms[room].length < 2) io.to(room).emit("playerDisconnected");
         }
     });
 });
