@@ -1,51 +1,35 @@
 class BattleGame extends Phaser.Scene {
     constructor() {
-        super({ key: 'BattleGame' });
+        super({ key: "BattleGame" });
         this.gridSize = 10;
         this.tileSize = 50;
         this.attacks = [];
         this.isMyTurn = false;
-        this.playerName = "";
-        this.room = "";
     }
 
     preload() {
-        this.load.image('water', 'assets/agua.jpg');
+        this.load.image("water", "assets/agua.jpg");
     }
 
     create() {
-        this.socket = io();
+        // Asegurar que el socket está configurado correctamente
+        this.socket = window.socket;
+        if (!this.socket) {
+            console.error("Error: No se encontró el socket.");
+            return;
+        }
 
-        // Mostrar formulario de ingreso
-        document.getElementById('startMenu').style.display = 'block';
-        document.getElementById('gameCanvas').style.display = 'none';
+        // Crear el tablero
+        this.add.text(20, 20, "Batalla Naval", { fontSize: "20px", fill: "#fff" });
+        this.createGrid();
 
-        document.getElementById('joinGame').addEventListener('click', () => {
-            this.playerName = document.getElementById('playerName').value;
-            this.room = document.getElementById('roomSelect').value;
-
-            if (this.playerName && this.room) {
-                this.socket.emit('joinRoom', { playerName: this.playerName, room: this.room });
-            }
-        });
-
-        this.socket.on('playerAssigned', ({ playerName, room }) => {
-            console.log(`Jugador ${playerName} asignado en la sala ${room}`);
-            document.getElementById('startMenu').style.display = 'none';
-            document.getElementById('gameCanvas').style.display = 'block';
-            this.createGrid();
-        });
-
-        this.socket.on('gameStart', (players) => {
-            console.log("El juego ha comenzado. Jugadores:", players);
-        });
-
-        this.socket.on('turn', (isMyTurn) => {
+        // Recibir eventos del servidor
+        this.socket.on("turn", (isMyTurn) => {
             this.isMyTurn = isMyTurn;
-            console.log(isMyTurn ? 'Tu turno' : 'Turno del oponente');
+            console.log(isMyTurn ? "Tu turno" : "Turno del oponente");
         });
 
-        this.socket.on('hit', ({ row, col }) => {
+        this.socket.on("shotFired", ({ row, col }) => {
             this.markHit(row, col);
         });
     }
@@ -55,13 +39,13 @@ class BattleGame extends Phaser.Scene {
             for (let col = 0; col < this.gridSize; col++) {
                 let x = col * this.tileSize;
                 let y = row * this.tileSize;
-                let tile = this.add.image(x, y, 'water').setOrigin(0, 0).setInteractive();
+                let tile = this.add.image(x, y, "water").setOrigin(0, 0).setInteractive();
 
-                tile.on('pointerdown', () => {
+                tile.on("pointerdown", () => {
                     if (this.isMyTurn && !this.attacks.includes(`${row}-${col}`)) {
                         console.log(`Disparo en fila ${row}, columna ${col}`);
                         this.attacks.push(`${row}-${col}`);
-                        this.socket.emit('shoot', { row, col, room: this.room });
+                        this.socket.emit("shoot", { row, col });
                     }
                 });
             }
@@ -75,11 +59,15 @@ class BattleGame extends Phaser.Scene {
     }
 }
 
-const config = {
-    type: Phaser.AUTO,
-    width: 500,
-    height: 500,
-    scene: BattleGame
-};
-
-const game = new Phaser.Game(config);
+// Inicializar Phaser solo cuando inicie el juego
+function startGame() {
+    document.getElementById("phaser-game").innerHTML = ""; // Limpia el contenedor
+    const config = {
+        type: Phaser.AUTO,
+        width: 500,
+        height: 500,
+        parent: "phaser-game",
+        scene: BattleGame
+    };
+    new Phaser.Game(config);
+}
