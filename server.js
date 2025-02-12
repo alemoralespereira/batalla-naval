@@ -59,6 +59,7 @@ io.on("connection", (socket) => {
 
         const nextTurn = rooms[room][0].id === socket.id ? rooms[room][1].id : rooms[room][0].id;
         io.to(nextTurn).emit("yourTurn");
+        io.to(socket.id).emit("opponentTurn"); // Notificar al jugador actual que es el turno del oponente
     });
 
     socket.on("disconnect", () => {

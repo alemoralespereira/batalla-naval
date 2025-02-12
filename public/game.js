@@ -25,6 +25,11 @@ class BattleGame extends Phaser.Scene {
             this.updateTurnIndicator();
         });
 
+        this.socket.on("opponentTurn", () => {
+            this.isMyTurn = false;
+            this.updateTurnIndicator();
+        });
+
         this.socket.on("shotFired", ({ row, col }) => {
             this.markHit(row, col, true); // true indica que es un disparo del oponente
         });
@@ -71,9 +76,4 @@ class BattleGame extends Phaser.Scene {
 
 const config = {
     type: Phaser.AUTO,
-    width: 500,
-    height: 500,
-    scene: BattleGame,
-};
-
-const game = new Phaser.Game(config);
+    width
