@@ -6,7 +6,7 @@
     <title>Batalla Naval</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script defer src="game.js"></script>
+    <script defer src="game.js"></script> <!-- Carga única -->
     <style>
         body {
             background-color: black;
@@ -61,14 +61,6 @@
 
             document.getElementById("login").style.display = "none";
             document.getElementById("game").style.display = "block";
-
-            startGame();
-        }
-
-        function startGame() {
-            const script = document.createElement("script");
-            script.src = "game.js";
-            document.body.appendChild(script);
         }
     </script>
 </body>
