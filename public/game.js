@@ -5,6 +5,8 @@ class BattleGame extends Phaser.Scene {
         this.tileSize = 50;
         this.attacks = [];
         this.isMyTurn = false;
+        this.room = localStorage.getItem("room");
+        this.username = localStorage.getItem("username");
     }
 
     preload() {
@@ -16,12 +18,15 @@ class BattleGame extends Phaser.Scene {
 
         this.createGrid();
 
+        // Enviar el usuario y la sala al servidor
+        this.socket.emit("joinRoom", { username: this.username, room: this.room });
+
         this.socket.on("player", (data) => {
-            console.log(`🎮 Jugador asignado: ${data.id}`);
+            console.log(`🎮 Jugador ${data.username} asignado en la sala ${this.room}`);
         });
 
         this.socket.on("gameStart", (players) => {
-            console.log("🎮 El juego ha comenzado con los jugadores:", players);
+            console.log("🎮 El juego ha comenzado en la sala:", this.room, "con los jugadores:", players);
         });
 
         this.socket.on("yourTurn", (isMyTurn) => {
@@ -46,9 +51,8 @@ class BattleGame extends Phaser.Scene {
                     if (this.isMyTurn && !this.attacks.includes(`${row}-${col}`)) {
                         console.log(`🎯 Disparo en fila ${row}, columna ${col}`);
                         this.attacks.push(`${row}-${col}`);
-                        this.socket.emit("shoot", { row, col });
+                        this.socket.emit("shoot", { room: this.room, row, col });
 
-                        // Desactivar clics en esta celda
                         tile.removeInteractive();
                         tile.setTint(0xff0000);
                         this.isMyTurn = false;
@@ -63,12 +67,6 @@ class BattleGame extends Phaser.Scene {
         let x = col * this.tileSize;
         let y = row * this.tileSize;
         this.add.rectangle(x + this.tileSize / 2, y + this.tileSize / 2, this.tileSize, this.tileSize, 0xff0000, 0.5);
-    }
-
-    updateTurnMessage() {
-        let turnText = this.isMyTurn ? "🔥 Tu turno" : "⏳ Turno del oponente";
-        console.log(turnText);
-        document.getElementById("turno").innerText = turnText;
     }
 }
 

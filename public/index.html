@@ -17,10 +17,53 @@
             display: block;
             margin: auto;
         }
+        #login {
+            display: block;
+        }
+        #game {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Batalla Naval</h1>
-    <h2 id="turno">Esperando jugadores...</h2>
+    <div id="login">
+        <h1>Batalla Naval</h1>
+        <label>Nombre de usuario:</label>
+        <input type="text" id="username" placeholder="Ingresa tu nombre">
+        <br><br>
+        <label>Selecciona una sala:</label>
+        <select id="room">
+            <option value="sala1">Sala 1</option>
+            <option value="sala2">Sala 2</option>
+            <option value="sala3">Sala 3</option>
+        </select>
+        <br><br>
+        <button onclick="joinGame()">Ingresar</button>
+    </div>
+
+    <div id="game">
+        <h1>Batalla Naval</h1>
+        <h2 id="turno">Esperando jugadores...</h2>
+    </div>
+
+    <script>
+        function joinGame() {
+            const username = document.getElementById("username").value;
+            const room = document.getElementById("room").value;
+
+            if (username.trim() === "") {
+                alert("Por favor, ingresa un nombre de usuario.");
+                return;
+            }
+
+            localStorage.setItem("username", username);
+            localStorage.setItem("room", room);
+
+            document.getElementById("login").style.display = "none";
+            document.getElementById("game").style.display = "block";
+
+            startGame();
+        }
+    </script>
 </body>
 </html>

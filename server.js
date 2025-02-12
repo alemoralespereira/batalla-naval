@@ -7,9 +7,11 @@ const { Server } = require("socket.io");
 
 const io = new Server(server);
 
-// Lista de jugadores y turno actual
-let players = [];
-let turn = 0;
+let rooms = {
+    sala1: [],
+    sala2: [],
+    sala3: []
+};
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -20,43 +22,32 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
     console.log("🔹 Un jugador se ha conectado:", socket.id);
 
-    if (players.length < 2) {
-        players.push(socket.id);
-        socket.emit("player", { id: socket.id, index: players.length - 1 });
-    }
+    socket.on("joinRoom", ({ username, room }) => {
+        if (!rooms[room]) return;
 
-    if (players.length === 2) {
-        io.emit("gameStart", players);
+        if (rooms[room].length < 2) {
+            rooms[room].push({ id: socket.id, username });
+            socket.join(room);
+            socket.emit("player", { username, room });
 
-        // Enviar el turno inicial al primer jugador
-        setTimeout(() => {
-            console.log(`✅ Turno inicial asignado a: ${players[turn]}`);
-            io.to(players[turn]).emit("yourTurn", true);
-            io.to(players[(turn + 1) % 2]).emit("yourTurn", false);
-        }, 1000);
-    }
-
-    socket.on("shoot", ({ row, col }) => {
-        if (players.length === 2 && socket.id === players[turn]) {
-            console.log(`🎯 Disparo en fila ${row}, columna ${col} por ${socket.id}`);
-            io.emit("shotFired", { row, col });
-
-            // Cambiar turno
-            turn = (turn + 1) % 2;
-            console.log(`🔄 Turno cambiado a: ${players[turn]}`);
-            io.to(players[turn]).emit("yourTurn", true);
-            io.to(players[(turn + 1) % 2]).emit("yourTurn", false);
+            if (rooms[room].length === 2) {
+                io.to(room).emit("gameStart", rooms[room]);
+                io.to(rooms[room][0].id).emit("yourTurn", true);
+                io.to(rooms[room][1].id).emit("yourTurn", false);
+            }
+        } else {
+            socket.emit("roomFull", { message: "La sala está llena, elige otra." });
         }
     });
 
+    socket.on("shoot", ({ room, row, col }) => {
+        io.to(room).emit("shotFired", { row, col });
+    });
+
     socket.on("disconnect", () => {
-        console.log("❌ Un jugador se ha desconectado:", socket.id);
-        players = players.filter((player) => player !== socket.id);
-        
-        if (players.length < 2) {
-            io.emit("playerDisconnected");
-            turn = 0;
-        }
+        Object.keys(rooms).forEach((room) => {
+            rooms[room] = rooms[room].filter(player => player.id !== socket.id);
+        });
     });
 });
 
