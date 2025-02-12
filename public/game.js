@@ -25,13 +25,8 @@ class BattleGame extends Phaser.Scene {
             this.updateTurnIndicator();
         });
 
-        this.socket.on("opponentTurn", () => {
-            this.isMyTurn = false;
-            this.updateTurnIndicator();
-        });
-
         this.socket.on("shotFired", ({ row, col }) => {
-            this.markHit(row, col);
+            this.markHit(row, col, true); // true indica que es un disparo del oponente
         });
     }
 
@@ -62,14 +57,15 @@ class BattleGame extends Phaser.Scene {
         }
     }
 
-    markHit(row, col) {
+    markHit(row, col, isOpponent = false) {
         let x = col * this.tileSize;
         let y = row * this.tileSize;
-        this.add.rectangle(x + this.tileSize / 2, y + this.tileSize / 2, this.tileSize, this.tileSize, 0xff0000, 0.5);
+        let color = isOpponent ? 0xff0000 : 0x00ff00; // Rojo para el oponente, verde para el jugador
+        this.add.rectangle(x + this.tileSize / 2, y + this.tileSize / 2, this.tileSize, this.tileSize, color, 0.5);
     }
 
     updateTurnIndicator() {
-        document.getElementById("game-status").innerText = this.isMyTurn ? "🔥 Es tu turno!" : "⏳ Turno del oponente...";
+        document.getElementById("turnIndicator").innerText = this.isMyTurn ? "🔥 Es tu turno!" : "⏳ Turno del oponente...";
     }
 }
 

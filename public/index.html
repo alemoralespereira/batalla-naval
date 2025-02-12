@@ -47,7 +47,7 @@
 
             if (!playerName) {
                 alert("Por favor, introduce un nombre de usuario.");
-                return;
+                return; // Detener la ejecución si no hay nombre de usuario
             }
 
             socket.emit("joinRoom", { username: playerName, room: playerRoom });
@@ -55,6 +55,10 @@
 
         socket.on("roomFull", () => {
             alert("La sala está llena. Elige otra.");
+        });
+
+        socket.on("roomNotFound", () => {
+            alert("La sala seleccionada no existe.");
         });
 
         socket.on("roomJoined", ({ room, username }) => {
