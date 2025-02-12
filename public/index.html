@@ -4,64 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalla Naval</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script defer src="game.js"></script> <!-- Carga única -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
     <style>
         body {
             background-color: black;
             color: white;
+            font-family: Arial, sans-serif;
             text-align: center;
         }
-        canvas {
-            display: block;
-            margin: auto;
-        }
-        #login {
-            display: block;
-        }
-        #game {
+        #game-container {
             display: none;
+        }
+        #lobby {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div id="login">
-        <h1>Batalla Naval</h1>
-        <label>Nombre de usuario:</label>
-        <input type="text" id="username" placeholder="Ingresa tu nombre">
-        <br><br>
-        <label>Selecciona una sala:</label>
-        <select id="room">
+    <h1>Batalla Naval</h1>
+    
+    <div id="lobby">
+        <h2>Ingrese su nombre y seleccione una sala</h2>
+        <input type="text" id="playerName" placeholder="Ingrese su nombre">
+        <select id="roomSelect">
             <option value="sala1">Sala 1</option>
             <option value="sala2">Sala 2</option>
             <option value="sala3">Sala 3</option>
         </select>
-        <br><br>
         <button onclick="joinGame()">Ingresar</button>
+        <p id="error-message" style="color: red;"></p>
     </div>
 
-    <div id="game">
-        <h1>Batalla Naval</h1>
-        <h2 id="turno">Esperando jugadores...</h2>
+    <div id="game-container">
+        <h2 id="waiting-message">Esperando jugadores...</h2>
+        <div id="phaser-game"></div>
     </div>
 
     <script>
-        function joinGame() {
-            const username = document.getElementById("username").value;
-            const room = document.getElementById("room").value;
+        const socket = io();
+        let playerName = "";
+        let room = "";
 
-            if (username.trim() === "") {
-                alert("Por favor, ingresa un nombre de usuario.");
+        function joinGame() {
+            playerName = document.getElementById("playerName").value.trim();
+            room = document.getElementById("roomSelect").value;
+            const errorMessage = document.getElementById("error-message");
+
+            if (playerName === "") {
+                errorMessage.innerText = "Por favor, ingrese su nombre.";
                 return;
             }
 
-            localStorage.setItem("username", username);
-            localStorage.setItem("room", room);
+            errorMessage.innerText = "";
+            socket.emit("joinRoom", { playerName, room });
+        }
 
-            document.getElementById("login").style.display = "none";
-            document.getElementById("game").style.display = "block";
+        socket.on("playerAssigned", ({ playerName, room }) => {
+            document.getElementById("lobby").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+            console.log(`Jugador ${playerName} asignado en la sala ${room}`);
+        });
+
+        socket.on("roomFull", (message) => {
+            document.getElementById("error-message").innerText = message;
+        });
+
+        socket.on("gameStart", (players) => {
+            document.getElementById("waiting-message").innerText = "¡Juego iniciado!";
+            console.log("El juego ha comenzado. Jugadores:", players);
+            startGame();
+        });
+
+        function startGame() {
+            const config = {
+                type: Phaser.AUTO,
+                width: 500,
+                height: 500,
+                parent: "phaser-game",
+                scene: new BattleGame(socket, room)
+            };
+            new Phaser.Game(config);
         }
     </script>
+
+    <script src="game.js"></script>
 </body>
 </html>
