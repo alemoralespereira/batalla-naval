@@ -7,26 +7,31 @@ const { Server } = require("socket.io");
 
 const io = new Server(server);
 
+// Lista de salas disponibles
 const rooms = {
     sala1: [],
     sala2: [],
     sala3: []
 };
 
-// Servir archivos estáticos desde "public"
+// Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "public")));
 
-// Servir index.html
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 io.on("connection", (socket) => {
-    console.log(`Jugador conectado: ${socket.id}`);
+    console.log("🔹 Un jugador se ha conectado:", socket.id);
 
     socket.on("joinRoom", ({ username, room }) => {
-        if (!rooms[room] || rooms[room].length >= 2) {
-            socket.emit("roomFull");
+        if (!rooms[room]) {
+            socket.emit("error", "Sala no válida.");
+            return;
+        }
+
+        if (rooms[room].length >= 2) {
+            socket.emit("error", "La sala está llena.");
             return;
         }
 
@@ -34,38 +39,42 @@ io.on("connection", (socket) => {
         socket.room = room;
         rooms[room].push(socket.id);
 
-        console.log(`Jugador ${username} asignado a la sala ${room}`);
+        console.log(`👤 ${username} se unió a ${room}:`, rooms[room]);
 
-        socket.emit("playerAssigned", { username, room });
-        io.to(room).emit("playerJoined", rooms[room]);
+        socket.join(room);
+
+        // Informar a todos en la sala sobre los jugadores conectados
+        io.to(room).emit("waitingForPlayers", rooms[room]);
 
         if (rooms[room].length === 2) {
             io.to(room).emit("gameStart", rooms[room]);
-            io.to(rooms[room][0]).emit("yourTurn");
+            io.to(rooms[room][0]).emit("yourTurn"); // El primer jugador comienza
         }
     });
 
     socket.on("shoot", ({ row, col }) => {
         const room = socket.room;
-        if (!room || rooms[room].length < 2) return;
+        if (!room || !rooms[room] || rooms[room].length < 2) return;
 
-        const opponent = rooms[room].find(id => id !== socket.id);
-        if (!opponent) return;
-
-        io.to(opponent).emit("shotFired", { row, col });
-
-        // Cambiar turno
-        io.to(opponent).emit("yourTurn");
-        io.to(socket.id).emit("opponentTurn");
+        if (socket.id === rooms[room][0]) {
+            io.to(rooms[room][1]).emit("shotFired", { row, col });
+            io.to(rooms[room][0]).emit("opponentTurn");
+            io.to(rooms[room][1]).emit("yourTurn");
+        } else if (socket.id === rooms[room][1]) {
+            io.to(rooms[room][0]).emit("shotFired", { row, col });
+            io.to(rooms[room][1]).emit("opponentTurn");
+            io.to(rooms[room][0]).emit("yourTurn");
+        }
     });
 
     socket.on("disconnect", () => {
+        console.log("❌ Un jugador se ha desconectado:", socket.id);
         const room = socket.room;
-        if (room) {
-            rooms[room] = rooms[room].filter(id => id !== socket.id);
-            io.to(room).emit("playerDisconnected");
+
+        if (room && rooms[room]) {
+            rooms[room] = rooms[room].filter(playerId => playerId !== socket.id);
+            io.to(room).emit("playerDisconnected", socket.id);
         }
-        console.log(`Jugador desconectado: ${socket.id}`);
     });
 });
 

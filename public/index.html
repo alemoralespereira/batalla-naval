@@ -16,8 +16,26 @@
         #game-container {
             display: none;
         }
-        #menu {
+        #join-container {
             margin-top: 50px;
+        }
+        .input-field {
+            padding: 10px;
+            font-size: 18px;
+            margin: 10px;
+            width: 250px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
@@ -25,60 +43,74 @@
 
     <h1>Batalla Naval</h1>
 
-    <div id="menu">
-        <label for="username">Nombre de usuario:</label>
-        <input type="text" id="username" placeholder="Ingresa tu nombre">
-        
-        <br><br>
-
-        <label for="room">Selecciona una sala:</label>
-        <select id="room">
+    <!-- Formulario de ingreso de usuario y selección de sala -->
+    <div id="join-container">
+        <input type="text" id="username" class="input-field" placeholder="Ingresa tu nombre">
+        <select id="roomSelect" class="input-field">
             <option value="sala1">Sala 1</option>
             <option value="sala2">Sala 2</option>
             <option value="sala3">Sala 3</option>
         </select>
-
-        <br><br>
-
-        <button onclick="joinGame()">Unirse al Juego</button>
+        <button class="button" onclick="joinGame()">Unirse</button>
     </div>
 
+    <!-- Contenedor del juego -->
     <div id="game-container">
-        <h2 id="status">Esperando jugadores...</h2>
-        <div id="game"></div>
+        <h2 id="statusMessage">Esperando jugadores...</h2>
+        <div id="phaser-container"></div>
     </div>
 
     <script>
-        let socket = io();
+        let socket;
         let username;
         let room;
 
         function joinGame() {
             username = document.getElementById("username").value.trim();
-            room = document.getElementById("room").value;
+            room = document.getElementById("roomSelect").value;
 
             if (!username) {
-                alert("Debes ingresar un nombre de usuario.");
+                alert("Por favor ingresa un nombre.");
                 return;
             }
 
+            // Ocultar el formulario y mostrar el juego
+            document.getElementById("join-container").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+
+            socket = io();
+
             socket.emit("joinRoom", { username, room });
 
-            document.getElementById("menu").style.display = "none";
-            document.getElementById("game-container").style.display = "block";
+            socket.on("waitingForPlayers", () => {
+                document.getElementById("statusMessage").innerText = "Esperando jugadores...";
+            });
+
+            socket.on("gameStart", () => {
+                document.getElementById("statusMessage").innerText = "¡Juego iniciado!";
+                startGame(); // Inicia el juego con Phaser
+            });
+
+            socket.on("yourTurn", () => {
+                document.getElementById("statusMessage").innerText = "🔥 Es tu turno!";
+            });
+
+            socket.on("opponentTurn", () => {
+                document.getElementById("statusMessage").innerText = "⏳ Espera al oponente...";
+            });
         }
 
-        socket.on("gameStart", () => {
-            document.getElementById("status").innerText = "¡Juego iniciado!";
-        });
-
-        socket.on("yourTurn", () => {
-            document.getElementById("status").innerText = "🔥 Es tu turno!";
-        });
-
-        socket.on("opponentTurn", () => {
-            document.getElementById("status").innerText = "⏳ Turno del oponente...";
-        });
+        function startGame() {
+            const gameContainer = document.getElementById("phaser-container");
+            gameContainer.innerHTML = ""; // Reiniciar el contenedor del juego
+            new Phaser.Game({
+                type: Phaser.AUTO,
+                width: 500,
+                height: 500,
+                scene: BattleGame,
+                parent: "phaser-container"
+            });
+        }
     </script>
 
     <script src="game.js"></script>
