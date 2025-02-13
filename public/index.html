@@ -4,16 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Batalla Naval</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script defer src="game.js"></script>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            display: none;
+            width: 100%;
+            height: 100vh;
+        }
+        #turn-indicator {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1>Batalla Naval</h1>
-    <h2 id="turnIndicator">Esperando jugadores...</h2>
 
-    <div id="game-container"></div>
+    <!-- Pantalla de inicio -->
+    <div id="login-screen">
+        <h1>Batalla Naval</h1>
+        <label>Nombre de usuario:</label>
+        <input type="text" id="username" placeholder="Ingresa tu nombre">
+        <br><br>
 
-    <script src="game.js"></script>
+        <label>Selecciona una sala:</label>
+        <select id="room">
+            <option value="sala1">Sala 1</option>
+            <option value="sala2">Sala 2</option>
+            <option value="sala3">Sala 3</option>
+        </select>
+        <br><br>
+
+        <label>Selecciona tu rol:</label>
+        <select id="role">
+            <option value="battleship">Comandante del Bismarck</option>
+            <option value="carrier">Comandante del Portaaviones</option>
+        </select>
+        <br><br>
+
+        <button onclick="joinGame()">Unirse</button>
+    </div>
+
+    <!-- Contenedor del juego -->
+    <div id="game-container">
+        <h2 id="turn-indicator">Esperando jugadores...</h2>
+    </div>
+
 </body>
 </html>

@@ -61,6 +61,8 @@ export default class Preload extends Phaser.Scene {
 
 	preload() {
 
+		this.load.image("water", "assets/agua.jpg");
+
 		this.editorCreate();
 
 		this.editorPreload();
@@ -76,6 +78,15 @@ export default class Preload extends Phaser.Scene {
 	create() {
 
 		this.scene.start("Level");
+		const rows = 10;
+    const cols = 10;
+    const tileSize = 64;
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+            this.add.image(x * tileSize, y * tileSize, "water").setOrigin(0, 0);
+        }
+    }
 	}
 
 	/* END-USER-CODE */
