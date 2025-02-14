@@ -1,9 +1,9 @@
 {
   "name": "servidor-bismarck",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "servidor/main.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node servidor/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
