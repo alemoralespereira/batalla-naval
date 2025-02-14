@@ -38,6 +38,7 @@ class Menu extends Phaser.Scene {
         socket.on("gameStart", (data) => {
             document.getElementById("login-screen").style.display = "none"; // Ocultar login
             document.getElementById("game-container").style.display = "block"; // Mostrar juego
+            document.getElementById("turn-indicator").innerText = "";
 
             // Inicializar el Juego
             this.scene.start('Game', { gameState: data.gameState, role: this.role, room: this.room });
