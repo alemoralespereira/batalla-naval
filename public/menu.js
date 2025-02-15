@@ -41,7 +41,7 @@ class Menu extends Phaser.Scene {
             document.getElementById("turn-indicator").innerText = "";
 
             // Inicializar el Juego
-            this.scene.start('Game', { gameState: data.gameState, role: this.role, room: this.room });
+            this.scene.start('Game', { gameState: data.gameState, role: this.role, room: this.room, username: this.username });
         });
     }
 
@@ -60,6 +60,7 @@ class Menu extends Phaser.Scene {
         this.room = room;
         this.role = role;
 
+        console.log("📡 Enviando solicitud para unirse:", { username, room, role });
         // Emitir evento para unirse a la sala con el rol seleccionado
         socket.emit("joinRoom", { username, room, role });
     }

@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "../public")));
@@ -51,8 +51,8 @@ io.on("connection", (socket) => {
         // Iniciar juego cuando hay dos jugadores
         if (rooms[room].players.length === 2) {
             rooms[room].gameState.entities = {
-                battleship: { x: 600, y: 400, speed: 200 },
-                carrier: { x: 300, y: 200, speed: 150 }
+                bismarck: { x: 600, y: 400, speed: 200 },
+                portaaviones: { x: 300, y: 200, speed: 150 }
             };
 
             io.to(room).emit("gameStart", {

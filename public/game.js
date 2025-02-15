@@ -10,60 +10,92 @@ class Game extends Phaser.Scene {
         this.role = data.role;
         this.gameState = data.gameState;
         this.entities = {
-            battleship: { target: null, speed: 0 },
-            carrier: { target: null, speed: 0 },
+            bismarck: { 
+                target: null, 
+                speed: 0, 
+                maxSpeed: 100, 
+                acceleration: 2,
+            },
+
+            portaaviones: { 
+                target: null, 
+                speed: 0, 
+                maxSpeed: 100, 
+                acceleration: 2 },
         };
     }
 
     preload() {
         this.load.image("water", "assets/water.png");
-        this.load.image("battleship", "assets/battleship.png");
-        this.load.image("carrier", "assets/carrier.png");
+        this.load.image("bismarck", "assets/bismarck.png");
+        this.load.image("portaaviones", "assets/carrier.png");
     }
 
     create() {
         // Init mapa
         this.add.tileSprite(0, 0, this.scale.width * 2, this.scale.height * 2, "water").setOrigin(0, 0);
 
-        const { battleship, carrier } = this.gameState.entities;
+        const { bismarck, portaaviones } = this.gameState.entities;
 
         // Init acorazado
-        this.entities.battleship.target = this.physics.add.sprite(battleship.x, battleship.y, "battleship").setScale(0.5).setInteractive();
-        this.entities.battleship.speed = battleship.speed;
+        this.entities.bismarck.target = this.physics.add.sprite(bismarck.x, bismarck.y, "bismarck").setScale(0.5).setOrigin(1, 0.5);
+        this.entities.bismarck.speed = bismarck.speed;
 
         // Init portaviones
-        this.entities.carrier.target = this.physics.add.sprite(carrier.x, carrier.y, "carrier").setScale(0.6).setInteractive();
-        this.entities.carrier.speed = carrier.speed;
+        this.entities.portaaviones.target = this.physics.add.sprite(portaaviones.x, portaaviones.y, "portaaviones").setScale(0.6).setOrigin(1, 0.5);;
+        this.entities.portaaviones.speed = portaaviones.speed;
 
-        this.input.on("pointerdown", (pointer) => {
-            this.moveEntity(this.entities[this.role], pointer.x, pointer.y);
-            socket.emit("moveEntity", {
-                room: this.room,
-                entity: this.role,
-                x: pointer.x,
-                y: pointer.y
-            });
+        // Agregar controles de teclado
+        this.cursors = this.input.keyboard.addKeys({
+            up: "W",
+            left: "A",
+            right: "D"
         });
 
-        // Evento de actualización de entidades (los jugadores ven reflejados los movimientos)
-        socket.on("updateEntityPosition", (data) => {
-            if (this.entities[data.entity]) {
-                const entity = this.entities[data.entity];
-                this.moveEntity(entity, data.x, data.y);
-            }
+        // Actualizar física en cada frame
+        this.events.on("update", () => this.moverEntidad());
+
+       // Evento de actualización de entidades (los jugadores ven reflejados los movimientos)
+       socket.on("updateEntityPosition", (data) => {
+        if (this.entities[data.entity]) {
+            const entity = this.entities[data.entity];
+            // Actualizar la posición directamente
+            entity.target.setPosition(data.x, data.y);
+        }
         });
     }
 
-    moveEntity(entity, x, y) {
-        const distance = Phaser.Math.Distance.Between(entity.target.x, entity.target.y, x, y);
+   moverEntidad() {
+        const entity = this.entities[this.role];
+        const sprite = entity.target;
 
-        this.tweens.add({
-            targets: entity.target,
-            x: x,
-            y: y,
-            duration: (distance / entity.speed) * 1000,
-            ease: "Power2",
-        });
+        if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown ) {
+            
+            // Control de rotación: solo girar cuando se presionan las teclas A o D
+            if (this.cursors.left.isDown) {
+                sprite.setAngularVelocity(-50); // Gira a la izquierda
+            } else if (this.cursors.right.isDown) {
+                sprite.setAngularVelocity(50); // Gira a la derecha
+            } else {
+                sprite.setAngularVelocity(0); // No gira si no se presiona ninguna tecla
+            }
+
+             // Control de aceleración: acelerar cuando se presionan W 
+             if (this.cursors.up.isDown) {
+                // Acelera el barco
+                entity.speed = Math.min(entity.speed + entity.acceleration, entity.maxSpeed);
+            }
+
+            // Calcular nueva velocidad
+            const angle = Phaser.Math.DegToRad(sprite.angle);
+            sprite.setVelocityX(Math.cos(angle) * entity.speed);
+            sprite.setVelocityY(Math.sin(angle) * entity.speed);
+        } else {
+            // Si no se presionan teclas, la velocidad y la rotación se detienen
+            sprite.setVelocityX(0);
+            sprite.setVelocityY(0);
+            sprite.setAngularVelocity(0);
+        }
     }
 }
 
