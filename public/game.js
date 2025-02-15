@@ -13,27 +13,29 @@ class Game extends Phaser.Scene {
             bismarck: { 
                 target: null, 
                 speed: 0, 
-                maxSpeed: 100, 
-                acceleration: 2,
+                maxSpeed: 50, 
+                acceleration: 1,
             },
 
             portaaviones: { 
                 target: null, 
                 speed: 0, 
-                maxSpeed: 100, 
-                acceleration: 2 },
+                maxSpeed: 50, 
+                acceleration: 1 },
         };
     }
 
     preload() {
-        this.load.image("water", "assets/water.png");
+        //this.load.image("water", "assets/water.png");
+        this.load.image("mapa", "assets/mapa.png");
         this.load.image("bismarck", "assets/bismarck.png");
         this.load.image("portaaviones", "assets/carrier.png");
     }
 
     create() {
         // Init mapa
-        this.add.tileSprite(0, 0, this.scale.width * 2, this.scale.height * 2, "water").setOrigin(0, 0);
+        //this.add.tileSprite(0, 0, this.scale.width * 2, this.scale.height * 2, "water").setOrigin(0, 0);
+        this.add.image(0, 0, "mapa").setOrigin(0, 0);
 
         const { bismarck, portaaviones } = this.gameState.entities;
 
@@ -44,6 +46,9 @@ class Game extends Phaser.Scene {
         // Init portaviones
         this.entities.portaaviones.target = this.physics.add.sprite(portaaviones.x, portaaviones.y, "portaaviones").setScale(0.6).setOrigin(1, 0.5);;
         this.entities.portaaviones.speed = portaaviones.speed;
+
+         // Hacer que la cámara siga la entidad del jugador
+        this.cameras.main.startFollow(this.entities[this.role].target, true, 0.05, 0.05);
 
         // Agregar controles de teclado
         this.cursors = this.input.keyboard.addKeys({
@@ -73,9 +78,9 @@ class Game extends Phaser.Scene {
             
             // Control de rotación: solo girar cuando se presionan las teclas A o D
             if (this.cursors.left.isDown) {
-                sprite.setAngularVelocity(-50); // Gira a la izquierda
+                sprite.setAngularVelocity(-25); // Gira a la izquierda
             } else if (this.cursors.right.isDown) {
-                sprite.setAngularVelocity(50); // Gira a la derecha
+                sprite.setAngularVelocity(25); // Gira a la derecha
             } else {
                 sprite.setAngularVelocity(0); // No gira si no se presiona ninguna tecla
             }
