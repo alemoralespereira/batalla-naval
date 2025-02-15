@@ -65,21 +65,19 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("moveEntity", ({ room, entity, x, y }) => {
+    socket.on("moveEntity", ({ room, entity, x, y, angle }) => {
+        console.log("Received position update from client:", { room, entity, x, y, angle });
+    
         if (!rooms[room]) return;
-
+    
+        // Actualizar la posición y la rotación de la entidad
         rooms[room].gameState.entities[entity].x = x;
         rooms[room].gameState.entities[entity].y = y;
-
-        // Emitir actualización de la entidad a todos en la sala excepto la entidad actual
-        // que ya actualiza su posicion desde el lado del cliente
-        socket.to(room).emit("updateEntityPosition", { entity, x, y });
+        rooms[room].gameState.entities[entity].angle = angle;
+    
+        // Emitir actualización a todos en la sala excepto al cliente que envió la actualización
+        socket.to(room).emit("updateEntityPosition", { entity, x, y, angle });
     });
-
-    // // Manejo de disparos
-    // socket.on("shoot", ({ room, targetX, targetY }) => {
-    //     io.to(room).emit("shotFired", { targetX, targetY });
-    // });
 
     // Desconexión del jugador
     socket.on("disconnect", () => {

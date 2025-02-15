@@ -16,7 +16,6 @@ class Game extends Phaser.Scene {
                 maxSpeed: 50, 
                 acceleration: 1,
             },
-
             portaaviones: { 
                 target: null, 
                 speed: 0, 
@@ -26,7 +25,6 @@ class Game extends Phaser.Scene {
     }
 
     preload() {
-        //this.load.image("water", "assets/water.png");
         this.load.image("mapa", "assets/mapa.png");
         this.load.image("bismarck", "assets/bismarck.png");
         this.load.image("portaaviones", "assets/carrier.png");
@@ -34,7 +32,6 @@ class Game extends Phaser.Scene {
 
     create() {
         // Init mapa
-        //this.add.tileSprite(0, 0, this.scale.width * 2, this.scale.height * 2, "water").setOrigin(0, 0);
         this.add.image(0, 0, "mapa").setOrigin(0, 0);
 
         const { bismarck, portaaviones } = this.gameState.entities;
@@ -44,11 +41,8 @@ class Game extends Phaser.Scene {
         this.entities.bismarck.speed = bismarck.speed;
 
         // Init portaviones
-        this.entities.portaaviones.target = this.physics.add.sprite(portaaviones.x, portaaviones.y, "portaaviones").setScale(0.6).setOrigin(1, 0.5);;
+        this.entities.portaaviones.target = this.physics.add.sprite(portaaviones.x, portaaviones.y, "portaaviones").setScale(0.6).setOrigin(1, 0.5);
         this.entities.portaaviones.speed = portaaviones.speed;
-
-         // Hacer que la cámara siga la entidad del jugador
-        //this.cameras.main.startFollow(this.entities[this.role].target, true, 0.05, 0.05);
 
         // Agregar controles de teclado
         this.cursors = this.input.keyboard.addKeys({
@@ -58,36 +52,43 @@ class Game extends Phaser.Scene {
         });
 
         // Actualizar física en cada frame
-        this.events.on("update", () => this.moverEntidad());
+        this.events.on("update", () => this.moveEntity());
 
-       // Evento de actualización de entidades (los jugadores ven reflejados los movimientos)
-       socket.on("updateEntityPosition", (data) => {
-        if (this.entities[data.entity]) {
+        // Evento de actualización de entidades
+        socket.on("updateEntityPosition", (data) => {
+            console.log("Received position update from server:", data);
+
+            if (!this.entities[data.entity]) {
+                console.error(`Entity ${data.entity} not found.`);
+                return;
+            }
+
             const entity = this.entities[data.entity];
-            // Actualizar la posición directamente
-            entity.target.setPosition(data.x, data.y);
-        }
+            if (entity.target) {
+                entity.target.setPosition(data.x, data.y);
+                if (typeof data.angle === "number") {
+                    entity.target.setAngle(data.angle);
+                }
+            }
         });
     }
 
-   moverEntidad() {
+    moveEntity() {
         const entity = this.entities[this.role];
         const sprite = entity.target;
 
-        if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown ) {
-            
-            // Control de rotación: solo girar cuando se presionan las teclas A o D
+        if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown) {
+            // Control de rotación
             if (this.cursors.left.isDown) {
-                sprite.setAngularVelocity(-25); // Gira a la izquierda
+                sprite.setAngularVelocity(-25);
             } else if (this.cursors.right.isDown) {
-                sprite.setAngularVelocity(25); // Gira a la derecha
+                sprite.setAngularVelocity(25);
             } else {
-                sprite.setAngularVelocity(0); // No gira si no se presiona ninguna tecla
+                sprite.setAngularVelocity(0);
             }
 
-             // Control de aceleración: acelerar cuando se presionan W 
-             if (this.cursors.up.isDown) {
-                // Acelera el barco
+            // Control de aceleración
+            if (this.cursors.up.isDown) {
                 entity.speed = Math.min(entity.speed + entity.acceleration, entity.maxSpeed);
             }
 
@@ -96,11 +97,20 @@ class Game extends Phaser.Scene {
             sprite.setVelocityX(Math.cos(angle) * entity.speed);
             sprite.setVelocityY(Math.sin(angle) * entity.speed);
         } else {
-            // Si no se presionan teclas, la velocidad y la rotación se detienen
+            // Detener movimiento
             sprite.setVelocityX(0);
             sprite.setVelocityY(0);
             sprite.setAngularVelocity(0);
         }
+
+        // Enviar la nueva posición y rotación al servidor
+        socket.emit("moveEntity", {
+            room: this.room,
+            entity: this.role,
+            x: sprite.x,
+            y: sprite.y,
+            angle: sprite.angle
+        });
     }
 }
 
