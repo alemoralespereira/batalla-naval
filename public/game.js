@@ -21,6 +21,12 @@ class Game extends Phaser.Scene {
                 speed: 0, 
                 maxSpeed: 50, 
                 acceleration: 1 },
+            avion:{
+                target: null, 
+                speed: 0, 
+                maxSpeed: 100, 
+                acceleration: 2,
+            }
         };
     }
 
@@ -28,41 +34,59 @@ class Game extends Phaser.Scene {
         this.load.image("mapa", "assets/mapa.png");
         this.load.image("bismarck", "assets/bismarck.png");
         this.load.image("portaaviones", "assets/carrier.png");
+        this.load.image("avion", "assets/avion.png");
     }
 
     create() {
         // Init mapa
         this.add.image(0, 0, "mapa").setOrigin(0, 0);
-
-        const { bismarck, portaaviones } = this.gameState.entities;
-
+    
+        // Desestructurar entidades del estado del juego
+        const { bismarck, portaaviones, avion } = this.gameState.entities;
+        
+        // Verificar que las entidades estén definidas
+        if (!bismarck || !portaaviones || !avion) {
+        console.error("Error: Entidades no definidas en gameState.");
+        return;
+        }
+    
         // Init acorazado
-        this.entities.bismarck.target = this.physics.add.sprite(bismarck.x, bismarck.y, "bismarck").setScale(0.5).setOrigin(1, 0.5);
+        this.entities.bismarck.target = this.physics.add.sprite(bismarck.x, bismarck.y, "bismarck")
+            .setScale(0.5)
+            .setOrigin(1, 0.5);
         this.entities.bismarck.speed = bismarck.speed;
-
+    
         // Init portaviones
-        this.entities.portaaviones.target = this.physics.add.sprite(portaaviones.x, portaaviones.y, "portaaviones").setScale(0.6).setOrigin(1, 0.5);
+        this.entities.portaaviones.target = this.physics.add.sprite(portaaviones.x, portaaviones.y, "portaaviones")
+            .setScale(0.6)
+            .setOrigin(1, 0.5);
         this.entities.portaaviones.speed = portaaviones.speed;
-
+    
+        // Init avión
+        this.entities.avion.target = this.physics.add.sprite(avion.x, avion.y, "avion")
+            .setScale(0.6)
+            .setOrigin(1, 0.5);
+        this.entities.avion.speed = avion.speed;
+    
         // Agregar controles de teclado
         this.cursors = this.input.keyboard.addKeys({
             up: "W",
             left: "A",
             right: "D"
         });
-
+    
         // Actualizar física en cada frame
         this.events.on("update", () => this.moveEntity());
-
+    
         // Evento de actualización de entidades
         socket.on("updateEntityPosition", (data) => {
             console.log("Received position update from server:", data);
-
+    
             if (!this.entities[data.entity]) {
                 console.error(`Entity ${data.entity} not found.`);
                 return;
             }
-
+    
             const entity = this.entities[data.entity];
             if (entity.target) {
                 entity.target.setPosition(data.x, data.y);

@@ -52,7 +52,9 @@ io.on("connection", (socket) => {
         if (rooms[room].players.length === 2) {
             rooms[room].gameState.entities = {
                 bismarck: { x: 600, y: 400, speed: 200 },
-                portaaviones: { x: 300, y: 200, speed: 150 }
+                portaaviones: { x: 300, y: 200, speed: 150 },
+                avion: { x: 300, y: 250, speed: 150 }
+
             };
 
             io.to(room).emit("gameStart", {
