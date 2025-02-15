@@ -48,7 +48,7 @@ class Game extends Phaser.Scene {
         this.entities.portaaviones.speed = portaaviones.speed;
 
          // Hacer que la cámara siga la entidad del jugador
-        this.cameras.main.startFollow(this.entities[this.role].target, true, 0.05, 0.05);
+        //this.cameras.main.startFollow(this.entities[this.role].target, true, 0.05, 0.05);
 
         // Agregar controles de teclado
         this.cursors = this.input.keyboard.addKeys({
