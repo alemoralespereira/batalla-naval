@@ -42,7 +42,6 @@ io.on("connection", (socket) => {
             players: rooms[room].players.map(p => ({ username: p.username, role: p.role }))
         });
 
-
         // Si solo hay un jugador, enviar evento de espera
         if (rooms[room].players.length === 1) {
             io.to(room).emit("waitingForPlayers");
@@ -53,8 +52,7 @@ io.on("connection", (socket) => {
             rooms[room].gameState.entities = {
                 bismarck: { x: 600, y: 400, speed: 200 },
                 portaaviones: { x: 300, y: 200, speed: 150 },
-                avion: { x: 300, y: 250, speed: 150 }
-
+                avion: { x: 400, y: 250, speed: 150 }
             };
 
             io.to(room).emit("gameStart", {
@@ -68,16 +66,12 @@ io.on("connection", (socket) => {
     });
 
     socket.on("moveEntity", ({ room, entity, x, y, angle }) => {
-        console.log("Received position update from client:", { room, entity, x, y, angle });
-    
         if (!rooms[room]) return;
     
-        // Actualizar la posición y la rotación de la entidad
-        rooms[room].gameState.entities[entity].x = x;
-        rooms[room].gameState.entities[entity].y = y;
-        rooms[room].gameState.entities[entity].angle = angle;
+        // Actualizar la posición de la entidad
+        rooms[room].gameState.entities[entity] = { x, y, angle };
     
-        // Emitir actualización a todos en la sala excepto al cliente que envió la actualización
+         // Emitir la actualización a todos los jugadores en la sala
         socket.to(room).emit("updateEntityPosition", { entity, x, y, angle });
     });
 
