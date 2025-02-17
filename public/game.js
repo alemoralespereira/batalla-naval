@@ -5,6 +5,8 @@ class Game extends Phaser.Scene {
         super({ key: 'Game' });
     }
 
+    //init()    -> Se ejecuta una sola vez al iniciar la escena.
+    //          -> Se usa para inicializar variables y recibir parámetros.
     init(data) {
         this.room = data.room;
         this.role = data.role;
@@ -37,6 +39,8 @@ class Game extends Phaser.Scene {
         }
     }
 
+    //preload() -> Se ejecuta una sola vez después de init().
+    //          -> Se usa para cargar imágenes, sonidos y otros assets antes de que se cree la escena.
     preload() {
         this.load.image("mapa", "assets/mapa.png");
         this.load.image("bismarck", "assets/bismarck.png");
@@ -44,6 +48,8 @@ class Game extends Phaser.Scene {
         this.load.image("avion", "assets/avion.png");
     }
 
+    //create()  -> Se ejecuta una vez después de preload().
+    //          -> Se usa para inicializar sprites, físicas y objetos del juego.
     create() {
 
         // Mostrar el mapa para ambos roles
@@ -106,7 +112,7 @@ class Game extends Phaser.Scene {
         }
   
         //CREAR ENTIDADES
-        //******************************************************* */
+        //********************************************************/
         // Crear Bismarck
         this.entities.bismarck.target = this.physics.add.sprite(
             this.gameState.entities.bismarck.x,
@@ -118,16 +124,7 @@ class Game extends Phaser.Scene {
 
         // Configurar la cámara para seguir al Bismarck
         this.cameras.main.startFollow(this.entities.bismarck.target);
-        
-        //Circulo de vision del Bismarck
-        this.bismarckVision = this.add.circle(
-            this.entities.bismarck.target.x,
-            this.entities.bismarck.target.y,
-            this.entities.bismarck.visionRange,
-            0x00ff00,                   // Color del círculo
-            0.2                         // Opacidad
-        ).setStrokeStyle(2, 0x00ff00);  // Borde del círculo
-                        
+    
         // Crear Portaaviones
         this.entities.portaaviones.target = this.physics.add.sprite(
             this.gameState.entities.portaaviones.x,
@@ -150,7 +147,19 @@ class Game extends Phaser.Scene {
             .setScale(0.2)
             .setOrigin(0.5, 0.5);
         }
-             
+        
+        //Circulo de vision del Bismarck
+        this.bismarckVision = this.add.circle(
+            this.entities.bismarck.target.x,
+            this.entities.bismarck.target.y,
+            this.entities.bismarck.visionRange,
+            0x00ff00,                   // Color del círculo
+            0.2                         // Opacidad
+        ).setStrokeStyle(2, 0x00ff00);  // Borde del círculo
+    
+
+        console.log("Círculo de visión creado y configurado.");
+
         // Agregar controles de teclado
         this.cursors = this.input.keyboard.addKeys({
             up: "W",
@@ -178,6 +187,8 @@ class Game extends Phaser.Scene {
         });
     }
 
+    //update()  -> Se ejecuta en cada frame, después de create().
+    //          -> Se usa para la lógica del juego en tiempo real (movimientos, colisiones, etc.).
     update(){
         this.moveEntity();
         
