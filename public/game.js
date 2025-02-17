@@ -16,6 +16,8 @@ class Game extends Phaser.Scene {
                 speed: 0, 
                 maxSpeed: 50, 
                 acceleration: 1,
+                visionRange: 200
+                
             },
             portaaviones: { 
                 target: null, 
@@ -51,13 +53,33 @@ class Game extends Phaser.Scene {
     }
 
     create() {
-        // Mostrar el mapa (esto debe hacerse para ambos roles)
+
+        // Mostrar el mapa para ambos roles
         const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
         console.log("Mapa creado:", mapa);
-    
+
+        // Crear una segunda cámara para el minimapa
+        this.minimapCamera = this.cameras.add(1100, 550, 200, 200) // (x, y, width, height)
+            .setZoom(0.1) // Reducir el zoom para que el minimapa sea más pequeño
+            .setBackgroundColor('#00008B') // Fondo del minimapa
+            .setName('minimapa'); // Nombre opcional para la cámara
+/*        // Agregar un borde al minimapa
+        const minimapBorder = this.add.rectangule(
+            this.minimapCamera.x + this.minimapCamera.width / 2,
+            this.minimapCamera.y + this.minimapCamera.height / 2,
+            this.minimapCamera.width,
+            this.minimapCamera.height
+        )
+        .setStrokeStyle(2, 0xffffff) // Borde blanco de 2 píxeles
+        .setScrollFactor(0); // El borde no se mueve con la cámara principal
+*/        
+        // Mostrar el mapa en el minimapa
+        //mapa.setScrollFactor(0); // El mapa no se mueve con la cámara principal
+        this.minimapCamera.ignore(mapa); // Ignorar el mapa en la cámara del minimapa
+
         // Crear el panel de selección solo si el rol es "portaaviones"
         if (this.role === "portaaviones") {
-            this.entityPanel = this.add.group(); // Grupo para los botones de selección
+            this.entityPanel = this.add.group(); // Panel para los botones de selección
     
             // Botón para seleccionar el portaaviones
             const portaavionesButton = this.add.text(20, 50, 'Portaaviones', { 
@@ -67,11 +89,9 @@ class Game extends Phaser.Scene {
             })
             .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
             .on('pointerdown', () => {
-                console.log("Botón portaaviones clickeado"); // Verificar en la consola
                 this.selectEntity('portaaviones');
             });
-    
-            portaavionesButton.setDepth(1000); // Colocar el botón en una capa superior
+            portaavionesButton.setScrollFactor(0); //Fijar boton en la pantalla
             this.entityPanel.add(portaavionesButton);
     
             // Botones para seleccionar los aviones
@@ -83,10 +103,9 @@ class Game extends Phaser.Scene {
                 })
                 .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
                 .on('pointerdown', () => {
-                    console.log(`Botón avión ${i + 1} clickeado`); // Verificar en la consola
                     this.selectEntity(`avion_${i}`);
                 });
-    
+                button.setScrollFactor(0); //Fijar boton en la pantalla
                 this.entityPanel.add(button);
             }
     
@@ -99,52 +118,55 @@ class Game extends Phaser.Scene {
             return;
         }
     
-        // Crear entidades según el rol del jugador
-        if (this.role === "bismarck") {
-            // Crear el Bismarck
-            this.entities.bismarck.target = this.physics.add.sprite(
-                this.gameState.entities.bismarck.x,
-                this.gameState.entities.bismarck.y,
-                "bismarck"
+        //Crear entidades para ambos roles:
+        // Crear el Bismarck
+        this.entities.bismarck.target = this.physics.add.sprite(
+            this.gameState.entities.bismarck.x,
+            this.gameState.entities.bismarck.y,
+            "bismarck"
+        )
+        .setScale(0.8)
+        .setOrigin(0.5, 0.5);
+
+        // Configurar la cámara para seguir al Bismarck
+        this.cameras.main.startFollow(this.entities.bismarck.target);
+        
+        this.bismarckVision = this.add.circle(
+            this.entities.bismarck.target.x,
+            this.entities.bismarck.target.y,
+            this.entities.bismarck.visionRange,
+            0x00ff00, // Color del círculo
+            0.2 // Opacidad
+        ).setStrokeStyle(2, 0x00ff00); // Borde del círculo
+                
+       console.log("Bismarck creado:", this.entities.bismarck.target);
+        
+        // Crear el portaaviones
+        this.entities.portaaviones.target = this.physics.add.sprite(
+            this.gameState.entities.portaaviones.x,
+            this.gameState.entities.portaaviones.y,
+            "portaaviones"
+        )
+        .setScale(1.1)
+        .setOrigin(0.5, 0.5);
+        
+        // Configurar la cámara para seguir al portaaviones inicialmente.
+        this.cameras.main.startFollow(this.entities.portaaviones.target);
+        console.log("Portaaviones creado:", this.entities.portaaviones.target);
+        
+        // Crear los aviones
+        for (let i = 0; i < 10; i++) {
+            this.entities[`avion_${i}`].target = this.physics.add.sprite(
+                this.gameState.entities.avion.x, 
+                this.gameState.entities.avion.y,
+                "avion"
             )
-            .setScale(0.8)
+            .setScale(0.2)
             .setOrigin(0.5, 0.5);
-    
-            console.log("Bismarck creado:", this.entities.bismarck.target);
-    
-            // Configurar la cámara para seguir al Bismarck
-            this.cameras.main.startFollow(this.entities.bismarck.target);
-            console.log("Cámara siguiendo al Bismarck");
-        } else if (this.role === "portaaviones") {
-            // Crear el portaaviones
-            this.entities.portaaviones.target = this.physics.add.sprite(
-                this.gameState.entities.portaaviones.x,
-                this.gameState.entities.portaaviones.y,
-                "portaaviones"
-            )
-            .setScale(1.1)
-            .setOrigin(0.5, 0.5);
-    
-            console.log("Portaaviones creado:", this.entities.portaaviones.target);
-    
-            // Crear los aviones (solo para el portaaviones)
-            for (let i = 0; i < 10; i++) {
-                this.entities[`avion_${i}`].target = this.physics.add.sprite(
-                    this.gameState.entities.avion.x, // Ajusta las coordenadas según sea necesario
-                    this.gameState.entities.avion.y,
-                    "avion"
-                )
-                .setScale(0.2)
-                .setOrigin(0.5, 0.5);
-    
-                console.log(`Avión ${i} creado:`, this.entities[`avion_${i}`].target);
-            }
-    
-            // Configurar la cámara para seguir al portaaviones
-            this.cameras.main.startFollow(this.entities.portaaviones.target);
-            console.log("Cámara siguiendo al portaaviones");
+            
+            console.log(`Avión ${i} creado:`, this.entities[`avion_${i}`].target);
         }
-    
+          
         // Ajustar los límites de la cámara al tamaño del mapa
         this.cameras.main.setBounds(0, 0, mapa.width, mapa.height);
         console.log("Límites de la cámara configurados:", mapa.width, mapa.height);
@@ -156,9 +178,6 @@ class Game extends Phaser.Scene {
             right: "D",
             down: "S"
         });
-    
-        // Actualizar física en cada frame
-        this.events.on("update", () => this.moveEntity());
     
         // Evento de actualización de entidades
         socket.on("updateEntityPosition", (data) => {
@@ -179,9 +198,32 @@ class Game extends Phaser.Scene {
         });
     }
 
+    update(){
+        this.moveEntity();
+        
+        // Actualizar la posición del círculo de visión del Bismarck
+        if (this.bismarckVision && this.entities.bismarck.target) {
+            this.bismarckVision.x = this.entities.bismarck.target.x;
+            this.bismarckVision.y = this.entities.bismarck.target.y;
+        }
+        
+    }
+
+     // Función para cambiar la camara a la entidad seleccionada.
+     changeCameraTarget(entity) {
+        if (this.entities[entity] && this.entities[entity].target) {
+            this.cameras.main.startFollow(this.entities[entity].target);
+            console.log(`Cámara siguiendo a ${entity}`);
+        } else {
+            console.error(`Entidad ${entity} no encontrada.`);
+        }
+    }
+
+    //Funcion para seleccionar entidad y cambiar de camara.
     selectEntity(entity) {
         if (this.role === "portaaviones" && this.entities[entity]) {
-            this.selectedEntity = entity; // Guardar la entidad seleccionada
+            this.selectedEntity = entity;       // Guardar la entidad seleccionada
+            this.changeCameraTarget(entity);    // Cambiar la cámara para seguir la entidad seleccionada
             console.log(`Entidad seleccionada: ${entity}`);
         } else {
             console.error(`Entidad ${entity} no encontrada o rol incorrecto.`);
@@ -189,8 +231,8 @@ class Game extends Phaser.Scene {
     }
 
     moveEntity() {
+         // Mover el Bismarck
         if (this.role === "bismarck") {
-            // Mover el Bismarck
             const bismarck = this.entities.bismarck;
             const sprite = bismarck.target;
     
@@ -198,7 +240,7 @@ class Game extends Phaser.Scene {
                 console.error("Sprite del Bismarck no encontrado.");
                 return;
             }
-    
+            
             // Movimiento con las teclas W, A, S, D
             if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown) {
                 // Rotación (A y D)
@@ -227,7 +269,7 @@ class Game extends Phaser.Scene {
                 sprite.setVelocityY(0);
                 sprite.setAngularVelocity(0);
             }
-    
+            
             // Enviar la posición del Bismarck al servidor
             socket.emit("moveEntity", {
                 room: this.room,
