@@ -1,4 +1,7 @@
 import socket from './socket.js';
+import Bismarck from './bismarck.js';
+import Portaaviones from './portaaviones.js';
+import Avion from './avion.js';
 
 class Game extends Phaser.Scene {
     constructor() {
@@ -10,32 +13,15 @@ class Game extends Phaser.Scene {
     init(data) {
         this.room = data.room;
         this.role = data.role;
-        this.gameState = data.gameState;
         // Inicializar bismarck y portaaviones
         this.entities = {
-            bismarck: { 
-                target: null, 
-                speed: 0, 
-                maxSpeed: 50, 
-                acceleration: 1,
-                visionRange: 200
-                
-            },
-            portaaviones: { 
-                target: null, 
-                speed: 0, 
-                maxSpeed: 50, 
-                acceleration: 1 }
+            bismarck: new Bismarck(data.gameState.entities.bismarck),
+            portaaviones: new Portaaviones(data.gameState.entities.portaaviones)
         };
-        
+
         // Inicializar los aviones
         for (let i = 0; i < 10; i++) {
-            this.entities[`avion_${i}`] = {
-                target: null,
-                speed: 0,
-                maxSpeed: 100,
-                acceleration: 2
-            };
+            this.entities[`avion_${i}`] = new Avion(data.gameState.entities.avion);
         }
     }
 
@@ -109,49 +95,25 @@ class Game extends Phaser.Scene {
                 button.setScrollFactor(0);          //Fijar boton en la pantalla
                 this.entityPanel.add(button);       //Agregar boton al panel.
             }
+
+            // seleccionar portaaviones por defecto
+            this.selectedEntity = "portaaviones";
         }
   
         //CREAR ENTIDADES
         //********************************************************/
         // Crear Bismarck
-        this.entities.bismarck.target = this.physics.add.sprite(
-            this.gameState.entities.bismarck.x,
-            this.gameState.entities.bismarck.y,
-            "bismarck"
-        )
-        .setScale(0.8)
-        .setOrigin(0.5, 0.5);
-        
-        //Circulo de vision del Bismarck
-        this.bismarckVision = this.add.circle(
-            this.entities.bismarck.target.x,
-            this.entities.bismarck.target.y,
-            this.entities.bismarck.visionRange,
-            0x00ff00,                   // Color del círculo
-            0.2                         // Opacidad
-        ).setStrokeStyle(2, 0x00ff00);  // Borde del círculo
+        this.entities.bismarck.init(this);
         
         // Configurar la cámara para seguir al Bismarck
         this.cameras.main.startFollow(this.entities.bismarck.target);
         
         // Crear Portaaviones
-        this.entities.portaaviones.target = this.physics.add.sprite(
-            this.gameState.entities.portaaviones.x,
-            this.gameState.entities.portaaviones.y,
-            "portaaviones"
-        )
-        .setScale(1.1)
-        .setOrigin(0.5, 0.5);
+        this.entities.portaaviones.init(this);
               
         // Crear los aviones
         for (let i = 0; i < 10; i++) {
-            this.entities[`avion_${i}`].target = this.physics.add.sprite(
-                this.gameState.entities.avion.x, 
-                this.gameState.entities.avion.y,
-                "avion"
-            )
-            .setScale(0.2)
-            .setOrigin(0.5, 0.5);
+            this.entities[`avion_${i}`].init(this);
         }
 
         // Agregar controles de teclado
@@ -186,11 +148,7 @@ class Game extends Phaser.Scene {
     update() {
         this.moveEntity();
         
-        // Actualizar la posición del círculo de visión del Bismarck.
-        if (this.bismarckVision && this.entities.bismarck.target) {
-            this.bismarckVision.x = this.entities.bismarck.target.x;
-            this.bismarckVision.y = this.entities.bismarck.target.y;
-        }
+        this.entities.bismarck.update();
     }
 
      // Función para cambiar la camara a la entidad seleccionada.
@@ -215,99 +173,27 @@ class Game extends Phaser.Scene {
     }
 
     moveEntity() {
+        let entity = null;
+        let entityName = "";
+
         // Mover el Bismarck
         if (this.role === "bismarck") {
-            const bismarck = this.entities.bismarck;
-            const sprite = bismarck.target;
-    
-            if (!sprite) {
-                console.error("Sprite del Bismarck no encontrado.");
-                return;
-            }
-            
-            // Movimiento con las teclas W, A, S, D
-            if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown) {
-                // Rotación (A y D)
-                if (this.cursors.left.isDown) {
-                    sprite.setAngularVelocity(-25);
-                } else if (this.cursors.right.isDown) {
-                    sprite.setAngularVelocity(25);
-                } else {
-                    sprite.setAngularVelocity(0);
-                }
-    
-                // Aceleración (W y S)
-                if (this.cursors.up.isDown) {
-                    bismarck.speed = Math.min(bismarck.speed + bismarck.acceleration, bismarck.maxSpeed);
-                } else if (this.cursors.down.isDown) {
-                    bismarck.speed = Math.max(bismarck.speed - bismarck.acceleration, -bismarck.maxSpeed);
-                }
-    
-                // Calcular nueva velocidad
-                const angle = Phaser.Math.DegToRad(sprite.angle);
-                sprite.setVelocityX(Math.cos(angle) * bismarck.speed);
-                sprite.setVelocityY(Math.sin(angle) * bismarck.speed);
-            } else {
-                // Detener movimiento
-                sprite.setVelocityX(0);
-                sprite.setVelocityY(0);
-                sprite.setAngularVelocity(0);
-            }
-            
-            // Enviar la posición del Bismarck al servidor
-            socket.emit("moveEntity", {
-                room: this.room,
-                entity: "bismarck",
-                x: sprite.x,
-                y: sprite.y,
-                angle: sprite.angle
-            });
+            entity = this.entities.bismarck;
+            entityName = "bismarck";
         } else if (this.selectedEntity && this.entities[this.selectedEntity]) {
             // Mover la entidad seleccionada (portaaviones o avión)
-            const entity = this.entities[this.selectedEntity];
-            const sprite = entity.target;
-    
-            if (!sprite) {
-                console.error(`Sprite no encontrado para la entidad ${this.selectedEntity}`);
-                return;
-            }
-    
-            // Movimiento con las teclas W, A, S, D
-            if (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.up.isDown || this.cursors.down.isDown) {
-                // Rotación (A y D)
-                if (this.cursors.left.isDown) {
-                    sprite.setAngularVelocity(-25);
-                } else if (this.cursors.right.isDown) {
-                    sprite.setAngularVelocity(25);
-                } else {
-                    sprite.setAngularVelocity(0);
-                }
-    
-                // Aceleración (W y S)
-                if (this.cursors.up.isDown) {
-                    entity.speed = Math.min(entity.speed + entity.acceleration, entity.maxSpeed);
-                } else if (this.cursors.down.isDown) {
-                    entity.speed = Math.max(entity.speed - entity.acceleration, -entity.maxSpeed);
-                }
-    
-                // Calcular nueva velocidad
-                const angle = Phaser.Math.DegToRad(sprite.angle);
-                sprite.setVelocityX(Math.cos(angle) * entity.speed);
-                sprite.setVelocityY(Math.sin(angle) * entity.speed);
-            } else {
-                // Detener movimiento
-                sprite.setVelocityX(0);
-                sprite.setVelocityY(0);
-                sprite.setAngularVelocity(0);
-            }
-    
-            // Enviar la posición de la entidad al servidor
+            entity = this.entities[this.selectedEntity];
+            entityName = this.selectedEntity;
+        }
+
+        if (entity) {
+            entity.move(this.cursors);
             socket.emit("moveEntity", {
                 room: this.room,
-                entity: this.selectedEntity,
-                x: sprite.x,
-                y: sprite.y,
-                angle: sprite.angle
+                entity: entityName,
+                x: entity.x,
+                y: entity.y,
+                angle: entity.angle
             });
         } else {
             console.error("No hay entidad seleccionada o no es válida.");
