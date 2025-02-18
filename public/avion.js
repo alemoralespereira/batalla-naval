@@ -23,7 +23,7 @@ class Avion extends Entity {
         }
 
         // Movimiento con las teclas W, A, S, D
-        if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown) {
+        if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown) {
             // Rotación (A y D)
             if (cursors.left.isDown) {
                 this.target.setAngularVelocity(-25);
