@@ -29,17 +29,22 @@ class Avion extends Entity {
                 this.target.setAngularVelocity(-25);
             } else if (cursors.right.isDown) {
                 this.target.setAngularVelocity(25);
+            } else {
+                this.target.setAngularVelocity(0);
             }
-            
+
             // Aceleración (W)
             if (cursors.up.isDown) {
                 this.speed = Math.min(this.speed + this.acceleration, this.maxSpeed);
             }
 
             // Calcular nueva velocidad
+            console.log(this.target.angle);
             const angle = Phaser.Math.DegToRad(this.target.angle);
             this.target.setVelocityX(Math.cos(angle) * this.speed);
             this.target.setVelocityY(Math.sin(angle) * this.speed);
+        } else {
+            this.target.setAngularVelocity(0);
         }
     }
 }
