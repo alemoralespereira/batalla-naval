@@ -191,9 +191,9 @@ class Game extends Phaser.Scene {
             socket.emit("moveEntity", {
                 room: this.room,
                 entity: entityName,
-                x: entity.x,
-                y: entity.y,
-                angle: entity.angle
+                x: entity.target.x,
+                y: entity.target.y,
+                angle: entity.target.angle
             });
         } else {
             console.error("No hay entidad seleccionada o no es válida.");
