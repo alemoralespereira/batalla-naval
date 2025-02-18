@@ -1,6 +1,6 @@
-import Entity from './entity.js';
+import Barco from './barco.js';
 
-class Bismarck extends Entity {
+class Bismarck extends Barco {
     constructor(bismarckData) {
         super(
             bismarckData.x,

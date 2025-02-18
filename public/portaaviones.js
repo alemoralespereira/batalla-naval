@@ -1,6 +1,6 @@
-import Entity from './entity.js';
+import Barco from './barco.js';
 
-class Portaaviones extends Entity {
+class Portaaviones extends Barco {
     constructor(portaavionesData) {
         super(
             portaavionesData.x,
