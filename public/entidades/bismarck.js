@@ -5,7 +5,7 @@ class Bismarck extends Barco {
         super(
             bismarckData.x,
             bismarckData.y,
-            0,
+            1,
             50,
             1,
             null

@@ -1,7 +1,7 @@
 import socket from './socket.js';
-import Bismarck from './bismarck.js';
-import Portaaviones from './portaaviones.js';
-import Avion from './avion.js';
+import Bismarck from './entidades/bismarck.js';
+import Portaaviones from './entidades/portaaviones.js';
+import Avion from './entidades/avion.js';
 
 class Game extends Phaser.Scene {
     constructor() {

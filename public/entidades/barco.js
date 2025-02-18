@@ -35,8 +35,8 @@ class Barco extends Entity {
             this.target.setVelocityY(Math.sin(angle) * this.speed);
         } else {
             // Detener movimiento
-            this.target.setVelocityX(0);
-            this.target.setVelocityY(0);
+            //this.target.setVelocityX(0);
+           // this.target.setVelocityY(0);
             this.target.setAngularVelocity(0);
         }
     }
