@@ -40,66 +40,16 @@ class Game extends Phaser.Scene {
 
         // Mostrar el mapa para ambos roles
         const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
-        
         // Ajustar los límites de la camara principal al tamaño del mapa
         this.cameras.main.setBounds(0, 0, mapa.width, mapa.height);
-        
         // Crear una segunda cámara para el minimapa
         this.minimapCamera = this.cameras.add(1100, 550, 200, 200) // (x, y, width, height)
             .setZoom(0.1) 
             .setBackgroundColor('#00008B')
             .setName('minimapa');
 
-/*        // Agregar un borde al minimapa
-        const minimapBorder = this.add.rectangule(
-            this.minimapCamera.x + this.minimapCamera.width / 2,
-            this.minimapCamera.y + this.minimapCamera.height / 2,
-            this.minimapCamera.width,
-            this.minimapCamera.height
-        )
-        .setStrokeStyle(2, 0xffffff) // Borde blanco de 2 píxeles
-        .setScrollFactor(0); // El borde no se mueve con la cámara principal
-*/        
-        // Mostrar el mapa en el minimapa
-        //mapa.setScrollFactor(0); // El mapa no se mueve con la cámara principal
         this.minimapCamera.ignore(mapa); // Ignorar el mapa en la cámara del minimapa
 
-        // Crear el panel de selección solo si el rol es "portaaviones"
-        if (this.role === "portaaviones") {
-            this.entityPanel = this.add.group(); // Panel para los botones de selección
-    
-            // Boton para seleccionar el portaaviones
-            const portaavionesButton = this.add.text(20, 50, 'Portaaviones', { 
-                fill: '#ffffff',                        // Texto blanco
-                backgroundColor: '#000000',             // Fondo negro
-                padding: { x: 10, y: 5 }                //Espaciado interno
-            })
-            .setInteractive({ useHandCursor: true })    //Hacer el texto interactivo
-            .on('pointerdown', () => {
-                this.selectEntity('portaaviones');
-            });
-            portaavionesButton.setScrollFactor(0);      //Fijar boton en la pantalla
-            this.entityPanel.add(portaavionesButton);   //Agregar boton al panel.
-    
-            // Botones para seleccionar los aviones
-            for (let i = 0; i < 10; i++) {
-                const button = this.add.text(20, 80 + i * 30, `Avión ${i + 1}`, { 
-                    fill: '#ffffff', 
-                    backgroundColor: '#000000',
-                    padding: { x: 10, y: 5 }
-                })
-                .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
-                .on('pointerdown', () => {
-                    this.selectEntity(`avion_${i}`);
-                });
-                button.setScrollFactor(0);          //Fijar boton en la pantalla
-                this.entityPanel.add(button);       //Agregar boton al panel.
-            }
-
-            // seleccionar portaaviones por defecto
-            this.selectedEntity = "portaaviones";
-        }
-  
         //CREAR ENTIDADES
         //********************************************************/
         // Crear Bismarck
@@ -115,7 +65,42 @@ class Game extends Phaser.Scene {
         for (let i = 0; i < 10; i++) {
             this.entities[`avion_${i}`].init(this);
         }
+        //********************************************************/
 
+        // Crear el panel de selección solo si el rol es "portaaviones"
+        if (this.role === "portaaviones") {
+            this.entityPanel = this.add.group(); // Panel para los botones de selección
+            
+            // Boton para seleccionar el portaaviones
+            const botonPortaaviones = this.add.text(20, 50, 'Portaaviones', { 
+                fill: '#ffffff',                        // Texto blanco
+                backgroundColor: '#000000',             // Fondo negro
+                padding: { x: 10, y: 5 }                //Espaciado interno
+            })
+            .setInteractive({ useHandCursor: true })    //Hacer el texto interactivo
+            .on('pointerdown', () => {
+                this.selectEntity('portaaviones');
+            });
+            botonPortaaviones.setScrollFactor(0);      //Fijar boton en la pantalla
+            this.entityPanel.add(botonPortaaviones);   //Agregar boton al panel.
+    
+            // Botones para seleccionar los aviones
+            for (let i = 0; i < 10; i++) {
+                const botonAviones = this.add.text(20, 80 + i * 30, `Avión ${i + 1}`, { 
+                    fill: '#ffffff', 
+                    backgroundColor: '#000000',
+                    padding: { x: 10, y: 5 }
+                })
+                .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
+                .on('pointerdown', () => {
+                    this.selectEntity(`avion_${i}`);
+                });
+                botonAviones.setScrollFactor(0);          //Fijar boton en la pantalla
+                this.entityPanel.add(botonAviones);       //Agregar boton al panel.
+            }
+        }
+  
+        
         // Agregar controles de teclado
         this.cursors = this.input.keyboard.addKeys({
             up: "W",
@@ -126,7 +111,7 @@ class Game extends Phaser.Scene {
     
         // Evento de actualización de entidades
         socket.on("updateEntityPosition", (data) => {
-            console.log("Received position update from server:", data);
+            //console.log("Received position update from server:", data);
     
             if (!this.entities[data.entity]) {
                 console.error(`Entity ${data.entity} not found.`);
@@ -146,9 +131,11 @@ class Game extends Phaser.Scene {
     //update()  -> Se ejecuta en cada frame, después de create().
     //          -> Se usa para la lógica del juego en tiempo real (movimientos, colisiones, etc.).
     update() {
-        this.moveEntity();
-        
-        this.entities.bismarck.update();
+        this.moveEntity();    
+   
+        for (let key in this.entities) {
+            this.entities[key].update();
+        }
     }
 
      // Función para cambiar la camara a la entidad seleccionada.
