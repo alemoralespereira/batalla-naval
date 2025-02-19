@@ -9,7 +9,7 @@ class Bismarck extends Barco {
             50,
             1,
             null,
-            500, //COMBUSTIBLE
+            5000, //COMBUSTIBLE
             null,
             200
         )
@@ -18,7 +18,7 @@ class Bismarck extends Barco {
     }
 
     init(scene) {
-        this.target = scene.physics.add.sprite(this.x, this.y, "bismarck").setScale(0.8).setOrigin(0.5, 0.5);
+        this.target = scene.physics.add.sprite(900, 200, "bismarck").setScale(0.8).setOrigin(0.5, 0.5);
         super.init(scene);
     }
 

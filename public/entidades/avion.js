@@ -9,7 +9,7 @@ class Avion extends Entity {
             100,
             2,
             null,
-            1000, //COMBUSTIBLE
+            10000, //COMBUSTIBLE
             null,
             50
         )
@@ -19,8 +19,7 @@ class Avion extends Entity {
     }
 
     init(scene) {
-        this.target = scene.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
-
+        this.target = scene.physics.add.sprite(50, 500, "avion").setScale(0.2).setOrigin(0.5, 0.5);
         super.init(scene);
     }
 

@@ -50,22 +50,33 @@ class Game extends Phaser.Scene {
 
         this.minimapCamera.ignore(mapa); // Ignorar el mapa en la cámara del minimapa
 
+        //CREAR EQUIPOS
+        //********************************************************/
+        this.equipoRojo = this.physics.add.group();
+        this.equipoAzul = this.physics.add.group();
+
         //CREAR ENTIDADES
         //********************************************************/
         // Crear Bismarck
         this.entities.bismarck.init(this);
-        
-        // Configurar la cámara para seguir al Bismarck
-        this.cameras.main.startFollow(this.entities.bismarck.target);
-        
+        this.equipoRojo.add(this.entities.bismarck.target);
+
         // Crear Portaaviones
         this.entities.portaaviones.init(this);
-              
+        this.equipoAzul.add(this.entities.portaaviones.target);
+
         // Crear los aviones
         for (let i = 0; i < 10; i++) {
             this.entities[`avion_${i}`].init(this);
+            this.equipoAzul.add(this.entities[`avion_${i}`].target)
         }
         //********************************************************/
+
+        this.physics.add.collider(this.equipoRojo, this.equipoAzul, enemigoAvistado, null, this);
+        
+        function enemigoAvistado() {
+            console.log("Entidad entro en rango de vision del Bismarck!");
+        }
 
         // Crear el panel de selección solo si el rol es "portaaviones"
         if (this.role === "portaaviones") {
@@ -100,7 +111,11 @@ class Game extends Phaser.Scene {
             }
         }
   
-        
+        if(this.role === "bismarck") {
+             // Configurar la cámara para seguir al Bismarck
+            this.cameras.main.startFollow(this.entities.bismarck.target);
+        }
+
         // Agregar controles de teclado
         this.cursors = this.input.keyboard.addKeys({
             up: "W",
