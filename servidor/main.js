@@ -23,13 +23,11 @@ io.on("connection", (socket) => {
             salas[sala] = { jugadores: [], estadoJuego: { entidades: {} } };
         }
 
-        // Verificar si el rol ya está ocupado
-        const rolAsignado = salas[sala].jugadores.find(jugador => jugador.rol === rol);
-        if (rolAsignado) {
-            // Asignar el rol restante al segundo jugador
-            const rolDisponible = rol === "bismarck" ? "portaaviones" : "bismarck";
-            socket.emit("rolAsignado", { mensaje: `El rol ${rol} ya está ocupado. Se te ha asignado el rol ${rolDisponible}.`, rol: rolDisponible });
-            rol = rolDisponible; // Actualizar el rol del jugador
+       // Verificar si el rol ya está ocupado
+        const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
+        if (rolOcupado) {
+            socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
+            return; // No permite que el jugador se una si el rol ya está ocupado
         }
 
         // Agregar jugador a la sala

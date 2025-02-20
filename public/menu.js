@@ -24,6 +24,11 @@ class Menu extends Phaser.Scene {
             document.getElementById("indicador-turno").innerText = "Esperando jugadores...";
         });
 
+        // Evento cuando el servidor indica que el rol ya esta asignado
+        socket.on("errorUnirse", (data) => {
+            alert(data.mensaje); // Muestra el error al usuario
+        });
+
         // Evento cuando el juego inicia
         socket.on("juegoIniciado", (data) => {
             document.getElementById("pantalla-login").style.display = "none"; // Ocultar login
@@ -33,6 +38,7 @@ class Menu extends Phaser.Scene {
             // Inicializar el Juego
             this.scene.start('Juego', { estadoJuego: data.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
         });
+
     }
 
     // Función para unirse al juego
