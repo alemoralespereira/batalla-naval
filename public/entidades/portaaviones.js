@@ -15,9 +15,9 @@ class Portaaviones extends Barco {
         );
     }
 
-    init(scene) {
-        this.target = scene.physics.add.sprite(100, 500, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
-        super.init(scene);
+    init(escena) {
+        this.objetivo = escena.physics.add.sprite(100, 500, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
+        super.init(escena);
     }
 
     update(){

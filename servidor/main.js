@@ -4,85 +4,78 @@ const path = require("path");
 const socketIo = require("socket.io");
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const servidor = http.createServer(app);
+const io = socketIo(servidor);
 
-const PORT = process.env.PORT || 8080;
+const PUERTO = process.env.PORT || 8080;
 
 // Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "../public")));
 
 // Almacenar información de las salas y jugadores
-let rooms = {};
+let salas = {};
 
 io.on("connection", (socket) => {
     console.log("🟢 Nuevo jugador conectado:", socket.id);
 
-    socket.on("joinRoom", ({ username, room, role }) => {
-        if (!rooms[room]) {
-            rooms[room] = { players: [], gameState: { entities: {} } };
+    socket.on("unirseSala", ({ nombreUsuario, sala, rol }) => {
+        if (!salas[sala]) {
+            salas[sala] = { jugadores: [], estadoJuego: { entidades: {} } };
         }
 
-        // Verificar si la sala ya tiene el rol seleccionado
-        // const existingRole = rooms[room].players.find(player => player.role === role);
-        // if (existingRole) {
-        //     socket.emit("roleTaken", { message: "Este rol ya ha sido seleccionado. Elige otro." });
-        //     return;
-        // }
-
         // Agregar jugador a la sala
-        rooms[room].players.push({ id: socket.id, username, role });
-        socket.join(room);
+        salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
+        socket.join(sala);
 
-        console.log(`📌 ${username} se unió a la sala ${room} como ${role}`);
+        console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
 
         // Notificar a todos en la sala
-        io.to(room).emit("playerJoined", {
-            message: `${username} se unió como ${role}`,
-            players: rooms[room].players.map(p => ({ username: p.username, role: p.role }))
+        io.to(sala).emit("jugadorUnido", {
+            mensaje: `${nombreUsuario} se unió como ${rol}`,
+            jugadores: salas[sala].jugadores.map(j => ({ nombreUsuario: j.nombreUsuario, rol: j.rol }))
         });
 
         // Si solo hay un jugador, enviar evento de espera
-        if (rooms[room].players.length === 1) {
-            io.to(room).emit("waitingForPlayers");
+        if (salas[sala].jugadores.length === 1) {
+            io.to(sala).emit("esperandoJugadores");
         }
 
         // Iniciar juego cuando hay dos jugadores
-        if (rooms[room].players.length === 2) {
-            rooms[room].gameState.entities = {
-                bismarck: { x: 600, y: 400, speed: 200 },
-                portaaviones: { x: 300, y: 200, speed: 150 },
-                avion: { x: 400, y: 250, speed: 150 }
+        if (salas[sala].jugadores.length === 2) {
+            salas[sala].estadoJuego.entidades = {
+                bismarck: { x: 600, y: 400, velocidad: 200 },
+                portaaviones: { x: 300, y: 200, velocidad: 150 },
+                avion: { x: 400, y: 250, velocidad: 150 }
             };
 
-            io.to(room).emit("gameStart", {
-                message: "El juego ha comenzado",
-                players: rooms[room].players,
-                gameState: rooms[room].gameState,
+            io.to(sala).emit("juegoIniciado", {
+                mensaje: "El juego ha comenzado",
+                jugadores: salas[sala].jugadores,
+                estadoJuego: salas[sala].estadoJuego,
             });
 
-            console.log(`🎮 Juego iniciado en la sala ${room}`);
+            console.log(`🎮 Juego iniciado en la sala ${sala}`);
         }
     });
 
-    socket.on("moveEntity", ({ room, entity, x, y, angle }) => {
-        if (!rooms[room]) return;
-    
+    socket.on("moverEntidad", ({ sala, entidad, x, y, angulo }) => {
+        if (!salas[sala]) return;
+
         // Actualizar la posición de la entidad
-        rooms[room].gameState.entities[entity] = { x, y, angle };
-    
-         // Emitir la actualización a todos los jugadores en la sala
-        socket.to(room).emit("updateEntityPosition", { entity, x, y, angle });
+        salas[sala].estadoJuego.entidades[entidad] = { x, y, angulo };
+
+        // Emitir la actualización a todos los jugadores en la sala
+        socket.to(sala).emit("actualizarPosicionEntidad", { entidad, x, y, angulo });
     });
 
     // Desconexión del jugador
     socket.on("disconnect", () => {
-        for (const room in rooms) {
-            rooms[room].players = rooms[room].players.filter(p => p.id !== socket.id);
-            if (rooms[room].players.length === 0) {
-                delete rooms[room]; // Eliminar sala si no quedan jugadores
+        for (const sala in salas) {
+            salas[sala].jugadores = salas[sala].jugadores.filter(j => j.id !== socket.id);
+            if (salas[sala].jugadores.length === 0) {
+                delete salas[sala]; // Eliminar sala si no quedan jugadores
             } else {
-                io.to(room).emit("playerLeft", { message: "Un jugador ha salido." });
+                io.to(sala).emit("jugadorSalio", { mensaje: "Un jugador ha salido." });
             }
         }
         console.log("🔴 Jugador desconectado:", socket.id);
@@ -90,6 +83,6 @@ io.on("connection", (socket) => {
 });
 
 // Iniciar servidor en el puerto 3000
-server.listen(PORT, () => {
-    console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
+servidor.listen(PUERTO, () => {
+    console.log(`✅ Servidor corriendo en el puerto ${PUERTO}`);
 });

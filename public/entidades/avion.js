@@ -18,17 +18,17 @@ class Avion extends Entity {
        this.operador = false;
     }
 
-    init(scene) {
-        this.target = scene.physics.add.sprite(50, 500, "avion").setScale(0.2).setOrigin(0.5, 0.5);
-        super.init(scene);
+    init(escena) {
+        this.objetivo = escena.physics.add.sprite(50, 500, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+        super.init(escena);
     }
 
     update(){
         super.update();
     }
 
-    move(cursors) {
-        if (!this.target) {
+    mover(controles) {
+        if (!this.objetivo) {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
@@ -36,41 +36,41 @@ class Avion extends Entity {
 
         if(this.combustible > 0) {
             // Movimiento con las teclas W, A, S, D
-            if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown) {
+            if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown) {
                            
                 // Rotación (A y D)
-                if (cursors.left.isDown) {
-                    this.target.setAngularVelocity(-25);
-                } else if (cursors.right.isDown) {
-                    this.target.setAngularVelocity(25);
+                if (controles.izquierda.isDown) {
+                    this.objetivo.setAngularVelocity(-25);
+                } else if (controles.derecha.isDown) {
+                    this.objetivo.setAngularVelocity(25);
                 } else {
-                    this.target.setAngularVelocity(0);
+                    this.objetivo.setAngularVelocity(0);
                 }
 
                 // Aceleración (W)
-                if (cursors.up.isDown) {
-                    this.speed = Math.min(this.speed + this.acceleration, this.maxSpeed);
+                if (controles.arriba.isDown) {
+                    this.velocidad = Math.min(this.velocidad + this.aceleracion, this.velocidadMaxima);
                 }
 
                 // Calcular nueva velocidad
-                const angle = Phaser.Math.DegToRad(this.target.angle);
-                const velocityX = Math.cos(angle) * this.speed;
-                const velocityY = Math.sin(angle) * this.speed;
+                const angle = Phaser.Math.DegToRad(this.objetivo.angle);
+                const velocityX = Math.cos(angle) * this.velocidad;
+                const velocityY = Math.sin(angle) * this.velocidad;
             
                 // Actualizar las posiciones
-                this.target.setVelocityX(velocityX);
-                this.target.setVelocityY(velocityY);
+                this.objetivo.setVelocityX(velocityX);
+                this.objetivo.setVelocityY(velocityY);
 
                 // Actualizar las posiciones internas
-                this.x = this.target.x;
-                this.y = this.target.y;
+                this.x = this.objetivo.x;
+                this.y = this.objetivo.y;
             } else {
-                this.target.setAngularVelocity(0);
+                this.objetivo.setAngularVelocity(0);
             }
         } else {
-            this.target.setAngularVelocity(0);  // Detener rotación también cuando el combustible sea 0
-            this.target.setVelocityX(0);        // Detener movimiento horizontal
-            this.target.setVelocityY(0);
+            this.objetivo.setAngularVelocity(0);  // Detener rotación también cuando el combustible sea 0
+            this.objetivo.setVelocityX(0);        // Detener movimiento horizontal
+            this.objetivo.setVelocityY(0);
         }
         
     }

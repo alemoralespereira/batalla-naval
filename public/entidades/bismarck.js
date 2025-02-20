@@ -13,13 +13,12 @@ class Bismarck extends Barco {
             null,
             200
         )
-        //this.vision = null;
-        //this.visionRange = 200;
+
     }
 
-    init(scene) {
-        this.target = scene.physics.add.sprite(900, 200, "bismarck").setScale(0.8).setOrigin(0.5, 0.5);
-        super.init(scene);
+    init(escena) {
+        this.objetivo = escena.physics.add.sprite(900, 200, "bismarck").setScale(0.8).setOrigin(0.5, 0.5);
+        super.init(escena);
     }
 
     update(){

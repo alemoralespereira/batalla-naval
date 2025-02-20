@@ -14,12 +14,12 @@
             text-align: center;
             font-family: Arial, sans-serif;
         }
-        #game-container {
+        #contenedor-juego {
             display: none;
             width: 100%;
             height: 100vh;
         }
-        #turn-indicator {
+        #indicador-turno {
             font-size: 20px;
             font-weight: bold;
             margin-top: 10px;
@@ -35,14 +35,14 @@
 <body>
 
     <!-- Pantalla de inicio -->
-    <div id="login-screen">
+    <div id="pantalla-login">
         <h1>Batalla Naval</h1>
         <label>Nombre de usuario:</label>
-        <input type="text" id="username" placeholder="Ingresa tu nombre">
+        <input type="text" id="nombreUsuario" placeholder="Ingresa tu nombre">
         <br><br>
 
         <label>Selecciona una sala:</label>
-        <select id="room">
+        <select id="sala">
             <option value="sala1">Sala 1</option>
             <option value="sala2">Sala 2</option>
             <option value="sala3">Sala 3</option>
@@ -50,18 +50,18 @@
         <br><br>
 
         <label>Selecciona tu rol:</label>
-        <select id="role">
+        <select id="rol">
             <option value="bismarck">Equipo Rojo</option>
             <option value="portaaviones">Equipo Azul</option>
         </select>
         <br><br>
 
-        <button onclick="joinGame()">Unirse</button>
+        <button onclick="unirseJuego()">Unirse</button>
     </div>
 
     <!-- Contenedor del juego -->
-    <div id="game-container">
-        <h2 id="turn-indicator">Esperando jugadores...</h2>
+    <div id="contenedor-juego">
+        <h2 id="indicador-turno">Esperando jugadores...</h2>
     </div>
 
 </body>
