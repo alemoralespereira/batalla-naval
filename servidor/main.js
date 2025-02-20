@@ -23,6 +23,15 @@ io.on("connection", (socket) => {
             salas[sala] = { jugadores: [], estadoJuego: { entidades: {} } };
         }
 
+        // Verificar si el rol ya está ocupado
+        const rolAsignado = salas[sala].jugadores.find(jugador => jugador.rol === rol);
+        if (rolAsignado) {
+            // Asignar el rol restante al segundo jugador
+            const rolDisponible = rol === "bismarck" ? "portaaviones" : "bismarck";
+            socket.emit("rolAsignado", { mensaje: `El rol ${rol} ya está ocupado. Se te ha asignado el rol ${rolDisponible}.`, rol: rolDisponible });
+            rol = rolDisponible; // Actualizar el rol del jugador
+        }
+
         // Agregar jugador a la sala
         salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
         socket.join(sala);
@@ -30,7 +39,7 @@ io.on("connection", (socket) => {
         console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
 
         // Notificar a todos en la sala
-        io.to(sala).emit("jugadorUnido", {
+        io.to(sala).emit("jugadorConectado", {
             mensaje: `${nombreUsuario} se unió como ${rol}`,
             jugadores: salas[sala].jugadores.map(j => ({ nombreUsuario: j.nombreUsuario, rol: j.rol }))
         });
@@ -43,9 +52,9 @@ io.on("connection", (socket) => {
         // Iniciar juego cuando hay dos jugadores
         if (salas[sala].jugadores.length === 2) {
             salas[sala].estadoJuego.entidades = {
-                bismarck: { x: 600, y: 400, velocidad: 200 },
-                portaaviones: { x: 300, y: 200, velocidad: 150 },
-                avion: { x: 400, y: 250, velocidad: 150 }
+                bismarck: { x: 900, y: 200, angulo: 0 }, 
+                portaaviones: { x: 50, y: 500, angulo: 0 },
+                avion: { x: 50, y: 500, angulo: 0 }
             };
 
             io.to(sala).emit("juegoIniciado", {
@@ -75,7 +84,7 @@ io.on("connection", (socket) => {
             if (salas[sala].jugadores.length === 0) {
                 delete salas[sala]; // Eliminar sala si no quedan jugadores
             } else {
-                io.to(sala).emit("jugadorSalio", { mensaje: "Un jugador ha salido." });
+                io.to(sala).emit("jugadorDesconectado", { mensaje: "Un jugador ha salido." });
             }
         }
         console.log("🔴 Jugador desconectado:", socket.id);
