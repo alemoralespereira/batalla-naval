@@ -10,7 +10,7 @@ class Menu extends Phaser.Scene {
 
     create() {
         // Evento cuando un jugador se une a la sala
-        socket.on("jugadorUnido", (data) => {
+        socket.on("jugadorConectado", (data) => {
             console.log(`${this.nombreUsuario} se unió a la sala ${this.sala}`);
 
             // Mostrar pantalla de juego con mensaje de espera si aún falta un jugador
@@ -36,7 +36,7 @@ class Menu extends Phaser.Scene {
             document.getElementById("indicador-turno").innerText = "";
 
             // Inicializar el Juego
-            this.scene.start('Juego', { estadoJuego: data.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
+            this.scene.start('EscenaAerea', { estadoJuego: data.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
         });
 
     }

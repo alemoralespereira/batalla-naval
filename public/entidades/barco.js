@@ -8,7 +8,7 @@ class Barco extends Entity {
     init(escena){
         super.init(escena);
     }
-
+    
     update(){
         super.update();
     }

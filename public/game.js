@@ -3,14 +3,16 @@ import Bismarck from './entidades/bismarck.js';
 import Portaaviones from './entidades/portaaviones.js';
 import Avion from './entidades/avion.js';
 
-class Juego extends Phaser.Scene {
+class EscenaAerea extends Phaser.Scene {
     constructor() {
-        super({ key: 'Juego' });
+        super({ key: 'EscenaAerea' });
     }
 
     init(data) {
         this.sala = data.sala;
         this.rol = data.rol;
+        this.estadoJuego = data.estadoJuego;
+
         // Inicializar bismarck y portaaviones
         this.entidades = {
             bismarck: new Bismarck(data.estadoJuego.entidades.bismarck),
@@ -21,6 +23,8 @@ class Juego extends Phaser.Scene {
         for (let i = 0; i < 10; i++) {
             this.entidades[`avion_${i}`] = new Avion(data.estadoJuego.entidades.avion);
         }
+
+        
     }
 
     preload() {
@@ -33,6 +37,10 @@ class Juego extends Phaser.Scene {
     create() {
         // Mostrar el mapa para ambos roles
         const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
+        
+        this.physics.world.setBounds(0, 0, 1800, 1800);
+        this.physics.world.setBoundsCollision(true, true, true, true);
+
         // Ajustar los límites de la cámara principal al tamaño del mapa
         this.cameras.main.setBounds(0, 0, mapa.width, mapa.height);
         // Crear una segunda cámara para el minimapa
@@ -45,31 +53,33 @@ class Juego extends Phaser.Scene {
 
         // CREAR EQUIPOS
         //********************************************************/
-        this.equipoRojo = this.physics.add.group();
+        //this.equipoRojo = this.physics.add.group();
         this.equipoAzul = this.physics.add.group();
 
         // CREAR ENTIDADES
         //********************************************************/
         // Crear Bismarck
         this.entidades.bismarck.init(this);
-        this.equipoRojo.add(this.entidades.bismarck.objetivo);
+        this.entidades.bismarck.objetivo.setCollideWorldBounds(true);
+        //this.equipoRojo.add(this.entidades.bismarck.objetivo);
 
         // Crear Portaaviones
         this.entidades.portaaviones.init(this);
+        this.entidades.portaaviones.objetivo.setCollideWorldBounds(true);
         this.equipoAzul.add(this.entidades.portaaviones.objetivo);
 
         // Crear los aviones
         for (let i = 0; i < 10; i++) {
             this.entidades[`avion_${i}`].init(this);
+            this.entidades[`avion_${i}`].objetivo.setCollideWorldBounds(true);
             this.equipoAzul.add(this.entidades[`avion_${i}`].objetivo)
         }
         //********************************************************/
 
-        this.physics.add.collider(this.equipoRojo, this.equipoAzul, enemigoAvistado, null, this);
-
-        function enemigoAvistado() {
-            console.log("Entidad entró en rango de visión del Bismarck!");
-        }
+        
+        this.physics.add.collider(this.entidades.bismarck.objetivo, this.equipoAzul, this.ejecutar, null, this);
+        this.physics.add.collider(this.equipoAzul,this.entidades.bismarck.objetivo, this.ejecutar, null, this);
+        
 
         // Crear el panel de selección solo si el rol es "portaaviones"
         if (this.rol === "portaaviones") {
@@ -114,7 +124,8 @@ class Juego extends Phaser.Scene {
             arriba: "W",
             izquierda: "A",
             derecha: "D",
-            abajo: "S"
+            abajo: "S",
+            atacar: "X"
         });
 
         // Evento de actualización de entidades
@@ -132,6 +143,10 @@ class Juego extends Phaser.Scene {
                 }
             }
         });
+    }
+
+    ejecutar(){
+        console.log("Entidad entró en rango de visión del Bismarck!");
     }
 
     update() {
@@ -192,4 +207,4 @@ class Juego extends Phaser.Scene {
     }
 }
 
-export default Juego;
+export default EscenaAerea;

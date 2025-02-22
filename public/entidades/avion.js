@@ -19,7 +19,7 @@ class Avion extends Entity {
     }
 
     init(escena) {
-        this.objetivo = escena.physics.add.sprite(50, 500, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+        this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
         super.init(escena);
     }
 

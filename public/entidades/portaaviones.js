@@ -5,18 +5,18 @@ class Portaaviones extends Barco {
         super(
             portaavionesData.x,
             portaavionesData.y,
-            0,
-            50,
-            1,
-            null,
-            500, //COMBUSTIBLE
-            null,
-            200
+            10,      //Velocidad 
+            10,     //VelocidadMaxima
+            1,      //Aceleracion 
+            null,   //Objetivo 
+            5000,   //Combustible 
+            null,   //Vision 
+            200     //RangoVision
         );
     }
 
     init(escena) {
-        this.objetivo = escena.physics.add.sprite(100, 500, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
+        this.objetivo = escena.physics.add.sprite(this.x, this.y, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
         super.init(escena);
     }
 

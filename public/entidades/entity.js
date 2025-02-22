@@ -19,6 +19,8 @@ class Entity {
             0x00ff00,                 // Color del círculo
             0.2                       // Opacidad
         ).setStrokeStyle(2, 0x00ff00) // Borde del círculo
+        
+       
     }
 
     update() {
