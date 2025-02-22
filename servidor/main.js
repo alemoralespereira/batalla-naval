@@ -39,6 +39,12 @@ io.on("connection", (socket) => {
         socket.join(sala);
 
         console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
+        console.log("Detalles del jugador:", {
+            socketId: socket.id,
+            nombreUsuario,
+            rol,
+            sala,
+        });
 
         // Notificar a todos en la sala
         io.to(sala).emit("jugadorConectado", {
@@ -101,10 +107,15 @@ io.on("connection", (socket) => {
             });
 
             console.log(`🎮 Juego iniciado en la sala ${sala}`);
+            console.log("Detalles del juego:", {
+                sala,
+                jugadores: salas[sala].jugadores,
+                estadoJuego: salas[sala].estadoJuego,
+            });
         }
     });
 
-    socket.on("moverEntidad", ({ sala, nombreEntidad, x, y, angulo }) => {
+    /*socket.on("moverEntidad", ({ sala, entidad, x, y, angulo }) => {
         if (!salas[sala]) return;
 
         // Actualizar la posición de la entidad
@@ -114,7 +125,31 @@ io.on("connection", (socket) => {
         entidad.setAngulo(angulo);
 
         // Emitir la actualización a todos los jugadores en la sala
-        socket.to(sala).emit("actualizarPosicionEntidad", { nombreEntidad, x, y, angulo });
+        socket.to(sala).emit("actualizarPosicionEntidad", { entidad, x, y, angulo });
+    });*/
+
+    socket.on("moverEntidad", (data) => {
+        //console.log("📥 Datos recibidos del cliente:", data);
+    
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+
+       // Actualizar la posición de la entidad
+        const entidad = salas[data.sala].estadoJuego.entidades[data.nombreEntidad];
+        entidad.setX(x);
+        entidad.setY(y);
+        entidad.setAngulo(angulo);
+
+         // Emitir la actualización a todos los jugadores en la sala
+        socket.to(data.sala).emit("actualizarPosicionEntidad", {
+            nombreEntidad: data.nombreEntidad, 
+            x: data.x,             
+            y: data.y,             
+            angulo: data.angulo    
+        });
     });
 
     // Desconexión del jugador

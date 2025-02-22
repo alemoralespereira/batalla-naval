@@ -10,7 +10,7 @@ class Portaaviones extends Barco {
             portaavionesData.aceleracion,
             null, // Objetivo
             portaavionesData.combustible,
-            portaavionesData.rangoVision
+            // portaavionesData.rangoVision
         );
     }
 

@@ -1,5 +1,5 @@
 class Entity {
-    constructor(x, y, velocidad, velocidadMaxima, aceleracion, objetivo, combustible, rangoVision) {
+    constructor(x, y, velocidad, velocidadMaxima, aceleracion, objetivo, combustible /*, rangoVision */) {
         this.x = x;
         this.y = y;
         this.velocidad = velocidad;
@@ -7,27 +7,29 @@ class Entity {
         this.aceleracion = aceleracion;
         this.objetivo = objetivo;
         this.combustible = combustible;
-        this.rangoVision = rangoVision;
-        this.vision = null;
+        // this.rangoVision = rangoVision;
+        // this.vision = null;
     }
 
     init(escena) {
-        this.vision = escena.add.circle(
+        /*this.vision = escena.add.circle(
             this.objetivo.x,
             this.objetivo.y,
             this.rangoVision,
             0x00ff00,                 // Color del círculo
             0.2                       // Opacidad
-        ).setStrokeStyle(2, 0x00ff00) // Borde del círculo
+        ).setStrokeStyle(2, 0x00ff00) // Borde del círculo*/
+        
+       
     }
 
     update() {
         this.calcularCombustible();
         // Actualizar la posición del círculo de visión.
-        if (this.vision && this.objetivo) {
+        /*if (this.vision && this.objetivo) {
             this.vision.x = this.objetivo.x;
             this.vision.y = this.objetivo.y;
-        }
+        }*/
     }
 
     calcularCombustible() {

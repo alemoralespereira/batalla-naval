@@ -10,7 +10,7 @@ class Avion extends Entity {
             avionData.aceleracion,
             null, // Objetivo
             avionData.combustible,
-            avionData.rangoVision
+            // avionData.rangoVision
         );
 
         this.piloto = avionData.piloto;
@@ -20,6 +20,9 @@ class Avion extends Entity {
 
     init(escena) {
         this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+        if (!this.objetivo || !(this.objetivo instanceof Phaser.GameObjects.Sprite)) {
+            console.error("Error: No se pudo crear el sprite para el avión.");
+        }
         super.init(escena);
     }
 
