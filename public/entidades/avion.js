@@ -9,9 +9,9 @@ class Avion extends Entity {
             100,
             2,
             null,
-            10000, //COMBUSTIBLE
+            10000/*, //COMBUSTIBLE
             null,
-            50
+            50*/
         )
        this.piloto = false;
        this.observador = false;
@@ -20,6 +20,9 @@ class Avion extends Entity {
 
     init(escena) {
         this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+        if (!this.objetivo || !(this.objetivo instanceof Phaser.GameObjects.Sprite)) {
+            console.error("Error: No se pudo crear el sprite para el avión.");
+        }
         super.init(escena);
     }
 

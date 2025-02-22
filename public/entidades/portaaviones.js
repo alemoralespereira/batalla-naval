@@ -9,9 +9,9 @@ class Portaaviones extends Barco {
             10,     //VelocidadMaxima
             1,      //Aceleracion 
             null,   //Objetivo 
-            5000,   //Combustible 
+            5000/*,   //Combustible 
             null,   //Vision 
-            200     //RangoVision
+            200     //RangoVision*/
         );
     }
 

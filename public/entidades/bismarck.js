@@ -9,9 +9,9 @@ class Bismarck extends Barco {
             100,     //VelocidadMaxima
             1,      //Aceleracion 
             null,   //Objetivo 
-            5000,   //Combustible 
+            5000/*,   //Combustible 
             null,   //Vision 
-            200     //RangoVision
+            200     //RangoVision*/
         )
 
     }
@@ -21,10 +21,15 @@ class Bismarck extends Barco {
         
         super.init(escena);
 
+        
     }
 
     update(){
         super.update();
+
+       /* this.update = function(){
+            rangoVision.setPosition(this.x, this.y);
+        }*/
     }
 
 }

@@ -12,6 +12,7 @@ class EscenaAerea extends Phaser.Scene {
         this.sala = data.sala;
         this.rol = data.rol;
         this.estadoJuego = data.estadoJuego;
+        this.nombreUsuario = data.nombreUsuario; 
 
         // Inicializar bismarck y portaaviones
         this.entidades = {
@@ -54,7 +55,9 @@ class EscenaAerea extends Phaser.Scene {
         // CREAR EQUIPOS
         //********************************************************/
         //this.equipoRojo = this.physics.add.group();
-        this.equipoAzul = this.physics.add.group();
+        //this.equipoAzul = this.physics.add.group();
+        this.equipoAzul = [];
+        
 
         // CREAR ENTIDADES
         //********************************************************/
@@ -66,19 +69,22 @@ class EscenaAerea extends Phaser.Scene {
         // Crear Portaaviones
         this.entidades.portaaviones.init(this);
         this.entidades.portaaviones.objetivo.setCollideWorldBounds(true);
-        this.equipoAzul.add(this.entidades.portaaviones.objetivo);
+       // this.equipoAzul.push(this.entidades.portaaviones.objetivo);
 
-        // Crear los aviones
-        for (let i = 0; i < 10; i++) {
-            this.entidades[`avion_${i}`].init(this);
-            this.entidades[`avion_${i}`].objetivo.setCollideWorldBounds(true);
-            this.equipoAzul.add(this.entidades[`avion_${i}`].objetivo)
+         // Crear los aviones
+         for (let i = 0; i < 10; i++) {
+            const avion = this.entidades[`avion_${i}`];
+            avion.init(this); // Inicializar el avión
+            avion.objetivo.setCollideWorldBounds(true);
+            //this.equipoAzul.add(avion.objetivo); // Añadir el sprite al grupo
+            this.equipoAzul.push(avion);
         }
-        //********************************************************/
+       
+              //********************************************************/
 
         
-        this.physics.add.collider(this.entidades.bismarck.objetivo, this.equipoAzul, this.ejecutar, null, this);
-        this.physics.add.collider(this.equipoAzul,this.entidades.bismarck.objetivo, this.ejecutar, null, this);
+        //this.physics.add.collider(this.entidades.bismarck.objetivo, this.equipoAzul, this.ejecutar, null, this);
+        //this.physics.add.collider(this.equipoAzul,this.entidades.bismarck.objetivo, this.ejecutar, null, this);
         
 
         // Crear el panel de selección solo si el rol es "portaaviones"
@@ -112,11 +118,19 @@ class EscenaAerea extends Phaser.Scene {
                 botonAviones.setScrollFactor(0);          // Fijar botón en la pantalla
                 this.panelEntidades.add(botonAviones);       // Agregar botón al panel.
             }
+            
+            this.entidades.bismarck.objetivo.setVisible(false);
         }
 
         if (this.rol === "bismarck") {
             // Configurar la cámara para seguir al Bismarck
             this.cameras.main.startFollow(this.entidades.bismarck.objetivo);
+            this.entidades.portaaviones.objetivo.setVisible(false);
+            this.equipoAzul.forEach((avion) => {
+                console.log('Avion:', avion);
+                console.log('Objetivo del avion:', avion.objetivo);
+                avion.objetivo.setVisible(false);
+            });
         }
 
         // Agregar controles de teclado
@@ -127,6 +141,10 @@ class EscenaAerea extends Phaser.Scene {
             abajo: "S",
             atacar: "X"
         });
+
+        this.rangoVisionBismarck = this.add.zone(this.entidades.bismarck.x, this.entidades.bismarck.y, 500, 500).setOrigin(0.5, 0.5);
+       // this.graphics = this.add.graphics();
+       // this.dibujarRangoVision();
 
         // Evento de actualización de entidades
         socket.on("actualizarPosicionEntidad", (data) => {
@@ -142,18 +160,77 @@ class EscenaAerea extends Phaser.Scene {
                     entidad.objetivo.setAngle(data.angulo);
                 }
             }
+             // Log para confirmar que la entidad se actualizó correctamente
+            /*console.log(`🔄 Entidad ${data.entidad} actualizada:`, {
+                x: data.x,
+                y: data.y,
+                angulo: data.angulo
+            });*/
         });
     }
 
-    ejecutar(){
+   /* ejecutar(){
         console.log("Entidad entró en rango de visión del Bismarck!");
-    }
+    }*/
+        dibujarRangoVision() {
+            // Limpiar el dibujo anterior
+            this.graphics.clear();
+    
+            // Estilo del rectángulo (color y grosor del borde)
+            this.graphics.lineStyle(2, 0xff0000); // Borde rojo de 2px de grosor
+    
+            // Dibujar el rectángulo de la Zone
+            const bounds = this.rangoVisionBismarck.getBounds();
+            this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        }
+
+        estaEnRangoDeVision(objetivo) {
+            // Obtener el bounding box de la entidad
+            const limites = objetivo.getBounds();
+    
+            // Definir las coordenadas de las cuatro esquinas
+            const topLeft = { x: limites.x, y: limites.y };
+            const topRight = { x: limites.x + limites.width, y: limites.y };
+            const bottomLeft = { x: limites.x, y: limites.y + limites.height };
+            const bottomRight = { x: limites.x + limites.width, y: limites.y + limites.height };
+    
+            // Verificar si alguna esquina está dentro del rango de visión
+            const limitesRangoVision = this.rangoVisionBismarck.getBounds();
+            return (
+                Phaser.Geom.Rectangle.Contains(limitesRangoVision, topLeft.x, topLeft.y) ||
+                Phaser.Geom.Rectangle.Contains(limitesRangoVision, topRight.x, topRight.y) ||
+                Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomLeft.x, bottomLeft.y) ||
+                Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomRight.x, bottomRight.y)
+            );
+        }
 
     update() {
         this.moverEntidad();
-
+        if (this.rol === "bismarck") {
         for (let key in this.entidades) {
             this.entidades[key].update();
+        }
+
+        this.rangoVisionBismarck.setPosition(this.entidades.bismarck.objetivo.x, this.entidades.bismarck.objetivo.y);
+        //this.dibujarRangoVision();
+        //console.log('Contenido de equipoAzul:', this.equipoAzul.getChildren());
+        
+        this.equipoAzul.forEach((avion)=>{
+            if (avion.objetivo && this.estaEnRangoDeVision(avion.objetivo)) {
+                console.log('DENTRO del rango de visión del BISMARCK');
+                avion.objetivo.setVisible(true);
+            } else {
+                avion.objetivo.setVisible(false); // Ocultar si no está en el rango
+            }
+        });
+          
+ 
+        if (this.estaEnRangoDeVision(this.entidades.portaaviones.objetivo)) {
+            this.entidades.portaaviones.objetivo.setVisible(true);
+        }else
+        {
+            this.entidades.portaaviones.objetivo.setVisible(false);
+        }
         }
     }
 
@@ -194,15 +271,29 @@ class EscenaAerea extends Phaser.Scene {
 
         if (entidad) {
             entidad.mover(this.controles);
-            socket.emit("moverEntidad", {
-                sala: this.sala,
-                entidad: nombreEntidad,
-                x: entidad.objetivo.x,
-                y: entidad.objetivo.y,
-                angulo: entidad.objetivo.angle
-            });
+            // Datos que se enviarán al servidor
+            const datosMovimiento = {
+                idUsuario: socket.id, // ID del socket (usuario)
+                nombreUsuario: this.nombreUsuario, // Nombre del usuario
+                rol: this.rol, // Rol del jugador (bismarck o portaaviones)
+                sala: this.sala, // Sala a la que pertenece el jugador
+                entidad: nombreEntidad, // Entidad que se está moviendo (bismarck, portaaviones, avion_X)
+                x: entidad.objetivo.x, // Posición X de la entidad
+                y: entidad.objetivo.y, // Posición Y de la entidad
+                angulo: entidad.objetivo.angle // Ángulo de la entidad
+            };
+
+            // Log para depuración: Verificar los datos antes de enviarlos
+            //console.log("📤 Datos que se enviarán al servidor:", datosMovimiento);
+
+            // Emitir el evento con todos los datos requeridos
+            socket.emit("moverEntidad", datosMovimiento);
+
+            // Log para depuración: Confirmar que los datos se enviaron
+            //console.log("✅ Datos enviados correctamente al servidor.");
+     
         } else {
-            console.error("No hay entidad seleccionada o no es válida.");
+           // console.error("No hay entidad seleccionada o no es válida.");
         }
     }
 }
