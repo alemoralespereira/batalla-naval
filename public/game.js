@@ -31,7 +31,7 @@ class EscenaAerea extends Phaser.Scene {
         this.load.image("mapa", "assets/mapa.png");
         this.load.image("bismarck", "assets/bismarck.png");
         this.load.image("portaaviones", "assets/carrier.png");
-        // this.load.image("avion", "assets/avion.png");
+        this.load.image("avion", "assets/avion.png");
     }
 
     create() {

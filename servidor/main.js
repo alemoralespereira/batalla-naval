@@ -119,10 +119,7 @@ io.on("connection", (socket) => {
         if (!salas[sala]) return;
 
         // Actualizar la posición de la entidad
-        const entidad = salas[sala].estadoJuego.entidades[nombreEntidad];
-        entidad.setX(x);
-        entidad.setY(y);
-        entidad.setAngulo(angulo);
+        salas[sala].estadoJuego.entidades[entidad] = { x, y, angulo };
 
         // Emitir la actualización a todos los jugadores en la sala
         socket.to(sala).emit("actualizarPosicionEntidad", { entidad, x, y, angulo });
@@ -138,10 +135,7 @@ io.on("connection", (socket) => {
         }
 
        // Actualizar la posición de la entidad
-        const entidad = salas[data.sala].estadoJuego.entidades[data.nombreEntidad];
-        entidad.setX(data.x);
-        entidad.setY(data.y);
-        entidad.setAngulo(data.angulo);
+        salas[data.sala].estadoJuego.entidades[data.nombreEntidad].setX(data.x).setY(data.y).setAngulo(data.angulo);
 
          // Emitir la actualización a todos los jugadores en la sala
         socket.to(data.sala).emit("actualizarPosicionEntidad", {
