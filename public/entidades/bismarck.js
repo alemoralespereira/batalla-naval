@@ -6,7 +6,7 @@ class Bismarck extends Barco {
             bismarckData.x,
             bismarckData.y,
             bismarckData.velocidad,
-            bismarckData.velocidadMaxina,
+            bismarckData.velocidadMaxima,
             bismarckData.aceleracion,
             null, // Objetivo
             bismarckData.combustible,

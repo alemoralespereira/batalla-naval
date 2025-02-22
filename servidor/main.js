@@ -84,8 +84,8 @@ io.on("connection", (socket) => {
 
             for (let i = 0; i < 10; i++) {
                 entidades[`avion_${i}`] = new Avion({
-                    x: 0,
-                    y: 100,
+                    x: 50,
+                    y: 500,
                     velocidad: 0,
                     velocidadMaxima: 100,
                     angulo: 0,
