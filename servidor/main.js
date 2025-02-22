@@ -139,9 +139,9 @@ io.on("connection", (socket) => {
 
        // Actualizar la posición de la entidad
         const entidad = salas[data.sala].estadoJuego.entidades[data.nombreEntidad];
-        entidad.setX(x);
-        entidad.setY(y);
-        entidad.setAngulo(angulo);
+        entidad.setX(data.x);
+        entidad.setY(data.y);
+        entidad.setAngulo(data.angulo);
 
          // Emitir la actualización a todos los jugadores en la sala
         socket.to(data.sala).emit("actualizarPosicionEntidad", {
