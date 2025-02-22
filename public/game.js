@@ -21,23 +21,22 @@ class EscenaAerea extends Phaser.Scene {
 
         // Inicializar los aviones
         for (let i = 0; i < 10; i++) {
-            this.entidades[`avion_${i}`] = new Avion(data.estadoJuego.entidades.avion);
+            const nombreAvion = `avion_${i}`;
+            this.entidades[nombreAvion] = new Avion(data.estadoJuego.entidades[nombreAvion]);
         }
-
-        
     }
 
     preload() {
         this.load.image("mapa", "assets/mapa.png");
         this.load.image("bismarck", "assets/bismarck.png");
         this.load.image("portaaviones", "assets/carrier.png");
-        this.load.image("avion", "assets/avion.png");
+        // this.load.image("avion", "assets/avion.png");
     }
 
     create() {
         // Mostrar el mapa para ambos roles
         const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
-        
+
         this.physics.world.setBounds(0, 0, 1800, 1800);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -70,19 +69,21 @@ class EscenaAerea extends Phaser.Scene {
 
         // Crear los aviones
         for (let i = 0; i < 10; i++) {
-            this.entidades[`avion_${i}`].init(this);
-            this.entidades[`avion_${i}`].objetivo.setCollideWorldBounds(true);
-            this.equipoAzul.add(this.entidades[`avion_${i}`].objetivo)
+            const nombreAvion = `avion_${i}`;
+            this.entidades[nombreAvion].init(this);
+            this.entidades[nombreAvion].objetivo.setCollideWorldBounds(true);
+            this.equipoAzul.add(this.entidades[nombreAvion].objetivo)
         }
         //********************************************************/
 
-        
-        this.physics.add.collider(this.entidades.bismarck.objetivo, this.equipoAzul, this.ejecutar, null, this);
-        this.physics.add.collider(this.equipoAzul,this.entidades.bismarck.objetivo, this.ejecutar, null, this);
-        
+
+        // this.physics.add.collider(this.entidades.bismarck.objetivo, this.equipoAzul, this.ejecutar, null, this);
+        // this.physics.add.collider(this.equipoAzul, this.entidades.bismarck.objetivo, this.ejecutar, null, this);
+
 
         // Crear el panel de selección solo si el rol es "portaaviones"
         if (this.rol === "portaaviones") {
+            this.nombreEntidadSeleccionada = "portaaviones";
             this.panelEntidades = this.add.group(); // Panel para los botones de selección
 
             // Botón para seleccionar el portaaviones
@@ -130,12 +131,12 @@ class EscenaAerea extends Phaser.Scene {
 
         // Evento de actualización de entidades
         socket.on("actualizarPosicionEntidad", (data) => {
-            if (!this.entidades[data.entidad]) {
-                console.error(`Entidad ${data.entidad} no encontrada.`);
+            if (!this.entidades[data.nombreEntidad]) {
+                console.error(`Entidad ${data.nombreEntidad} no encontrada.`);
                 return;
             }
 
-            const entidad = this.entidades[data.entidad];
+            const entidad = this.entidades[data.nombreEntidad];
             if (entidad.objetivo) {
                 entidad.objetivo.setPosition(data.x, data.y);
                 if (typeof data.angulo === "number") {
@@ -145,36 +146,36 @@ class EscenaAerea extends Phaser.Scene {
         });
     }
 
-    ejecutar(){
+    ejecutar() {
         console.log("Entidad entró en rango de visión del Bismarck!");
     }
 
     update() {
         this.moverEntidad();
 
-        for (let key in this.entidades) {
-            this.entidades[key].update();
+        for (let nombreEntidad in this.entidades) {
+            this.entidades[nombreEntidad].update();
         }
     }
 
     // Función para cambiar la cámara a la entidad seleccionada.
-    cambiarObjetivoCamara(entidad) {
-        if (this.entidades[entidad] && this.entidades[entidad].objetivo) {
-            this.cameras.main.startFollow(this.entidades[entidad].objetivo);
-            console.log(`Cámara siguiendo a ${entidad}`);
+    cambiarObjetivoCamara(nombreEntidad) {
+        if (this.entidades[nombreEntidad] && this.entidades[nombreEntidad].objetivo) {
+            this.cameras.main.startFollow(this.entidades[nombreEntidad].objetivo);
+            console.log(`Cámara siguiendo a ${nombreEntidad}`);
         } else {
-            console.error(`Entidad ${entidad} no encontrada.`);
+            console.error(`Entidad ${nombreEntidad} no encontrada.`);
         }
     }
 
     // Función para seleccionar entidad y cambiar de cámara.
-    seleccionarEntidad(entidad) {
-        if (this.rol === "portaaviones" && this.entidades[entidad]) {
-            this.entidadSeleccionada = entidad;       // Guardar la entidad seleccionada
-            this.cambiarObjetivoCamara(entidad);    // Cambiar la cámara para seguir la entidad seleccionada
-            console.log(`Entidad seleccionada: ${entidad}`);
+    seleccionarEntidad(nombreEntidad) {
+        if (this.rol === "portaaviones" && this.entidades[nombreEntidad]) {
+            this.nombreEntidadSeleccionada = nombreEntidad;       // Guardar el nombre de la entidad seleccionada
+            this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
+            console.log(`Entidad seleccionada: ${nombreEntidad}`);
         } else {
-            console.error(`Entidad ${entidad} no encontrada o rol incorrecto.`);
+            console.error(`Entidad ${nombreEntidad} no encontrada o rol incorrecto.`);
         }
     }
 
@@ -186,17 +187,17 @@ class EscenaAerea extends Phaser.Scene {
         if (this.rol === "bismarck") {
             entidad = this.entidades.bismarck;
             nombreEntidad = "bismarck";
-        } else if (this.entidadSeleccionada && this.entidades[this.entidadSeleccionada]) {
+        } else if (this.nombreEntidadSeleccionada && this.entidades[this.nombreEntidadSeleccionada]) {
             // Mover la entidad seleccionada (portaaviones o avión)
-            entidad = this.entidades[this.entidadSeleccionada];
-            nombreEntidad = this.entidadSeleccionada;
+            entidad = this.entidades[this.nombreEntidadSeleccionada];
+            nombreEntidad = this.nombreEntidadSeleccionada;
         }
 
         if (entidad) {
             entidad.mover(this.controles);
             socket.emit("moverEntidad", {
                 sala: this.sala,
-                entidad: nombreEntidad,
+                nombreEntidad,
                 x: entidad.objetivo.x,
                 y: entidad.objetivo.y,
                 angulo: entidad.objetivo.angle

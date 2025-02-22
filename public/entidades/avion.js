@@ -5,17 +5,17 @@ class Avion extends Entity {
         super(
             avionData.x,
             avionData.y,
-            0,
-            100,
-            2,
-            null,
-            10000, //COMBUSTIBLE
-            null,
-            50
-        )
-       this.piloto = false;
-       this.observador = false;
-       this.operador = false;
+            avionData.velocidad,
+            avionData.velocidadMaxima,
+            avionData.aceleracion,
+            null, // Objetivo
+            avionData.combustible,
+            avionData.rangoVision
+        );
+
+        this.piloto = avionData.piloto;
+        this.observador = avionData.observador;
+        this.operador = avionData.operador;
     }
 
     init(escena) {
@@ -23,7 +23,7 @@ class Avion extends Entity {
         super.init(escena);
     }
 
-    update(){
+    update() {
         super.update();
     }
 
@@ -34,10 +34,10 @@ class Avion extends Entity {
         }
         this.calcularCombustible();
 
-        if(this.combustible > 0) {
+        if (this.combustible > 0) {
             // Movimiento con las teclas W, A, S, D
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown) {
-                           
+
                 // Rotación (A y D)
                 if (controles.izquierda.isDown) {
                     this.objetivo.setAngularVelocity(-25);
@@ -56,7 +56,7 @@ class Avion extends Entity {
                 const angle = Phaser.Math.DegToRad(this.objetivo.angle);
                 const velocityX = Math.cos(angle) * this.velocidad;
                 const velocityY = Math.sin(angle) * this.velocidad;
-            
+
                 // Actualizar las posiciones
                 this.objetivo.setVelocityX(velocityX);
                 this.objetivo.setVelocityY(velocityY);
@@ -72,7 +72,7 @@ class Avion extends Entity {
             this.objetivo.setVelocityX(0);        // Detener movimiento horizontal
             this.objetivo.setVelocityY(0);
         }
-        
+
     }
 }
 

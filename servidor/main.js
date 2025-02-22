@@ -3,6 +3,10 @@ const http = require("http");
 const path = require("path");
 const socketIo = require("socket.io");
 
+const Bismarck = require('./logica/entidades/bismarck');
+const Portaaviones = require('./logica/entidades/portaaviones');
+const Avion = require('./logica/entidades/avion');
+
 const app = express();
 const servidor = http.createServer(app);
 const io = socketIo(servidor);
@@ -23,7 +27,7 @@ io.on("connection", (socket) => {
             salas[sala] = { jugadores: [], estadoJuego: { entidades: {} } };
         }
 
-       // Verificar si el rol ya está ocupado
+        // Verificar si el rol ya está ocupado
         const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
         if (rolOcupado) {
             socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
@@ -49,11 +53,46 @@ io.on("connection", (socket) => {
 
         // Iniciar juego cuando hay dos jugadores
         if (salas[sala].jugadores.length === 2) {
-            salas[sala].estadoJuego.entidades = {
-                bismarck: { x: 900, y: 200, angulo: 0 }, 
-                portaaviones: { x: 50, y: 500, angulo: 0 },
-                avion: { x: 50, y: 500, angulo: 0 }
-            };
+            const entidades = {};
+
+            entidades.bismarck = new Bismarck({
+                x: 900,
+                y: 200,
+                velocidad: 100,
+                velocidadMaxima: 100,
+                angulo: 0,
+                aceleracion: 1,
+                combustible: 5000,
+                rangoVision: 200
+            });
+            entidades.portaaviones = new Portaaviones({
+                x: 50,
+                y: 500,
+                velocidad: 10,
+                velocidadMaxima: 10,
+                angulo: 0,
+                aceleracion: 1,
+                combustible: 5000,
+                rangoVision: 200
+            });
+
+            for (let i = 0; i < 10; i++) {
+                entidades[`avion_${i}`] = new Avion({
+                    x: 0,
+                    y: 100,
+                    velocidad: 0,
+                    velocidadMaxima: 100,
+                    angulo: 0,
+                    aceleracion: 2,
+                    combustible: 10000,
+                    rangoVision: 50,
+                    piloto: false,
+                    observado: false,
+                    operador: false,
+                });
+            }
+
+            salas[sala].estadoJuego.entidades = entidades;
 
             io.to(sala).emit("juegoIniciado", {
                 mensaje: "El juego ha comenzado",
@@ -65,14 +104,17 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("moverEntidad", ({ sala, entidad, x, y, angulo }) => {
+    socket.on("moverEntidad", ({ sala, nombreEntidad, x, y, angulo }) => {
         if (!salas[sala]) return;
 
         // Actualizar la posición de la entidad
-        salas[sala].estadoJuego.entidades[entidad] = { x, y, angulo };
+        const entidad = salas[sala].estadoJuego.entidades[nombreEntidad];
+        entidad.setX(x);
+        entidad.setY(y);
+        entidad.setAngulo(angulo);
 
         // Emitir la actualización a todos los jugadores en la sala
-        socket.to(sala).emit("actualizarPosicionEntidad", { entidad, x, y, angulo });
+        socket.to(sala).emit("actualizarPosicionEntidad", { nombreEntidad, x, y, angulo });
     });
 
     // Desconexión del jugador

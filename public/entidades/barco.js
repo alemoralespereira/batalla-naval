@@ -1,8 +1,8 @@
 import Entity from './entity.js';
 
 class Barco extends Entity {
-    constructor(x, y, velocidad, velocidadMaxima, aceleracion, objetivo, combustible, vision, rangoVision) {
-        super(x, y, velocidad, velocidadMaxima, aceleracion, objetivo, combustible, vision, rangoVision);
+    constructor(x, y, velocidad, velocidadMaxima, aceleracion, objetivo, combustible, rangoVision) {
+        super(x, y, velocidad, velocidadMaxima, aceleracion, objetivo, combustible, rangoVision);
     }
 
     init(escena){

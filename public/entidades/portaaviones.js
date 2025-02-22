@@ -5,13 +5,12 @@ class Portaaviones extends Barco {
         super(
             portaavionesData.x,
             portaavionesData.y,
-            10,      //Velocidad 
-            10,     //VelocidadMaxima
-            1,      //Aceleracion 
-            null,   //Objetivo 
-            5000,   //Combustible 
-            null,   //Vision 
-            200     //RangoVision
+            portaavionesData.velocidad,
+            portaavionesData.velocidadMaxima,
+            portaavionesData.aceleracion,
+            null, // Objetivo
+            portaavionesData.combustible,
+            portaavionesData.rangoVision
         );
     }
 
@@ -20,7 +19,7 @@ class Portaaviones extends Barco {
         super.init(escena);
     }
 
-    update(){
+    update() {
         super.update();
     }
 }
