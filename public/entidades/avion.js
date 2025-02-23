@@ -26,8 +26,8 @@ class Avion extends Entity {
 
         this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
         this.objetivo.rangoVision = this.rangoVision;
-        this.graphics = escena.add.graphics();
-        this.dibujarRangoVision();
+       // this.graphics = escena.add.graphics();
+       // this.dibujarRangoVision();
     }
     
     dibujarRangoVision() {
@@ -45,7 +45,7 @@ class Avion extends Entity {
     update() {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
-        this.dibujarRangoVision();
+       // this.dibujarRangoVision();
     }
 
     mover(controles) {
@@ -61,9 +61,9 @@ class Avion extends Entity {
 
                 // Rotación (A y D)
                 if (controles.izquierda.isDown) {
-                    this.objetivo.setAngularVelocity(-25);
+                    this.objetivo.setAngularVelocity(-40);
                 } else if (controles.derecha.isDown) {
-                    this.objetivo.setAngularVelocity(25);
+                    this.objetivo.setAngularVelocity(40);
                 } else {
                     this.objetivo.setAngularVelocity(0);
                 }

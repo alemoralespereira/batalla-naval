@@ -19,8 +19,8 @@ class Bismarck extends Barco {
 
         this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
         this.objetivo.rangoVision = this.rangoVision;
-        this.graphics = escena.add.graphics();
-        this.dibujarRangoVision();
+      //  this.graphics = escena.add.graphics();
+       // this.dibujarRangoVision();
     }
     
     dibujarRangoVision() {
@@ -38,7 +38,7 @@ class Bismarck extends Barco {
     update() {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
-        this.dibujarRangoVision();
+       // this.dibujarRangoVision();
     }
 
 }

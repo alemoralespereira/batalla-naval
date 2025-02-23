@@ -14,13 +14,13 @@ class EscenaAerea extends Phaser.Scene {
         this.estadoJuego = data.estadoJuego;
         this.nombreUsuario = data.nombreUsuario; 
 
-        // Inicializar bismarck y portaaviones
+         //********************************************************/
+        // CREAR ENTIDADES
         this.entidades = {
             bismarck: new Bismarck(data.estadoJuego.entidades.bismarck),
             portaaviones: new Portaaviones(data.estadoJuego.entidades.portaaviones)
         };
 
-        // Inicializar los aviones
         for (let i = 0; i < 10; i++) {
             const nombreAvion = `avion_${i}`;
             this.entidades[nombreAvion] = new Avion(data.estadoJuego.entidades[nombreAvion]);
@@ -32,97 +32,122 @@ class EscenaAerea extends Phaser.Scene {
         this.load.image("bismarck", "assets/bismarck.png");
         this.load.image("portaaviones", "assets/carrier.png");
         this.load.image("avion", "assets/avion.png");
+        this.load.image("puerto", "assets/puerto.png");
     }
 
     create() {
-        // Mostrar el mapa para ambos roles
+        //*********************************************************************************/
+        // MAPA PRINCIPAL, CAMARA Y LIMITES DEL MUNDO
         const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
+        const puerto = this.add.image(2800,0,"puerto").setOrigin(0,0);
 
-        this.physics.world.setBounds(0, 0, 1800, 1800);
+        this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
-        // Ajustar los límites de la cámara principal al tamaño del mapa
         this.cameras.main.setBounds(0, 0, mapa.width, mapa.height);
-        // Crear una segunda cámara para el minimapa
-        this.camaraMinimapa = this.cameras.add(1100, 550, 200, 200) // (x, y, width, height)
+        this.cameras.main.setZoom(0.8);
+
+        //*********************************************************************************/
+        // MINI MAPA 
+        this.camaraMinimapa = this.cameras.add(700, 500, 200, 200) // (x, y, width, height)
             .setZoom(0.1)
             .setBackgroundColor('#00008B')
             .setName('minimapa');
 
-        this.camaraMinimapa.ignore(mapa); // Ignorar el mapa en la cámara del minimapa
-
-        // CREAR EQUIPOS
+        this.camaraMinimapa.ignore(mapa);
+        //this.camaraMinimapa.ignore(this.entidades);
+        this.puntosEntidades = this.add.group();
+        
         //********************************************************/
-        //this.equipoRojo = this.physics.add.group();
-        //this.equipoAzul = this.physics.add.group();
+        // CREAR EQUIPOS
         this.equipoAzul = [];
         
-
-        // CREAR ENTIDADES
         //********************************************************/
-        // Crear Bismarck
+        // INICIALIZAR ENTIDADES
+        // Bismarck
         this.entidades.bismarck.init(this);
         this.entidades.bismarck.objetivo.setCollideWorldBounds(true);
-        //this.equipoRojo.add(this.entidades.bismarck.objetivo);
 
-        // Crear Portaaviones
+        // Portaaviones
         this.entidades.portaaviones.init(this);
         this.entidades.portaaviones.objetivo.setCollideWorldBounds(true);
-       // this.equipoAzul.push(this.entidades.portaaviones.objetivo);
+        this.equipoAzul.push(this.entidades.portaaviones);
 
-         // Crear los aviones
+         // Aviones
          for (let i = 0; i < 10; i++) {
             const avion = this.entidades[`avion_${i}`];
             avion.init(this); // Inicializar el avión
             avion.objetivo.setCollideWorldBounds(true);
-            //this.equipoAzul.add(avion.objetivo); // Añadir el sprite al grupo
             this.equipoAzul.push(avion);
-            
+            avion.objetivo.setVisible(false);
             /*this.rangoVisionAvion = this.add.zone(avion.x, avion.y, 300,300).setOrigin(0.5, 0.5);
             this.graphics = this.add.graphics();
             this.dibujarRangoVision();*/
-        }
-       
-              //********************************************************/
+        }            
 
-        
-        //this.physics.add.collider(this.entidades.bismarck.objetivo, this.equipoAzul, this.ejecutar, null, this);
-        //this.physics.add.collider(this.equipoAzul,this.entidades.bismarck.objetivo, this.ejecutar, null, this);
-        
-
-        // Crear el panel de selección solo si el rol es "portaaviones"
+        //********************************************************/
+        // PANEL INTERACTIVO DEL EQUIPO AZUL
         if (this.rol === "portaaviones") {
             this.nombreEntidadSeleccionada = "portaaviones";
-            this.panelEntidades = this.add.group(); // Panel para los botones de selección
+            this.panelEquipoAzul = this.add.group(); // Panel para los botones de selección
 
             // Botón para seleccionar el portaaviones
-            const botonPortaaviones = this.add.text(20, 50, 'Portaaviones', {
+            const botonPortaaviones = this.add.text(-100, 460, 'Portaaviones', {
                 fill: '#ffffff',                        // Texto blanco
-                backgroundColor: '#000000',             // Fondo negro
+                backgroundColor: '#808080',             // Fondo negro
                 padding: { x: 10, y: 5 }                // Espaciado interno
             })
                 .setInteractive({ useHandCursor: true })    // Hacer el texto interactivo
                 .on('pointerdown', () => {
                     this.seleccionarEntidad('portaaviones');
                 });
-            botonPortaaviones.setScrollFactor(0);      // Fijar botón en la pantalla
-            this.panelEntidades.add(botonPortaaviones);   // Agregar botón al panel.
+            this.panelEquipoAzul.add(botonPortaaviones);   // Agregar botón al panel.
 
             // Botones para seleccionar los aviones
             for (let i = 0; i < 10; i++) {
-                const botonAviones = this.add.text(20, 80 + i * 30, `Avión ${i + 1}`, {
+                const botonAviones = this.add.text(-100, 490 + i * 30, `Avión ${i + 1}`, {
                     fill: '#ffffff',
-                    backgroundColor: '#000000',
+                    backgroundColor: '#808080',
                     padding: { x: 10, y: 5 }
                 })
                     .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
                     .on('pointerdown', () => {
+                        botonAviones.setBackgroundColor('#00ff00');
                         this.seleccionarEntidad(`avion_${i}`);
+                        this.panelTripulantes = this.add.group(); // Panel de tripulantes
+                        const botonObservador = this.add.text(120, 640,'Observador',{
+                            fill: '#ffffff',
+                            backgroundColor: '#808080',
+                            padding: { x: 10, y: 5 }
+                        })
+                        .setInteractive({ useHandCursor: true})
+                        .on('pointerdown',()=>{
+                            //cambiar valor booleano de atributos
+                            //cambiar de color a verde
+                            botonObservador.setBackgroundColor('#00ff00');
+                        });
+                        const botonOperador = this.add.text(120, 670,'Operador',{
+                            fill: '#ffffff',
+                            backgroundColor: '#808080',
+                            padding: { x: 10, y: 5 }
+                        })
+                        .setInteractive({ useHandCursor: true})
+                        .on('pointerdown',()=>{
+                            //cambiar valor booleano de atributos
+                            //cambiar de color a verde
+                            botonOperador.setBackgroundColor('#00ff00');
+                        });          
+                                                                  
                     });
-                botonAviones.setScrollFactor(0);          // Fijar botón en la pantalla
-                this.panelEntidades.add(botonAviones);       // Agregar botón al panel.
+                    this.panelEquipoAzul.add(botonAviones);
             }
-            
+            //FIJAR BOTONES EN LA PANTALLA
+            botonPortaaviones.setScrollFactor(0);
+            botonAviones.setScrollFactor(0);
+            botonObservador.setScrollFactor(0);
+            botonOperador.setScrollFactor(0);
+
+            //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
             this.entidades.bismarck.objetivo.setVisible(false);
         }
 
@@ -137,7 +162,7 @@ class EscenaAerea extends Phaser.Scene {
             });
         }
 
-        // Agregar controles de teclado
+        // CONTROLES
         this.controles = this.input.keyboard.addKeys({
             arriba: "W",
             izquierda: "A",
@@ -146,7 +171,8 @@ class EscenaAerea extends Phaser.Scene {
             atacar: "X"
         });      
 
-        // Evento de actualización de entidades
+        //********************************************************/
+        // EVENTO PARA ESCUCHAR AL SERVIDOR
         socket.on("actualizarPosicionEntidad", (data) => {
             if (!this.entidades[data.nombreEntidad]) {
                 console.error(`Entidad ${data.nombreEntidad} no encontrada.`);
@@ -169,102 +195,58 @@ class EscenaAerea extends Phaser.Scene {
         });
     }
 
-   /* ejecutar(){
-        console.log("Entidad entró en rango de visión del Bismarck!");
-    }*/
-        estaEnRangoDeVision(entidad1, entidad2) {
-            
-           /* if (entidad1.objetivo && entidad1.objetivo.rangoVision) {
-                let rangoVision = entidad1.objetivo.rangoVision.getBounds();
-                console.log("Rango de visión1:", rangoVision);
-            } else {
-                console.log("El objetivo o el rango de visión no están definidos.");
-            }*/
-            // Obtener el bounding box de la entidad
-            const limites = entidad2.objetivo.getBounds();
-            //console.log("Limites:", limites);
-             // Depuración: Verificar el bounding box
-           // console.log('Bounds del objetivo:', limites);
-            // Definir las coordenadas de las cuatro esquinas
-            const topLeft = { x: limites.x, y: limites.y };
-            const topRight = { x: limites.x + limites.width, y: limites.y };
-            const bottomLeft = { x: limites.x, y: limites.y + limites.height };
-            const bottomRight = { x: limites.x + limites.width, y: limites.y + limites.height };
-    
-            // Verificar si alguna esquina está dentro del rango de visión
-            const limitesRangoVision = entidad1.objetivo.rangoVision.getBounds();
-             // Depuración: Verificar el área de la Zone
-       // console.log('Bounds de la Zone:', limitesRangoVision);
-            return (
-                Phaser.Geom.Rectangle.Contains(limitesRangoVision, topLeft.x, topLeft.y) ||
-                Phaser.Geom.Rectangle.Contains(limitesRangoVision, topRight.x, topRight.y) ||
-                Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomLeft.x, bottomLeft.y) ||
-                Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomRight.x, bottomRight.y)
-            );
-        }
-
     update() {
+        
         this.moverEntidad();
         
         for (let key in this.entidades) {
             this.entidades[key].update();
         }
 
-        /*if(this.rol==="portaaviones"){
-            this.equipoAzul.forEach((avion)=>{
-                console.log('FOR DE AVIONES' + avion);
-                if (this.estaEnRangoDeVision(avion.objetivo, this.entidades.bismarck.objetivo)) {
-                    console.log('DENTRO del rango de visión del AVION');
-                    this.entidades.bismarck.objetivo.setVisible(true);
+        //RANGOS DE VISION DE LAS ENTIDADES
+        if (this.rol === "bismarck") {   
+            this.equipoAzul.forEach((entidad)=>{
+                if (this.estaEnRangoDeVision(this.entidades.bismarck, entidad)) {
+                    entidad.objetivo.setVisible(true);
                 } else {
-                    this.entidades.bismarck.objetivo.setVisible(false);
+                    entidad.objetivo.setVisible(false);
                 }
-            });
-        }*/
-
-        if (this.rol === "bismarck") {                       
-            this.equipoAzul.forEach((avion)=>{
-                if (this.estaEnRangoDeVision(this.entidades.bismarck, avion)) {
-                    avion.objetivo.setVisible(true);
-                } else {
-                    avion.objetivo.setVisible(false);
-                }
-            });
-            
-            if (this.estaEnRangoDeVision(this.entidades.bismarck, this.entidades.portaaviones)) {
-                this.entidades.portaaviones.objetivo.setVisible(true);
-            } else {
-                this.entidades.portaaviones.objetivo.setVisible(false);
-            }
+            });                 
         } else {
-            /*this.equipoAzul.forEach((avion)=>{
-                if (this.estaEnRangoDeVision(avion, this.entidades.bismarck)) {
+            let i = 0;
+            while(i < this.equipoAzul.length) {
+                const entidad = this.equipoAzul[i];
+
+                if (this.estaEnRangoDeVision(entidad, this.entidades.bismarck)) {
                     this.entidades.bismarck.objetivo.setVisible(true);
+                    break;
                 } else {
                     this.entidades.bismarck.objetivo.setVisible(false);
                 }
-            });*/
-            if (this.estaEnRangoDeVision(this.entidades.portaaviones, this.entidades.bismarck)) {
-                this.entidades.bismarck.objetivo.setVisible(true);
-            } else {
-                this.entidades.bismarck.objetivo.setVisible(false);
+                i++;
             }
-
-        } 
-        /*if (this.entidadSeleccionada && this.entidades[this.entidadSeleccionada]) {          
-            const nombreEntidad = this.entidadSeleccionada;
-            const entidad = this.entidades[this.entidadSeleccionada];
-            console.log(`Entidad seleccionada: ${entidad}`);
-            
-            if (this.estaEnRangoDeVision(entidad, this.entidades.bismarck)) {
-                console.log('DENTRO del rango de visión del AVION');
-                this.entidades.bismarck.objetivo.setVisible(true);
-            } else {
-                this.entidades.bismarck.objetivo.setVisible(false);
-            }
-        }*/
+        }      
     }
-    // Función para cambiar la cámara a la entidad seleccionada.
+    
+    //Funcion para determinar si entidad2 esta dentro del rango de entidad1
+    estaEnRangoDeVision(entidad1, entidad2) {
+        const limites = entidad2.objetivo.getBounds();
+     
+        const topLeft = { x: limites.x, y: limites.y };
+        const topRight = { x: limites.x + limites.width, y: limites.y };
+        const bottomLeft = { x: limites.x, y: limites.y + limites.height };
+        const bottomRight = { x: limites.x + limites.width, y: limites.y + limites.height };
+
+        const limitesRangoVision = entidad1.objetivo.rangoVision.getBounds();
+        return (
+            Phaser.Geom.Rectangle.Contains(limitesRangoVision, topLeft.x, topLeft.y) ||
+            Phaser.Geom.Rectangle.Contains(limitesRangoVision, topRight.x, topRight.y) ||
+            Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomLeft.x, bottomLeft.y) ||
+            Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomRight.x, bottomRight.y)
+        );
+    }
+
+    //Función para cambiar la cámara a la entidad seleccionada.
     cambiarObjetivoCamara(nombreEntidad) {
         if (this.entidades[nombreEntidad] && this.entidades[nombreEntidad].objetivo) {
             this.cameras.main.startFollow(this.entidades[nombreEntidad].objetivo);
@@ -278,6 +260,7 @@ class EscenaAerea extends Phaser.Scene {
     seleccionarEntidad(nombreEntidad) {
         if (this.rol === "portaaviones" && this.entidades[nombreEntidad]) {
             this.nombreEntidadSeleccionada = nombreEntidad;       // Guardar el nombre de la entidad seleccionada
+            this.entidades[nombreEntidad].objetivo.setVisible(true);
             this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
             console.log(`Entidad seleccionada: ${nombreEntidad}`);
         } else {

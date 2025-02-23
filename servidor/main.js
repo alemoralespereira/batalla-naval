@@ -62,14 +62,14 @@ io.on("connection", (socket) => {
             const entidades = {};
 
             entidades.bismarck = new Bismarck({
-                x: 900,
+                x: 1500,
                 y: 200,
                 velocidad: 100,
                 velocidadMaxima: 100,
                 angulo: 0,
                 aceleracion: 1,
                 objetivo: null,
-                combustible: 5000
+                combustible: 50000
             });
             entidades.portaaviones = new Portaaviones({
                 x: 50,
@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
                     angulo: 0,
                     aceleracion: 2,
                     objetivo: null,
-                    combustible: 10000,
+                    combustible: 100000,
                     piloto: false,
                     observador: false,
                     operador: false,
