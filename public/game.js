@@ -3,9 +3,9 @@ import Bismarck from './entidades/bismarck.js';
 import Portaaviones from './entidades/portaaviones.js';
 import Avion from './entidades/avion.js';
 
-class EscenaAerea extends Phaser.Scene {
+class EscenaPrincipal extends Phaser.Scene {
     constructor() {
-        super({ key: 'EscenaAerea' });
+        super({ key: 'EscenaPrincipal' });
     }
 
     init(data) {
@@ -94,7 +94,8 @@ class EscenaAerea extends Phaser.Scene {
             // Botón para seleccionar el portaaviones
             const botonPortaaviones = this.add.text(-100, 460, 'Portaaviones', {
                 fill: '#ffffff',                        // Texto blanco
-                backgroundColor: '#808080',             // Fondo negro
+                backgroundColor: '#808080',             // Fondo gris
+                fontStyle: 'bold',
                 padding: { x: 10, y: 5 }                // Espaciado interno
             })
                 .setInteractive({ useHandCursor: true })    // Hacer el texto interactivo
@@ -109,6 +110,7 @@ class EscenaAerea extends Phaser.Scene {
                 const botonAviones = this.add.text(-100, 490 + i * 30, `Avión ${i + 1}`, {
                     fill: '#ffffff',
                     backgroundColor: '#808080',
+                    fontStyle: 'bold',
                     padding: { x: 10, y: 5 }
                 })
                     .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
@@ -116,9 +118,10 @@ class EscenaAerea extends Phaser.Scene {
                         botonAviones.setBackgroundColor('#00ff00');
                         this.seleccionarEntidad(`avion_${i}`);
                         this.panelTripulantes = this.add.group(); // Panel de tripulantes
-                        const botonObservador = this.add.text(120, 640,'Observador',{
+                        const botonObservador = this.add.text(10, 490,'Observador',{
                             fill: '#ffffff',
                             backgroundColor: '#808080',
+                            fontStyle: 'bold',
                             padding: { x: 10, y: 5 }
                         })
                         .setInteractive({ useHandCursor: true})
@@ -128,9 +131,10 @@ class EscenaAerea extends Phaser.Scene {
                             botonObservador.setBackgroundColor('#00ff00');
                         });
                         botonObservador.setScrollFactor(0);
-                        const botonOperador = this.add.text(120, 670,'Operador',{
+                        const botonOperador = this.add.text(10, 520,'Operador',{
                             fill: '#ffffff',
                             backgroundColor: '#808080',
+                            fontStyle: 'bold',
                             padding: { x: 10, y: 5 }
                         })
                         .setInteractive({ useHandCursor: true})
@@ -267,6 +271,13 @@ class EscenaAerea extends Phaser.Scene {
     }
 
     moverEntidad() {
+
+        if(this.controles.atacar.isDown)
+        {
+            this.scene.pause("EscenaPrincipal");
+            this.scene.start('EscenaAtaque');//,{estadoJuego: this.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
+        }
+
         let entidad = null;
         let nombreEntidad = "";
 
@@ -309,4 +320,4 @@ class EscenaAerea extends Phaser.Scene {
     }
 }
 
-export default EscenaAerea;
+export default EscenaPrincipal;

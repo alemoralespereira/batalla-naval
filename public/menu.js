@@ -36,7 +36,7 @@ class Menu extends Phaser.Scene {
             document.getElementById("indicador-turno").innerText = "";
 
             // Inicializar el Juego
-            this.scene.start('EscenaAerea', { estadoJuego: data.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
+            this.scene.start('EscenaPrincipal', { estadoJuego: data.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
         });
 
     }

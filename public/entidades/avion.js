@@ -29,7 +29,7 @@ class Avion extends Entity {
        // this.graphics = escena.add.graphics();
        // this.dibujarRangoVision();
 
-       this.indicadorCombustible = escena.add.text(10, 10, 'COMBUSTIBLE:  ${escena.combustible}',{
+       this.indicadorCombustible = escena.add.text(10, 10, `COMBUSTIBLE:  ${escena.combustible}`,{
             fontSize: '20px',
             fill: '#ffffff'
        });
@@ -51,7 +51,7 @@ class Avion extends Entity {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
        // this.dibujarRangoVision();
-        this.indicadorCombustible.setText('COMBUSTIBLE:  ${this.combustible}');
+        this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
     }
 
     mover(controles) {
