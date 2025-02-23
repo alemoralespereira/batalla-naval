@@ -7,12 +7,11 @@ class Avion extends Entity {
             avionData.y,
             avionData.velocidad,
             avionData.velocidadMaxima,
+            avionData.angulo,
             avionData.aceleracion,
-            null, // Objetivo
+            avionData.objetivo,
             avionData.combustible,
-            // avionData.rangoVision
         );
-
         this.piloto = avionData.piloto;
         this.observador = avionData.observador;
         this.operador = avionData.operador;
@@ -26,6 +25,7 @@ class Avion extends Entity {
         super.init(escena);
 
         this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
+        this.objetivo.rangoVision = this.rangoVision;
         this.graphics = escena.add.graphics();
         this.dibujarRangoVision();
     }
@@ -35,7 +35,7 @@ class Avion extends Entity {
         this.graphics.clear();
 
         // Estilo del rectángulo (color y grosor del borde)
-        this.graphics.lineStyle(2, 0xff0000); // Borde rojo de 2px de grosor
+        this.graphics.lineStyle(2, 0x0000FF); // Borde rojo de 2px de grosor
 
         // Dibujar el rectángulo de la Zone
         const bounds = this.rangoVision.getBounds();

@@ -9,6 +9,6 @@ export const game = new Phaser.Game({
     scene: [Menu, EscenaAerea],
     physics: {
         default: "arcade",
-        arcade: { debug: false }
+        arcade: { debug: true }
     }
 });

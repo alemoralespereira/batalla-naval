@@ -7,10 +7,10 @@ class Bismarck extends Barco {
             bismarckData.y,
             bismarckData.velocidad,
             bismarckData.velocidadMaxima,
+            bismarckData.angulo,
             bismarckData.aceleracion,
-            null, // Objetivo
+            bismarckData.objetivo,
             bismarckData.combustible,
-            // bismarckData.rangoVision
         );
     }
 
@@ -18,6 +18,7 @@ class Bismarck extends Barco {
         this.objetivo = escena.physics.add.sprite(this.x, this.y, "bismarck").setScale(0.8).setOrigin(0.5, 0.5);
 
         this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
+        this.objetivo.rangoVision = this.rangoVision;
         this.graphics = escena.add.graphics();
         this.dibujarRangoVision();
     }
