@@ -24,10 +24,28 @@ class Avion extends Entity {
             console.error("Error: No se pudo crear el sprite para el avión.");
         }
         super.init(escena);
+
+        this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
+        this.graphics = escena.add.graphics();
+        this.dibujarRangoVision();
+    }
+    
+    dibujarRangoVision() {
+        // Limpiar el dibujo anterior
+        this.graphics.clear();
+
+        // Estilo del rectángulo (color y grosor del borde)
+        this.graphics.lineStyle(2, 0xff0000); // Borde rojo de 2px de grosor
+
+        // Dibujar el rectángulo de la Zone
+        const bounds = this.rangoVision.getBounds();
+        this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     update() {
         super.update();
+        this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
+        this.dibujarRangoVision();
     }
 
     mover(controles) {

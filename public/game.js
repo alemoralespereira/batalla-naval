@@ -77,6 +77,10 @@ class EscenaAerea extends Phaser.Scene {
             avion.objetivo.setCollideWorldBounds(true);
             //this.equipoAzul.add(avion.objetivo); // Añadir el sprite al grupo
             this.equipoAzul.push(avion);
+            
+            /*this.rangoVisionAvion = this.add.zone(avion.x, avion.y, 300,300).setOrigin(0.5, 0.5);
+            this.graphics = this.add.graphics();
+            this.dibujarRangoVision();*/
         }
        
               //********************************************************/
@@ -127,8 +131,8 @@ class EscenaAerea extends Phaser.Scene {
             this.cameras.main.startFollow(this.entidades.bismarck.objetivo);
             this.entidades.portaaviones.objetivo.setVisible(false);
             this.equipoAzul.forEach((avion) => {
-                console.log('Avion:', avion);
-                console.log('Objetivo del avion:', avion.objetivo);
+                //console.log('Avion:', avion);
+                //console.log('Objetivo del avion:', avion.objetivo);
                 avion.objetivo.setVisible(false);
             });
         }
@@ -142,9 +146,10 @@ class EscenaAerea extends Phaser.Scene {
             atacar: "X"
         });
 
-        this.rangoVisionBismarck = this.add.zone(this.entidades.bismarck.x, this.entidades.bismarck.y, 500, 500).setOrigin(0.5, 0.5);
-       // this.graphics = this.add.graphics();
-       // this.dibujarRangoVision();
+        /*this.rangoVisionBismarck = this.add.zone(this.entidades.bismarck.x, this.entidades.bismarck.y, 500, 500).setOrigin(0.5, 0.5);
+        this.graphics = this.add.graphics();
+        this.dibujarRangoVision(this.entidades.bismarck);*/
+       
 
         // Evento de actualización de entidades
         socket.on("actualizarPosicionEntidad", (data) => {
@@ -172,7 +177,8 @@ class EscenaAerea extends Phaser.Scene {
    /* ejecutar(){
         console.log("Entidad entró en rango de visión del Bismarck!");
     }*/
-        dibujarRangoVision() {
+        /*dibujarRangoVision(entidad) {
+            this.rangoVisionEntidad = this.entidad.rangoVisionBismarck;
             // Limpiar el dibujo anterior
             this.graphics.clear();
     
@@ -180,14 +186,16 @@ class EscenaAerea extends Phaser.Scene {
             this.graphics.lineStyle(2, 0xff0000); // Borde rojo de 2px de grosor
     
             // Dibujar el rectángulo de la Zone
-            const bounds = this.rangoVisionBismarck.getBounds();
+            const bounds = this.rangoVisionEntidad.getBounds();
             this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        }
+        }*/
 
-        estaEnRangoDeVision(objetivo) {
+        estaEnRangoDeVision(objetivo1, objetivo2) {
+            
             // Obtener el bounding box de la entidad
-            const limites = objetivo.getBounds();
-    
+            const limites = objetivo2.getBounds();
+             // Depuración: Verificar el bounding box
+           // console.log('Bounds del objetivo:', limites);
             // Definir las coordenadas de las cuatro esquinas
             const topLeft = { x: limites.x, y: limites.y };
             const topRight = { x: limites.x + limites.width, y: limites.y };
@@ -195,7 +203,9 @@ class EscenaAerea extends Phaser.Scene {
             const bottomRight = { x: limites.x + limites.width, y: limites.y + limites.height };
     
             // Verificar si alguna esquina está dentro del rango de visión
-            const limitesRangoVision = this.rangoVisionBismarck.getBounds();
+            const limitesRangoVision = objetivo1.getBounds();
+             // Depuración: Verificar el área de la Zone
+       // console.log('Bounds de la Zone:', limitesRangoVision);
             return (
                 Phaser.Geom.Rectangle.Contains(limitesRangoVision, topLeft.x, topLeft.y) ||
                 Phaser.Geom.Rectangle.Contains(limitesRangoVision, topRight.x, topRight.y) ||
@@ -206,34 +216,50 @@ class EscenaAerea extends Phaser.Scene {
 
     update() {
         this.moverEntidad();
-        if (this.rol === "bismarck") {
+        
         for (let key in this.entidades) {
             this.entidades[key].update();
         }
 
-        this.rangoVisionBismarck.setPosition(this.entidades.bismarck.objetivo.x, this.entidades.bismarck.objetivo.y);
-        //this.dibujarRangoVision();
-        //console.log('Contenido de equipoAzul:', this.equipoAzul.getChildren());
-        
-        this.equipoAzul.forEach((avion)=>{
-            if (avion.objetivo && this.estaEnRangoDeVision(avion.objetivo)) {
-                console.log('DENTRO del rango de visión del BISMARCK');
-                avion.objetivo.setVisible(true);
+        /*if(this.rol==="portaaviones"){
+            this.equipoAzul.forEach((avion)=>{
+                console.log('FOR DE AVIONES' + avion);
+                if (this.estaEnRangoDeVision(avion.objetivo, this.entidades.bismarck.objetivo)) {
+                    console.log('DENTRO del rango de visión del AVION');
+                    this.entidades.bismarck.objetivo.setVisible(true);
+                } else {
+                    this.entidades.bismarck.objetivo.setVisible(false);
+                }
+            });
+        }*/
+
+        if (this.rol === "bismarck") {                       
+            this.equipoAzul.forEach((avion)=>{
+                if (this.estaEnRangoDeVision(this.entidades.bismarck.objetivo, avion.objetivo)) {
+                    avion.objetivo.setVisible(true);
+                } else {
+                    avion.objetivo.setVisible(false);
+                }
+            });
+            
+            if (this.estaEnRangoDeVision(this.entidades.bismarck.objetivo, this.entidades.portaaviones.objetivo)) {
+                this.entidades.portaaviones.objetivo.setVisible(true);
             } else {
-                avion.objetivo.setVisible(false); // Ocultar si no está en el rango
+                this.entidades.portaaviones.objetivo.setVisible(false);
             }
-        });
-          
- 
-        if (this.estaEnRangoDeVision(this.entidades.portaaviones.objetivo)) {
-            this.entidades.portaaviones.objetivo.setVisible(true);
-        }else
-        {
-            this.entidades.portaaviones.objetivo.setVisible(false);
-        }
+        } else if (this.entidadSeleccionada && this.entidades[this.entidadSeleccionada]) {          
+            const nombreEntidad = this.entidadSeleccionada;
+            const entidad = this.entidades[this.entidadSeleccionada];
+            console.log(`Entidad seleccionada: ${entidad}`);
+            
+            if (this.estaEnRangoDeVision(entidad.objetivo, this.entidades.bismarck.objetivo)) {
+                console.log('DENTRO del rango de visión del AVION');
+                this.entidades.bismarck.objetivo.setVisible(true);
+            } else {
+                this.entidades.bismarck.objetivo.setVisible(false);
+            }
         }
     }
-
     // Función para cambiar la cámara a la entidad seleccionada.
     cambiarObjetivoCamara(nombreEntidad) {
         if (this.entidades[nombreEntidad] && this.entidades[nombreEntidad].objetivo) {
