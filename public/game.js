@@ -102,6 +102,7 @@ class EscenaAerea extends Phaser.Scene {
                     this.seleccionarEntidad('portaaviones');
                 });
             this.panelEquipoAzul.add(botonPortaaviones);   // Agregar botón al panel.
+            botonPortaaviones.setScrollFactor(0);
 
             // Botones para seleccionar los aviones
             for (let i = 0; i < 10; i++) {
@@ -126,6 +127,7 @@ class EscenaAerea extends Phaser.Scene {
                             //cambiar de color a verde
                             botonObservador.setBackgroundColor('#00ff00');
                         });
+                        botonObservador.setScrollFactor(0);
                         const botonOperador = this.add.text(120, 670,'Operador',{
                             fill: '#ffffff',
                             backgroundColor: '#808080',
@@ -137,15 +139,11 @@ class EscenaAerea extends Phaser.Scene {
                             //cambiar de color a verde
                             botonOperador.setBackgroundColor('#00ff00');
                         });          
-                                                                  
+                        botonOperador.setScrollFactor(0);                                  
                     });
                     this.panelEquipoAzul.add(botonAviones);
+                    botonAviones.setScrollFactor(0);
             }
-            //FIJAR BOTONES EN LA PANTALLA
-            botonPortaaviones.setScrollFactor(0);
-            botonAviones.setScrollFactor(0);
-            botonObservador.setScrollFactor(0);
-            botonOperador.setScrollFactor(0);
 
             //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
             this.entidades.bismarck.objetivo.setVisible(false);
