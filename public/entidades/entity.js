@@ -13,7 +13,7 @@ class Entity {
     init(escena) {      
        
     }
-
+    
     update() {
         this.calcularCombustible();
     }

@@ -13,6 +13,7 @@ class Portaaviones extends Barco {
             portaavionesData.combustible,
             // portaavionesData.rangoVision
         );
+        this.seleccionado = false;
     }
 
     init(escena) {

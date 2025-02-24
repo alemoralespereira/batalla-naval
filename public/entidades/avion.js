@@ -1,7 +1,7 @@
 import Entity from './entity.js';
 
 class Avion extends Entity {
-    constructor(avionData) {
+    constructor(avionData, numeroAvion) {
         super(
             avionData.x,
             avionData.y,
@@ -15,6 +15,8 @@ class Avion extends Entity {
         this.piloto = avionData.piloto;
         this.observador = avionData.observador;
         this.operador = avionData.operador;
+        this.seleccionado = false;
+        this.numeroAvion = numeroAvion;
     }
 
     init(escena) {
@@ -22,17 +24,20 @@ class Avion extends Entity {
         if (!this.objetivo || !(this.objetivo instanceof Phaser.GameObjects.Sprite)) {
             console.error("Error: No se pudo crear el sprite para el avión.");
         }
-        super.init(escena);
-
+        
         this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
         this.objetivo.rangoVision = this.rangoVision;
        // this.graphics = escena.add.graphics();
        // this.dibujarRangoVision();
-
-       this.indicadorCombustible = escena.add.text(10, 10, `COMBUSTIBLE:  ${escena.combustible}`,{
+        this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
             fontSize: '20px',
             fill: '#ffffff'
-       });
+        });
+        this.indicadorCombustible.setVisible(false);
+        this.indicadorCombustible.setScrollFactor(0); 
+        
+        super.init(escena);
+
     }
     
     dibujarRangoVision() {
@@ -51,7 +56,12 @@ class Avion extends Entity {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
        // this.dibujarRangoVision();
-        this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
+       if(this.seleccionado || this.x != this.objetivo.x || this.y != this.objetivo.y)
+       {    
+            this.indicadorCombustible.setVisible(true);
+            this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
+       }
+      
     }
 
     mover(controles) {

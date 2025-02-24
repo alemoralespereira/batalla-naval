@@ -21,9 +21,9 @@ class EscenaPrincipal extends Phaser.Scene {
             portaaviones: new Portaaviones(data.estadoJuego.entidades.portaaviones)
         };
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 1; i < 11; i++) {
             const nombreAvion = `avion_${i}`;
-            this.entidades[nombreAvion] = new Avion(data.estadoJuego.entidades[nombreAvion]);
+            this.entidades[nombreAvion] = new Avion(data.estadoJuego.entidades[nombreAvion], i);
         }
     }
 
@@ -74,7 +74,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.equipoAzul.push(this.entidades.portaaviones);
 
          // Aviones
-         for (let i = 0; i < 10; i++) {
+         for (let i = 1; i < 11; i++) {
             const avion = this.entidades[`avion_${i}`];
             avion.init(this); // Inicializar el avión
             avion.objetivo.setCollideWorldBounds(true);
@@ -106,8 +106,8 @@ class EscenaPrincipal extends Phaser.Scene {
             botonPortaaviones.setScrollFactor(0);
 
             // Botones para seleccionar los aviones
-            for (let i = 0; i < 10; i++) {
-                const botonAviones = this.add.text(-100, 490 + i * 30, `Avión ${i + 1}`, {
+            for (let i = 1; i < 11; i++) {
+                const botonAviones = this.add.text(-100, 460 + i * 30, `Avión ${i}`, {
                     fill: '#ffffff',
                     backgroundColor: '#808080',
                     fontStyle: 'bold',
@@ -118,7 +118,7 @@ class EscenaPrincipal extends Phaser.Scene {
                         botonAviones.setBackgroundColor('#00ff00');
                         this.seleccionarEntidad(`avion_${i}`);
                         this.panelTripulantes = this.add.group(); // Panel de tripulantes
-                        const botonObservador = this.add.text(10, 490,'Observador',{
+                        const botonObservador = this.add.text(40, 460,'Observador',{
                             fill: '#ffffff',
                             backgroundColor: '#808080',
                             fontStyle: 'bold',
@@ -131,7 +131,7 @@ class EscenaPrincipal extends Phaser.Scene {
                             botonObservador.setBackgroundColor('#00ff00');
                         });
                         botonObservador.setScrollFactor(0);
-                        const botonOperador = this.add.text(10, 520,'Operador',{
+                        const botonOperador = this.add.text(170, 460,'Operador',{
                             fill: '#ffffff',
                             backgroundColor: '#808080',
                             fontStyle: 'bold',
@@ -143,7 +143,7 @@ class EscenaPrincipal extends Phaser.Scene {
                             //cambiar de color a verde
                             botonOperador.setBackgroundColor('#00ff00');
                         });          
-                        botonOperador.setScrollFactor(0);                                  
+                        botonOperador.setScrollFactor(0);                                 
                     });
                     this.panelEquipoAzul.add(botonAviones);
                     botonAviones.setScrollFactor(0);
@@ -202,7 +202,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.moverEntidad();
         
         for (let key in this.entidades) {
-            this.entidades[key].update();
+            this.entidades[key].update();        
         }
 
         //RANGOS DE VISION DE LAS ENTIDADES
@@ -215,7 +215,7 @@ class EscenaPrincipal extends Phaser.Scene {
                 }
             });                 
         } else {
-            let i = 0;
+            let i = 1;
             while(i < this.equipoAzul.length) {
                 const entidad = this.equipoAzul[i];
 
@@ -230,6 +230,8 @@ class EscenaPrincipal extends Phaser.Scene {
         }      
     }
     
+
+
     //Funcion para determinar si entidad2 esta dentro del rango de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
         const limites = entidad2.objetivo.getBounds();
@@ -261,8 +263,14 @@ class EscenaPrincipal extends Phaser.Scene {
     // Función para seleccionar entidad y cambiar de cámara.
     seleccionarEntidad(nombreEntidad) {
         if (this.rol === "portaaviones" && this.entidades[nombreEntidad]) {
+            for (let key in this.entidades) {
+                if (this.entidades[key] instanceof Avion) {
+                    this.entidades[key].seleccionado = false;  // Desmarcar todos los aviones
+                }
+            }
             this.nombreEntidadSeleccionada = nombreEntidad;       // Guardar el nombre de la entidad seleccionada
             this.entidades[nombreEntidad].objetivo.setVisible(true);
+            this.entidades[nombreEntidad].seleccionado = true;
             this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
             console.log(`Entidad seleccionada: ${nombreEntidad}`);
         } else {

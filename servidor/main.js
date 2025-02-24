@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
                 combustible: 5000
             });
 
-            for (let i = 0; i < 10; i++) {
+            for (let i = 1; i < 11; i++) {
                 entidades[`avion_${i}`] = new Avion({
                     x: 50,
                     y: 500,
