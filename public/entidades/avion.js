@@ -59,11 +59,17 @@ class Avion extends Entity {
        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones")
        {
-        if(this.seleccionado || this.x != this.objetivo.x || this.y != this.objetivo.y)
+        //Si esta seleccionado o si se esta moviendo pero tiene piloto.
+        if(this.seleccionado || ((this.x != this.objetivo.x || this.y != this.objetivo.y) && this.piloto))
             {    
                  this.indicadorCombustible.setVisible(true);
                  this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
             }
+       }
+
+       if(!this.piloto && !this.seleccionado){
+            this.objetivo.x = this.escena.entidades.portaaviones.objetivo.x;
+            this.objetivo.y = this.escena.entidades.portaaviones.objetivo.y;
        }
        
       
