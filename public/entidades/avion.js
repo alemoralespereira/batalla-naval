@@ -17,6 +17,7 @@ class Avion extends Entity {
         this.operador = avionData.operador;
         this.seleccionado = false;
         this.numeroAvion = numeroAvion;
+        this.torpedo = true;
     }
 
     init(escena) {
@@ -70,6 +71,7 @@ class Avion extends Entity {
        if(!this.piloto && !this.seleccionado){
             this.objetivo.x = this.escena.entidades.portaaviones.objetivo.x;
             this.objetivo.y = this.escena.entidades.portaaviones.objetivo.y;
+            this.objetivo.angulo = this.escena.entidades.portaaviones.objetivo.angulo;
        }
        
       

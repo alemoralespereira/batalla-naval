@@ -17,11 +17,15 @@ class EscenaAtaque extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("vistaAtaque", "assets/prueba.png");
+               
+        this.load.image("mapa", "assets/mapa.png");
+        this.load.image("bismarckLateral", "assets/bismarckLateral.png");
     }
 
     create(){
-        const vistaAtaque = this.add.image(0, 0, "vistaAtaque").setOrigin(0, 0);
+        
+        const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
+
     }
 
     update(){
