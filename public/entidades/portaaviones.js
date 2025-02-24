@@ -19,18 +19,18 @@ class Portaaviones extends Barco {
     init(escena) {
         this.escena = escena; 
         this.objetivo = escena.physics.add.sprite(this.x, this.y, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
-        super.init(escena);
         this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
         this.objetivo.rangoVision = this.rangoVision;
        // this.graphics = escena.add.graphics();
        // this.dibujarRangoVision();
-       this.indicadorCombustible = escena.add.text(-100, 430, `COMBUSTIBLE PORTAAVIONES :  ${this.combustible}`,{
+       this.indicadorCombustible = escena.add.text(-100, 430, `COMBUSTIBLE PORTAAVIONES:  ${this.combustible}`,{
             fontSize: '20px',
             fill: '#ffffff'
         });
         this.indicadorCombustible.setVisible(false);
         this.indicadorCombustible.setScrollFactor(0); 
-    }
+        super.init(escena);
+    }   
     
     dibujarRangoVision() {
         // Limpiar el dibujo anterior
@@ -53,7 +53,7 @@ class Portaaviones extends Barco {
          if(this.x != this.objetivo.x || this.y != this.objetivo.y)
              {    
                   this.indicadorCombustible.setVisible(true);
-                  this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
+                  this.indicadorCombustible.setText(`COMBUSTIBLE PORTAAVIONES: ${this.combustible}`);
              }
         }
     }
