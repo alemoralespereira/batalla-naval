@@ -153,8 +153,8 @@ class EscenaPrincipal extends Phaser.Scene {
                         botonOperador.setScrollFactor(0);
                         botonObservador.setScrollFactor(0);
                         const botonDespegar = this.add.text(260, 460,'Despegar',{
-                            fill: '#ffffff',
-                            backgroundColor: '#00ff00',
+                            fill: '#00ff00',
+                            backgroundColor: '#808080',
                             fontStyle: 'bold',
                             padding: { x: 10, y: 5 }
                         })
