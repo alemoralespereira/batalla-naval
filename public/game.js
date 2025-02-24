@@ -126,8 +126,7 @@ class EscenaPrincipal extends Phaser.Scene {
                         })
                         .setInteractive({ useHandCursor: true})
                         .on('pointerdown',()=>{
-                            //cambiar valor booleano de atributos
-                            //cambiar de color a verde
+                            this.entidades[`avion_${i}`].observador = true;
                             botonObservador.setBackgroundColor('#00ff00');
                         });
                         botonObservador.setScrollFactor(0);
@@ -139,8 +138,7 @@ class EscenaPrincipal extends Phaser.Scene {
                         })
                         .setInteractive({ useHandCursor: true})
                         .on('pointerdown',()=>{
-                            //cambiar valor booleano de atributos
-                            //cambiar de color a verde
+                            this.entidades[`avion_${i}`].operador = true;
                             botonOperador.setBackgroundColor('#00ff00');
                         });          
                         botonOperador.setScrollFactor(0);                                 
