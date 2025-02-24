@@ -23,6 +23,12 @@ class Portaaviones extends Barco {
         this.objetivo.rangoVision = this.rangoVision;
        // this.graphics = escena.add.graphics();
        // this.dibujarRangoVision();
+       this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
+            fontSize: '20px',
+            fill: '#ffffff'
+        });
+        this.indicadorCombustible.setVisible(false);
+        this.indicadorCombustible.setScrollFactor(0); 
     }
     
     dibujarRangoVision() {

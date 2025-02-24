@@ -88,7 +88,6 @@ class EscenaPrincipal extends Phaser.Scene {
         //********************************************************/
         // PANEL INTERACTIVO DEL EQUIPO AZUL
         if (this.rol === "portaaviones") {
-            this.nombreEntidadSeleccionada = "portaaviones";
             this.panelEquipoAzul = this.add.group(); // Panel para los botones de selección
 
             // Botón para seleccionar el portaaviones
@@ -115,9 +114,19 @@ class EscenaPrincipal extends Phaser.Scene {
                 })
                     .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
                     .on('pointerdown', () => {
-                        botonAviones.setBackgroundColor('#00ff00');
-                        this.seleccionarEntidad(`avion_${i}`);
                         this.panelTripulantes = this.add.group(); // Panel de tripulantes
+                        /*const botonPiloto = this.add.text(40, 460,'Piloto',{
+                            fill: '#ffffff',
+                            backgroundColor: '#808080',
+                            fontStyle: 'bold',
+                            padding: { x: 10, y: 5 }
+                        })
+                        .setInteractive({ useHandCursor: true})
+                        .on('pointerdown',()=>{
+                            this.entidades[`avion_${i}`].piloto = true;
+                            botonPiloto.setBackgroundColor('#00ff00');
+                        });
+                        botonPiloto.setScrollFactor(0);*/
                         const botonObservador = this.add.text(40, 460,'Observador',{
                             fill: '#ffffff',
                             backgroundColor: '#808080',
@@ -130,7 +139,7 @@ class EscenaPrincipal extends Phaser.Scene {
                             botonObservador.setBackgroundColor('#00ff00');
                         });
                         botonObservador.setScrollFactor(0);
-                        const botonOperador = this.add.text(170, 460,'Operador',{
+                        const botonOperador = this.add.text(160, 460,'Operador',{
                             fill: '#ffffff',
                             backgroundColor: '#808080',
                             fontStyle: 'bold',
@@ -141,7 +150,25 @@ class EscenaPrincipal extends Phaser.Scene {
                             this.entidades[`avion_${i}`].operador = true;
                             botonOperador.setBackgroundColor('#00ff00');
                         });          
-                        botonOperador.setScrollFactor(0);                                 
+                        botonOperador.setScrollFactor(0);
+                        botonObservador.setScrollFactor(0);
+                        const botonDespegar = this.add.text(260, 460,'Despegar',{
+                            fill: '#ffffff',
+                            backgroundColor: '#00ff00',
+                            fontStyle: 'bold',
+                            padding: { x: 10, y: 5 }
+                        })
+                        .setInteractive({ useHandCursor: true})
+                        .on('pointerdown',()=>{
+                            botonAviones.setBackgroundColor('#00ff00');
+                            this.entidades[`avion_${i}`].piloto = true;
+                            this.seleccionarEntidad(`avion_${i}`);
+                            botonDespegar.setVisible(false);
+                            botonOperador.setVisible(false);
+                            botonObservador.setVisible(false);
+                            //botonPiloto.setVisible(false);
+                        });          
+                        botonDespegar.setScrollFactor(0);                                
                     });
                     this.panelEquipoAzul.add(botonAviones);
                     botonAviones.setScrollFactor(0);
@@ -213,10 +240,9 @@ class EscenaPrincipal extends Phaser.Scene {
                 }
             });                 
         } else {
-            let i = 1;
+            let i = 0;
             while(i < this.equipoAzul.length) {
                 const entidad = this.equipoAzul[i];
-
                 if (this.estaEnRangoDeVision(entidad, this.entidades.bismarck)) {
                     this.entidades.bismarck.objetivo.setVisible(true);
                     break;

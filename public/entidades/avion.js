@@ -20,6 +20,7 @@ class Avion extends Entity {
     }
 
     init(escena) {
+        this.escena = escena; 
         this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
         if (!this.objetivo || !(this.objetivo instanceof Phaser.GameObjects.Sprite)) {
             console.error("Error: No se pudo crear el sprite para el avión.");
@@ -56,11 +57,15 @@ class Avion extends Entity {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
        // this.dibujarRangoVision();
-       if(this.seleccionado || this.x != this.objetivo.x || this.y != this.objetivo.y)
-       {    
-            this.indicadorCombustible.setVisible(true);
-            this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
+       if(this.escena.rol === "portaaviones")
+       {
+        if(this.seleccionado || this.x != this.objetivo.x || this.y != this.objetivo.y)
+            {    
+                 this.indicadorCombustible.setVisible(true);
+                 this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
+            }
        }
+       
       
     }
 
@@ -71,7 +76,7 @@ class Avion extends Entity {
         }
         this.calcularCombustible();
 
-        if (this.combustible > 0) {
+        if (this.combustible > 0 || !this.piloto) {
             // Movimiento con las teclas W, A, S, D
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown) {
 
