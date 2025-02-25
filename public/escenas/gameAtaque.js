@@ -25,7 +25,6 @@ class EscenaAtaque extends Phaser.Scene {
         const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
         this.add.image(450, 330, "bismarckLateral");
         this.add.circle(450, 350, 10, 0xff0000);
-        let timer;
 
         this.events.on('wake', () => {
             this.time.removeAllEvents();
