@@ -120,7 +120,10 @@ class EscenaPrincipal extends Phaser.Scene {
                         const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
                             .on('pointerdown', () => {
                                 botonAviones.setBackgroundColor('#00ff00');
-                                this.entidades[`avion_${i}`].piloto = true;
+                                const avion =  this.entidades[`avion_${i}`];
+                                avion.piloto = true;
+                                avion.calcularRangoVision();
+                                avion.calcularAlcanceVuelo();
                                 this.seleccionarEntidad(`avion_${i}`);
                                 botonDespegar.setVisible(false);
                                 botonOperador.setVisible(false);
