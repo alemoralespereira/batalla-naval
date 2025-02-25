@@ -148,6 +148,16 @@ io.on("connection", (socket) => {
         });
     });
 
+    socket.on("actualizarModoAtaque", (data) => { 
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+
+        socket.to(data.sala).emit("cambiarModoAtaque", { modoAtaque: data.modoAtaque });
+    });
+
     // Desconexión del jugador
     socket.on("disconnect", () => {
         for (const sala in salas) {

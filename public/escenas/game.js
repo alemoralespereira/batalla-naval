@@ -59,6 +59,11 @@ class EscenaPrincipal extends Phaser.Scene {
         //this.camaraMinimapa.ignore(this.entidades);
         this.puntosEntidades = this.add.group();
 
+        //*********************************************************************************/
+        // ESCENA ATAQUE LATERAL
+        this.scene.launch("EscenaAtaque", { sala: this.sala });
+        this.scene.get("EscenaAtaque").scene.sleep();
+
         //********************************************************/
         // CREAR EQUIPOS
         this.equipoAzul = [];
@@ -120,7 +125,10 @@ class EscenaPrincipal extends Phaser.Scene {
                         const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
                             .on('pointerdown', () => {
                                 botonAviones.setBackgroundColor('#00ff00');
-                                this.entidades[`avion_${i}`].piloto = true;
+                                const avion =  this.entidades[`avion_${i}`];
+                                avion.piloto = true;
+                                avion.calcularRangoVision();
+                                avion.calcularAlcanceVuelo();
                                 this.seleccionarEntidad(`avion_${i}`);
                                 botonDespegar.setVisible(false);
                                 botonOperador.setVisible(false);
@@ -152,7 +160,11 @@ class EscenaPrincipal extends Phaser.Scene {
             izquierda: "A",
             derecha: "D",
             abajo: "S",
-            atacar: "X"
+        });
+
+        this.input.keyboard.on('keydown-X', () => {
+            this.activarModoAtaque();
+            socket.emit("actualizarModoAtaque", { modoAtaque: true, sala: this.sala });
         });
 
         //********************************************************/
@@ -177,10 +189,20 @@ class EscenaPrincipal extends Phaser.Scene {
                 angulo: data.angulo
             });*/
         });
+
+        socket.on("cambiarModoAtaque", (data) => {
+            if (data.modoAtaque) {
+                this.activarModoAtaque();
+            }
+        });
+    }
+
+    activarModoAtaque() {
+        this.scene.get("EscenaPrincipal").scene.sleep();
+        this.scene.get("EscenaAtaque").scene.wake();
     }
 
     update() {
-
         this.moverEntidad();
 
         for (let key in this.entidades) {
@@ -260,12 +282,6 @@ class EscenaPrincipal extends Phaser.Scene {
     }
 
     moverEntidad() {
-
-        if (this.controles.atacar.isDown) {
-            this.scene.pause("EscenaPrincipal");
-            this.scene.start('EscenaAtaque');//,{estadoJuego: this.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
-        }
-
         let entidad = null;
         let nombreEntidad = "";
 
