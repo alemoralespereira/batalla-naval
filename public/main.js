@@ -1,6 +1,6 @@
-import Menu from './menu.js';
-import EscenaPrincipal from './game.js';
-import EscenaAtaque from './gameAtaque.js';
+import Menu from './escenas/menu.js';
+import EscenaPrincipal from './escenas/game.js';
+import EscenaAtaque from './escenas/gameAtaque.js';
 
 export const game = new Phaser.Game({
     type: Phaser.AUTO,

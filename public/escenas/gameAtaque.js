@@ -1,7 +1,7 @@
-import socket from './socket.js';
-import Bismarck from './entidades/bismarck.js';
-import Portaaviones from './entidades/portaaviones.js';
-import Avion from './entidades/avion.js';
+import socket from '../socket.js';
+import Bismarck from '../entidades/bismarck.js';
+import Portaaviones from '../entidades/portaaviones.js';
+import Avion from '../entidades/avion.js';
 import EscenaPrincipal from './game.js';
 
 class EscenaAtaque extends Phaser.Scene {
@@ -18,8 +18,8 @@ class EscenaAtaque extends Phaser.Scene {
 
     preload() {
                
-        this.load.image("mapa", "assets/mapa.png");
-        this.load.image("bismarckLateral", "assets/bismarckLateral.png");
+        this.load.image("mapa", "../assets/mapa.png");
+        this.load.image("bismarckLateral", "../assets/bismarckLateral.png");
     }
 
     create(){

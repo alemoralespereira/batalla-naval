@@ -1,7 +1,8 @@
-import socket from './socket.js';
-import Bismarck from './entidades/bismarck.js';
-import Portaaviones from './entidades/portaaviones.js';
-import Avion from './entidades/avion.js';
+import socket from '../socket.js';
+import Bismarck from '../entidades/bismarck.js';
+import Portaaviones from '../entidades/portaaviones.js';
+import Avion from '../entidades/avion.js';
+import Panel from '../ui/panel.js';
 
 class EscenaPrincipal extends Phaser.Scene {
     constructor() {
@@ -12,9 +13,9 @@ class EscenaPrincipal extends Phaser.Scene {
         this.sala = data.sala;
         this.rol = data.rol;
         this.estadoJuego = data.estadoJuego;
-        this.nombreUsuario = data.nombreUsuario; 
+        this.nombreUsuario = data.nombreUsuario;
 
-         //********************************************************/
+        //********************************************************/
         // CREAR ENTIDADES
         this.entidades = {
             bismarck: new Bismarck(data.estadoJuego.entidades.bismarck),
@@ -28,18 +29,18 @@ class EscenaPrincipal extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("mapa", "assets/mapa.png");
-        this.load.image("bismarck", "assets/bismarck.png");
-        this.load.image("portaaviones", "assets/carrier.png");
-        this.load.image("avion", "assets/avion.png");
-        this.load.image("puerto", "assets/puerto.png");
+        this.load.image("mapa", "../assets/mapa.png");
+        this.load.image("bismarck", "../assets/bismarck.png");
+        this.load.image("portaaviones", "../assets/carrier.png");
+        this.load.image("avion", "../assets/avion.png");
+        this.load.image("puerto", "../assets/puerto.png");
     }
 
     create() {
         //*********************************************************************************/
         // MAPA PRINCIPAL, CAMARA Y LIMITES DEL MUNDO
         const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
-        const puerto = this.add.image(2800,0,"puerto").setOrigin(0,0);
+        const puerto = this.add.image(2800, 0, "puerto").setOrigin(0, 0);
 
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
@@ -57,11 +58,11 @@ class EscenaPrincipal extends Phaser.Scene {
         this.camaraMinimapa.ignore(mapa);
         //this.camaraMinimapa.ignore(this.entidades);
         this.puntosEntidades = this.add.group();
-        
+
         //********************************************************/
         // CREAR EQUIPOS
         this.equipoAzul = [];
-        
+
         //********************************************************/
         // INICIALIZAR ENTIDADES
         // Bismarck
@@ -73,8 +74,8 @@ class EscenaPrincipal extends Phaser.Scene {
         this.entidades.portaaviones.objetivo.setCollideWorldBounds(true);
         this.equipoAzul.push(this.entidades.portaaviones);
 
-         // Aviones
-         for (let i = 1; i < 11; i++) {
+        // Aviones
+        for (let i = 1; i < 11; i++) {
             const avion = this.entidades[`avion_${i}`];
             avion.init(this); // Inicializar el avión
             avion.objetivo.setCollideWorldBounds(true);
@@ -83,95 +84,51 @@ class EscenaPrincipal extends Phaser.Scene {
             /*this.rangoVisionAvion = this.add.zone(avion.x, avion.y, 300,300).setOrigin(0.5, 0.5);
             this.graphics = this.add.graphics();
             this.dibujarRangoVision();*/
-        }            
+        }
 
         //********************************************************/
         // PANEL INTERACTIVO DEL EQUIPO AZUL
         if (this.rol === "portaaviones") {
-            this.panelEquipoAzul = this.add.group(); // Panel para los botones de selección
+            const panel = new Panel(this);
 
             // Botón para seleccionar el portaaviones
-            const botonPortaaviones = this.add.text(-100, 460, 'Portaaviones', {
-                fill: '#ffffff',                        // Texto blanco
-                backgroundColor: '#808080',             // Fondo gris
-                fontStyle: 'bold',
-                padding: { x: 10, y: 5 }                // Espaciado interno
-            })
-                .setInteractive({ useHandCursor: true })    // Hacer el texto interactivo
+            const botonPortaaviones = panel.agregarBoton(-100, 460, 'Portaaviones')
                 .on('pointerdown', () => {
                     this.seleccionarEntidad('portaaviones');
                 });
-            this.panelEquipoAzul.add(botonPortaaviones);   // Agregar botón al panel.
-            botonPortaaviones.setScrollFactor(0);
+            panel.agregarBotonAlPanel(botonPortaaviones);
 
             // Botones para seleccionar los aviones
             for (let i = 1; i < 11; i++) {
-                const botonAviones = this.add.text(-100, 460 + i * 30, `Avión ${i}`, {
-                    fill: '#ffffff',
-                    backgroundColor: '#808080',
-                    fontStyle: 'bold',
-                    padding: { x: 10, y: 5 }
-                })
-                    .setInteractive({ useHandCursor: true }) // Hacer el texto interactivo
+                const botonAviones = panel.agregarBoton(-100, 460 + i * 30, `Avión ${i}`)
                     .on('pointerdown', () => {
-                        this.panelTripulantes = this.add.group(); // Panel de tripulantes
-                        /*const botonPiloto = this.add.text(40, 460,'Piloto',{
-                            fill: '#ffffff',
-                            backgroundColor: '#808080',
-                            fontStyle: 'bold',
-                            padding: { x: 10, y: 5 }
-                        })
-                        .setInteractive({ useHandCursor: true})
+                        /*const botonPiloto = panel.agregarBoton(40, 460,'Piloto')
                         .on('pointerdown',()=>{
                             this.entidades[`avion_${i}`].piloto = true;
                             botonPiloto.setBackgroundColor('#00ff00');
-                        });
-                        botonPiloto.setScrollFactor(0);*/
-                        const botonObservador = this.add.text(40, 460,'Observador',{
-                            fill: '#ffffff',
-                            backgroundColor: '#808080',
-                            fontStyle: 'bold',
-                            padding: { x: 10, y: 5 }
-                        })
-                        .setInteractive({ useHandCursor: true})
-                        .on('pointerdown',()=>{
-                            this.entidades[`avion_${i}`].observador = true;
-                            botonObservador.setBackgroundColor('#00ff00');
-                        });
-                        botonObservador.setScrollFactor(0);
-                        const botonOperador = this.add.text(160, 460,'Operador',{
-                            fill: '#ffffff',
-                            backgroundColor: '#808080',
-                            fontStyle: 'bold',
-                            padding: { x: 10, y: 5 }
-                        })
-                        .setInteractive({ useHandCursor: true})
-                        .on('pointerdown',()=>{
-                            this.entidades[`avion_${i}`].operador = true;
-                            botonOperador.setBackgroundColor('#00ff00');
-                        });          
-                        botonOperador.setScrollFactor(0);
-                        botonObservador.setScrollFactor(0);
-                        const botonDespegar = this.add.text(260, 460,'Despegar',{
-                            fill: '#00ff00',
-                            backgroundColor: '#808080',
-                            fontStyle: 'bold',
-                            padding: { x: 10, y: 5 }
-                        })
-                        .setInteractive({ useHandCursor: true})
-                        .on('pointerdown',()=>{
-                            botonAviones.setBackgroundColor('#00ff00');
-                            this.entidades[`avion_${i}`].piloto = true;
-                            this.seleccionarEntidad(`avion_${i}`);
-                            botonDespegar.setVisible(false);
-                            botonOperador.setVisible(false);
-                            botonObservador.setVisible(false);
-                            //botonPiloto.setVisible(false);
-                        });          
-                        botonDespegar.setScrollFactor(0);                                
+                        });*/
+                        const botonObservador = panel.agregarBoton(40, 460, 'Observador')
+                            .on('pointerdown', () => {
+                                this.entidades[`avion_${i}`].observador = true;
+                                botonObservador.setBackgroundColor('#00ff00');
+                            });
+                        const botonOperador = panel.agregarBoton(160, 460, 'Operador')
+                            .on('pointerdown', () => {
+                                this.entidades[`avion_${i}`].operador = true;
+                                botonOperador.setBackgroundColor('#00ff00');
+                            });
+                        const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
+                            .on('pointerdown', () => {
+                                botonAviones.setBackgroundColor('#00ff00');
+                                this.entidades[`avion_${i}`].piloto = true;
+                                this.seleccionarEntidad(`avion_${i}`);
+                                botonDespegar.setVisible(false);
+                                botonOperador.setVisible(false);
+                                botonObservador.setVisible(false);
+                                //botonPiloto.setVisible(false);
+                            });
                     });
-                    this.panelEquipoAzul.add(botonAviones);
-                    botonAviones.setScrollFactor(0);
+                panel.agregarBotonAlPanel(botonAviones);
             }
 
             //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
@@ -196,7 +153,7 @@ class EscenaPrincipal extends Phaser.Scene {
             derecha: "D",
             abajo: "S",
             atacar: "X"
-        });      
+        });
 
         //********************************************************/
         // EVENTO PARA ESCUCHAR AL SERVIDOR
@@ -213,7 +170,7 @@ class EscenaPrincipal extends Phaser.Scene {
                     entidad.objetivo.setAngle(data.angulo);
                 }
             }
-             // Log para confirmar que la entidad se actualizó correctamente
+            // Log para confirmar que la entidad se actualizó correctamente
             /*console.log(`🔄 Entidad ${data.entidad} actualizada:`, {
                 x: data.x,
                 y: data.y,
@@ -223,25 +180,25 @@ class EscenaPrincipal extends Phaser.Scene {
     }
 
     update() {
-        
+
         this.moverEntidad();
-        
+
         for (let key in this.entidades) {
-            this.entidades[key].update();        
+            this.entidades[key].update();
         }
 
         //RANGOS DE VISION DE LAS ENTIDADES
-        if (this.rol === "bismarck") {   
-            this.equipoAzul.forEach((entidad)=>{
+        if (this.rol === "bismarck") {
+            this.equipoAzul.forEach((entidad) => {
                 if (this.estaEnRangoDeVision(this.entidades.bismarck, entidad)) {
                     entidad.objetivo.setVisible(true);
                 } else {
                     entidad.objetivo.setVisible(false);
                 }
-            });                 
+            });
         } else {
             let i = 0;
-            while(i < this.equipoAzul.length) {
+            while (i < this.equipoAzul.length) {
                 const entidad = this.equipoAzul[i];
                 if (this.estaEnRangoDeVision(entidad, this.entidades.bismarck)) {
                     this.entidades.bismarck.objetivo.setVisible(true);
@@ -251,15 +208,15 @@ class EscenaPrincipal extends Phaser.Scene {
                 }
                 i++;
             }
-        }      
+        }
     }
-    
+
 
 
     //Funcion para determinar si entidad2 esta dentro del rango de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
         const limites = entidad2.objetivo.getBounds();
-     
+
         const topLeft = { x: limites.x, y: limites.y };
         const topRight = { x: limites.x + limites.width, y: limites.y };
         const bottomLeft = { x: limites.x, y: limites.y + limites.height };
@@ -304,8 +261,7 @@ class EscenaPrincipal extends Phaser.Scene {
 
     moverEntidad() {
 
-        if(this.controles.atacar.isDown)
-        {
+        if (this.controles.atacar.isDown) {
             this.scene.pause("EscenaPrincipal");
             this.scene.start('EscenaAtaque');//,{estadoJuego: this.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
         }
@@ -345,9 +301,9 @@ class EscenaPrincipal extends Phaser.Scene {
 
             // Log para depuración: Confirmar que los datos se enviaron
             //console.log("✅ Datos enviados correctamente al servidor.");
-     
+
         } else {
-           // console.error("No hay entidad seleccionada o no es válida.");
+            // console.error("No hay entidad seleccionada o no es válida.");
         }
     }
 }

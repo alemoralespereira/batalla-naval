@@ -1,4 +1,4 @@
-import socket from './socket.js';
+import socket from '../socket.js';
 
 class Menu extends Phaser.Scene {
     constructor() {
