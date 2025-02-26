@@ -13,13 +13,21 @@ const io = socketIo(servidor);
 
 const PUERTO = process.env.PORT || 8080;
 
-const db = require('./persistencia/mainDB');
+const mainDB = require('./persistencia/mainDB');
+const consultas = require('./persistencia/consultas');
 
 // Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "../public")));
 
 // Almacenar información de las salas y jugadores
 let salas = {};
+
+//const db = new mainDB();
+//db.connect();
+//const conexion = db.getConnection();
+//const query = new consultas(conexion);
+
+
 
 io.on("connection", (socket) => {
     console.log("🟢 Nuevo jugador conectado:", socket.id);
@@ -36,9 +44,20 @@ io.on("connection", (socket) => {
             return; // No permite que el jugador se una si el rol ya está ocupado
         }
 
+       // const fecha = new Date();
+        /*query.insertarDatosSala(sala, socket.id, nombreUsuario, rol, fecha, (error, resultados) => {
+            if (error) {
+                console.error('Error al insertar datos:', error);
+                return;
+            }
+            console.log('Datos insertados:', resultados);
+        });*/
+       
+
         // Agregar jugador a la sala
         salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
         socket.join(sala);
+        
 
         console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
         console.log("Detalles del jugador:", {
