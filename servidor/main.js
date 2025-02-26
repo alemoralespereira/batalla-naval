@@ -167,14 +167,18 @@ io.on("connection", (socket) => {
         });
     });
 
-    socket.on("actualizarModoAtaque", (data) => { 
+    socket.on("actualizarModoBatalla", (data) => { 
         // Verificar si la sala existe
         if (!salas[data.sala]) {
             console.error(`❌ Sala ${data.sala} no encontrada.`);
             return;
         }
 
-        socket.to(data.sala).emit("cambiarModoAtaque", { modoAtaque: data.modoAtaque });
+        io.to(data.sala).emit("cambiarModoBatalla", { 
+            modoBatalla: data.modoBatalla,
+            nombreEntidadAtacante: data.nombreEntidadAtacante,
+            nombreEntidadDefensor: data.nombreEntidadDefensor
+         });
     });
 
     // Desconexión del jugador

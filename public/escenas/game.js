@@ -60,9 +60,10 @@ class EscenaPrincipal extends Phaser.Scene {
         this.puntosEntidades = this.add.group();
 
         //*********************************************************************************/
-        // ESCENA ATAQUE LATERAL
-        this.scene.launch("EscenaAtaque", { sala: this.sala });
-        this.scene.get("EscenaAtaque").scene.sleep();
+        // ESCENA BATALLA LATERAL
+        this.scene.launch("EscenaBatalla", { sala: this.sala, rol: this.rol });
+        this.scene.get("EscenaBatalla").scene.sleep();
+        this.ultimoModoBatalla = null;
 
         //********************************************************/
         // CREAR EQUIPOS
@@ -125,7 +126,7 @@ class EscenaPrincipal extends Phaser.Scene {
                         const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
                             .on('pointerdown', () => {
                                 botonAviones.setBackgroundColor('#00ff00');
-                                const avion =  this.entidades[`avion_${i}`];
+                                const avion = this.entidades[`avion_${i}`];
                                 avion.piloto = true;
                                 avion.calcularRangoVision();
                                 avion.calcularAlcanceVuelo();
@@ -163,8 +164,28 @@ class EscenaPrincipal extends Phaser.Scene {
         });
 
         this.input.keyboard.on('keydown-X', () => {
-            this.activarModoAtaque();
-            socket.emit("actualizarModoAtaque", { modoAtaque: true, sala: this.sala });
+            if (this.rol === "bismarck") {
+                // Restriccion donde el bismarck no puede atacar más de una vez cada 5 segundos
+                if (!this.ultimoModoBatalla || (Date.now() - this.ultimoModoBatalla) / 1000 > 10) {
+                    socket.emit("actualizarModoBatalla", {
+                        modoBatalla: true,
+                        sala: this.sala,
+                        nombreEntidadAtacante: "bismarck",
+                        nombreEntidadDefensor: "avion_2",
+                    });
+                    this.ultimoModoBatalla = Date.now();
+                }
+                console.log((Date.now() - this.ultimoModoBatalla) / 1000, "segundos desde que se el ultimo ataque");
+            }
+
+            if (this.rol === "portaaviones") {
+                socket.emit("actualizarModoBatalla", {
+                    modoBatalla: true,
+                    sala: this.sala,
+                    nombreEntidadAtacante: "avion_3",
+                    nombreEntidadDefensor: "bismarck",
+                });
+            }
         });
 
         //********************************************************/
@@ -190,16 +211,18 @@ class EscenaPrincipal extends Phaser.Scene {
             });*/
         });
 
-        socket.on("cambiarModoAtaque", (data) => {
-            if (data.modoAtaque) {
-                this.activarModoAtaque();
+        socket.on("cambiarModoBatalla", (data) => {
+            if (data.modoBatalla) {
+                this.activarModoBatalla(data.nombreEntidadAtacante, data.nombreEntidadDefensor);
             }
         });
     }
 
-    activarModoAtaque() {
+    activarModoBatalla(nombreEntidadAtacante, nombreEntidadDefensor) {
         this.scene.get("EscenaPrincipal").scene.sleep();
-        this.scene.get("EscenaAtaque").scene.wake();
+        this.scene.get("EscenaBatalla").setEntidadAtacante(this.entidades[nombreEntidadAtacante]);
+        this.scene.get("EscenaBatalla").setEntidadDefensor(this.entidades[nombreEntidadDefensor]);
+        this.scene.get("EscenaBatalla").scene.wake();
     }
 
     update() {
