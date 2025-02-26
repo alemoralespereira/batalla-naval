@@ -18,6 +18,7 @@ class Avion extends Entity {
         this.seleccionado = false;
         this.numeroAvion = numeroAvion;
         this.torpedo = true;
+        this.multiplicadorCombustible = 1;
     }
 
     init(escena) {
@@ -27,7 +28,7 @@ class Avion extends Entity {
             console.error("Error: No se pudo crear el sprite para el avión.");
         }
         
-        this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
+        this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
         this.objetivo.rangoVision = this.rangoVision;
        // this.graphics = escena.add.graphics();
        // this.dibujarRangoVision();
@@ -54,6 +55,28 @@ class Avion extends Entity {
         this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
+    calcularRangoVision() {
+        if (this.observador) {
+            this.rangoVision.width = 500; // el doble de cuando se crea la "zone"
+            this.rangoVision.height = 500;
+        }
+    }
+
+    calcularAlcanceVuelo() {
+        this.multiplicadorCombustible = 1; // 3 / 3;
+
+        if (this.observador) {
+            this.multiplicadorCombustible -= 1 / 3;  // 2 / 3;
+        }
+
+        if (this.operador) {
+            this.multiplicadorCombustible -= 1 / 3; // 1 / 3;
+        }
+
+        // Se disminuye el combustible total para facilitar los calculos de alcance máximo según los tripulantes
+        this.combustible = this.combustible * this.multiplicadorCombustible;
+    }
+
     update() {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
@@ -64,7 +87,9 @@ class Avion extends Entity {
         if(this.seleccionado || ((this.x != this.objetivo.x || this.y != this.objetivo.y) && this.piloto))
             {    
                  this.indicadorCombustible.setVisible(true);
-                 this.indicadorCombustible.setText(`COMBUSTIBLE: ${this.combustible}`);
+                // El jugador ve que todos los aviones tienen el mismo combustible maximo pero cuanto más tripulantes más rápido se consume
+                const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
+                this.indicadorCombustible.setText(`COMBUSTIBLE: ${combustible}`);
             }
        }
 
