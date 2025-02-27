@@ -85,7 +85,7 @@ io.on("connection", (socket) => {
             entidades.bismarck = new Bismarck({
                 x: 1500,
                 y: 200,
-                velocidad: 100,
+                velocidad: 0,
                 velocidadMaxima: 100,
                 angulo: 0,
                 aceleracion: 1,
@@ -95,7 +95,7 @@ io.on("connection", (socket) => {
             entidades.portaaviones = new Portaaviones({
                 x: 50,
                 y: 500,
-                velocidad: 100,
+                velocidad: 0,
                 velocidadMaxima: 100,
                 angulo: 0,
                 aceleracion: 1,

@@ -102,34 +102,37 @@ class EscenaPrincipal extends Phaser.Scene {
             for (let i = 1; i < 11; i++) {
                 const botonAviones = panel.agregarBoton(-100, 460 + i * 30, `Avión ${i}`)
                     .on('pointerdown', () => {
-                        /*const botonPiloto = panel.agregarBoton(40, 460,'Piloto')
-                        .on('pointerdown',()=>{
-                            this.entidades[`avion_${i}`].piloto = true;
-                            botonPiloto.setBackgroundColor('#00ff00');
-                        });*/
-                        const botonObservador = panel.agregarBoton(40, 460, 'Observador')
+                        //this.cambiarObjetivoCamara(`avion_${i}`);
+                        this.seleccionarEntidad(`avion_${i}`);
+
+                        if(!this.entidades[`avion_${i}`].piloto) {
+                            const botonObservador = panel.agregarBoton(40, 460, 'Observador')
                             .on('pointerdown', () => {
                                 this.entidades[`avion_${i}`].observador = true;
                                 botonObservador.setBackgroundColor('#00ff00');
                             });
-                        const botonOperador = panel.agregarBoton(160, 460, 'Operador')
+                            
+                            const botonOperador = panel.agregarBoton(160, 460, 'Operador')
                             .on('pointerdown', () => {
                                 this.entidades[`avion_${i}`].operador = true;
                                 botonOperador.setBackgroundColor('#00ff00');
                             });
-                        const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
+                            
+                            const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
                             .on('pointerdown', () => {
                                 botonAviones.setBackgroundColor('#00ff00');
-                                const avion =  this.entidades[`avion_${i}`];
+                                const avion = this.entidades[`avion_${i}`];
+                                avion.init(this);
                                 avion.piloto = true;
-                                avion.calcularRangoVision();
-                                avion.calcularAlcanceVuelo();
-                                this.seleccionarEntidad(`avion_${i}`);
+                                avion.objetivo.setVisible(true);                                                        
                                 botonDespegar.setVisible(false);
                                 botonOperador.setVisible(false);
                                 botonObservador.setVisible(false);
+                                
                                 //botonPiloto.setVisible(false);
                             });
+                        }
+                        
                     });
                 panel.agregarBotonAlPanel(botonAviones);
             }
@@ -253,7 +256,6 @@ class EscenaPrincipal extends Phaser.Scene {
                 }
             }
             this.nombreEntidadSeleccionada = nombreEntidad;       // Guardar el nombre de la entidad seleccionada
-            this.entidades[nombreEntidad].objetivo.setVisible(true);
             this.entidades[nombreEntidad].seleccionado = true;
             this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
             console.log(`Entidad seleccionada: ${nombreEntidad}`);
@@ -261,6 +263,7 @@ class EscenaPrincipal extends Phaser.Scene {
             console.error(`Entidad ${nombreEntidad} no encontrada o rol incorrecto.`);
         }
     }
+
 
     moverEntidad() {
 

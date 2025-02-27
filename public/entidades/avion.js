@@ -23,34 +23,30 @@ class Avion extends Entity {
 
     init(escena) {
         this.escena = escena; 
-        this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
-        if (!this.objetivo || !(this.objetivo instanceof Phaser.GameObjects.Sprite)) {
-            console.error("Error: No se pudo crear el sprite para el avión.");
-        }
-        
-        this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
-        this.objetivo.rangoVision = this.rangoVision;
-       // this.graphics = escena.add.graphics();
-       // this.dibujarRangoVision();
-        this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
-            fontSize: '20px',
-            fill: '#ffffff'
-        });
-        this.indicadorCombustible.setVisible(false);
-        this.indicadorCombustible.setScrollFactor(0); 
-        
-        super.init(escena);
+        if (this.objetivo) {
+            // Si el sprite ya existe, actualiza su posición
+            this.objetivo.x = this.escena.entidades.portaaviones.objetivo.x;
+            this.objetivo.y = this.escena.entidades.portaaviones.objetivo.y;
+        } else {
+            this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+            this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
+            this.objetivo.rangoVision = this.rangoVision;
+            // this.graphics = escena.add.graphics();
+            // this.dibujarRangoVision();
+            this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
+                fontSize: '20px',
+                fill: '#ffffff'
+            });
+            this.indicadorCombustible.setVisible(false);
+            this.indicadorCombustible.setScrollFactor(0); 
+        }      
 
+        super.init(escena);
     }
     
     dibujarRangoVision() {
-        // Limpiar el dibujo anterior
         this.graphics.clear();
-
-        // Estilo del rectángulo (color y grosor del borde)
-        this.graphics.lineStyle(2, 0x0000FF); // Borde rojo de 2px de grosor
-
-        // Dibujar el rectángulo de la Zone
+        this.graphics.lineStyle(2, 0x0000FF); 
         const bounds = this.rangoVision.getBounds();
         this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
@@ -91,15 +87,7 @@ class Avion extends Entity {
                 const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
                 this.indicadorCombustible.setText(`COMBUSTIBLE: ${combustible}`);
             }
-       }
-
-       if(!this.piloto && !this.seleccionado){
-            this.objetivo.x = this.escena.entidades.portaaviones.objetivo.x;
-            this.objetivo.y = this.escena.entidades.portaaviones.objetivo.y;
-            this.objetivo.angulo = this.escena.entidades.portaaviones.objetivo.angulo;
-       }
-       
-      
+        }     
     }
 
     mover(controles) {
