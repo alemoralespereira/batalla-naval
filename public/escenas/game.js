@@ -237,6 +237,10 @@ class EscenaPrincipal extends Phaser.Scene {
         //console.log(`Avion Pilot: ${avion.piloto}`)
         this.entidades[`avion_${avion.numeroAvion}`].piloto = false;
         this.entidades[`avion_${avion.numeroAvion}`].despego = false;
+        this.entidades[`avion_${avion.numeroAvion}`].torpedo = true;
+        this.entidades[`avion_${avion.numeroAvion}`].seleccionado = false;
+        this.entidades[`avion_${avion.numeroAvion}`].combustible = this.estadoJuego.entidades[`avion_${avion.numeroAvion}`].combustible;
+        this.entidades[`avion_${avion.numeroAvion}`].indicadorCombustible.setVisible(false);
         avion.setVisible(false); 
         let botonAmodificar = this.botonesAviones[`${avion.numeroAvion}`-1];
         botonAmodificar.setBackgroundColor('#808080'); // Cambiar el color a gris
