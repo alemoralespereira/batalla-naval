@@ -81,9 +81,8 @@ class EscenaPrincipal extends Phaser.Scene {
             avion.objetivo.setCollideWorldBounds(true);
             this.equipoAzul.push(avion);
             avion.objetivo.setVisible(false);
-            /*this.rangoVisionAvion = this.add.zone(avion.x, avion.y, 300,300).setOrigin(0.5, 0.5);
-            this.graphics = this.add.graphics();
-            this.dibujarRangoVision();*/
+            
+            
         }
 
         //********************************************************/
@@ -97,44 +96,56 @@ class EscenaPrincipal extends Phaser.Scene {
                     this.seleccionarEntidad('portaaviones');
                 });
             panel.agregarBotonAlPanel(botonPortaaviones);
-
+            
+            //Array para los botones
+            this.botonesAviones = [];
             // Botones para seleccionar los aviones
             for (let i = 1; i < 11; i++) {
-                const botonAviones = panel.agregarBoton(-100, 460 + i * 30, `Avión ${i}`)
-                    .on('pointerdown', () => {
+                let botonAvion = panel.agregarBoton(-100, 460 + i * 30, `Avión ${i}`);
+                botonAvion.numero = i;
+                this.botonesAviones.push(botonAvion);
+                botonAvion.on('pointerdown', () => {
                         //this.cambiarObjetivoCamara(`avion_${i}`);
                         this.seleccionarEntidad(`avion_${i}`);
 
                         if(!this.entidades[`avion_${i}`].piloto) {
-                            const botonObservador = panel.agregarBoton(40, 460, 'Observador')
+                            this.botonObservador = panel.agregarBoton(40, 460, 'Observador')
                             .on('pointerdown', () => {
                                 this.entidades[`avion_${i}`].observador = true;
-                                botonObservador.setBackgroundColor('#00ff00');
+                                this.botonObservador.setBackgroundColor('#00ff00');
                             });
                             
-                            const botonOperador = panel.agregarBoton(160, 460, 'Operador')
+                            this.botonOperador = panel.agregarBoton(160, 460, 'Operador')
                             .on('pointerdown', () => {
                                 this.entidades[`avion_${i}`].operador = true;
-                                botonOperador.setBackgroundColor('#00ff00');
+                                this.botonOperador.setBackgroundColor('#00ff00');
                             });
                             
-                            const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
+                            this.botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
                             .on('pointerdown', () => {
-                                botonAviones.setBackgroundColor('#00ff00');
+                                botonAvion.setBackgroundColor('#00ff00');
                                 const avion = this.entidades[`avion_${i}`];
-                                avion.init(this);
                                 avion.piloto = true;
+                                avion.init(this);
                                 avion.objetivo.setVisible(true);                                                        
-                                botonDespegar.setVisible(false);
-                                botonOperador.setVisible(false);
-                                botonObservador.setVisible(false);
+                                this.botonDespegar.setVisible(false);
+                                this.botonOperador.setVisible(false);
+                                this.botonObservador.setVisible(false);
+                                
+                               
+                                this.physics.add.overlap(
+                                    this.entidades.portaaviones.objetivo, 
+                                    avion.objetivo, 
+                                    this.superposicion, 
+                                    this.autorizarSuperposicion, 
+                                    this);
                                 
                                 //botonPiloto.setVisible(false);
                             });
                         }
                         
                     });
-                panel.agregarBotonAlPanel(botonAviones);
+                panel.agregarBotonAlPanel(botonAvion);
             }
 
             //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
@@ -183,6 +194,8 @@ class EscenaPrincipal extends Phaser.Scene {
                 angulo: data.angulo
             });*/
         });
+
+        
     }
 
     update() {
@@ -217,9 +230,34 @@ class EscenaPrincipal extends Phaser.Scene {
         }
     }
 
+    superposicion(portaaviones, avion) {
+        console.log(`Avion ${avion.numeroAvion} aterrizando en portaaviones`);
 
+        //console.log(`Avion nro: ${avion.numeroAvion} Avion X: ${avion.x} PortaAviones X: ${portaaviones.x} Despego: ${avion.despego}`)
+        //console.log(`Avion Pilot: ${avion.piloto}`)
+        this.entidades[`avion_${avion.numeroAvion}`].piloto = false;
+        this.entidades[`avion_${avion.numeroAvion}`].despego = false;
+        avion.setVisible(false); 
+        let botonAmodificar = this.botonesAviones[`${avion.numeroAvion}`-1];
+        botonAmodificar.setBackgroundColor('#808080'); // Cambiar el color a gris
 
-    //Funcion para determinar si entidad2 esta dentro del rango de entidad1
+        //console.log(`Avion Pilot: ${avion.piloto}`)
+        //recargar combustible
+        //recargar torpedo
+    }
+
+    //Autoriza la superposicion, si el avion esta volando (tiene piloto) y ya despego(La ubicacion del avion esta fuera del portaaviones)
+    autorizarSuperposicion(portaaviones, avion){
+        //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto}.`);
+        console.log(`Avion: ${this.entidades[`avion_${avion.numeroAvion}`]} Piloto: ${this.entidades[`avion_${avion.numeroAvion}`].piloto}`);
+        console.log("Piloto Objetivo: " , avion.piloto);
+        //this.entidades[`avion_${i}`].piloto
+        //console.log(`Avion X: ${avion.x} PortaAviones X: ${portaaviones.x} Avion Y: ${avion.y} PortaAviones Y: ${portaaviones.y}`)
+
+        return (avion.piloto && avion.despego);
+    }   
+
+    //Funcion para determinar si entidad2 esta dentro del rango de vision de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
         const limites = entidad2.objetivo.getBounds();
 
