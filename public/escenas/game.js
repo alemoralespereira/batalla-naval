@@ -34,18 +34,21 @@ class EscenaPrincipal extends Phaser.Scene {
         this.load.image("portaaviones", "../assets/carrier.png");
         this.load.image("avion", "../assets/avion.png");
         this.load.image("puerto", "../assets/puerto.png");
+        this.load.image("hit", "../assets/hit.png");
     }
 
     create() {
         //*********************************************************************************/
         // MAPA PRINCIPAL, CAMARA Y LIMITES DEL MUNDO
-        const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
+        this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
         const puerto = this.add.image(2800, 0, "puerto").setOrigin(0, 0);
+
+        this.coordenadasCursor = { x: 0, y: 0 };
 
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
-        this.cameras.main.setBounds(0, 0, mapa.width, mapa.height);
+        this.cameras.main.setBounds(0, 0, this.mapa.width, this.mapa.height);
         this.cameras.main.setZoom(0.8);
 
         //*********************************************************************************/
@@ -55,7 +58,7 @@ class EscenaPrincipal extends Phaser.Scene {
             .setBackgroundColor('#00008B')
             .setName('minimapa');
 
-        this.camaraMinimapa.ignore(mapa);
+        this.camaraMinimapa.ignore(this.mapa);
         //this.camaraMinimapa.ignore(this.entidades);
         this.puntosEntidades = this.add.group();
 
@@ -105,36 +108,36 @@ class EscenaPrincipal extends Phaser.Scene {
                         //this.cambiarObjetivoCamara(`avion_${i}`);
                         this.seleccionarEntidad(`avion_${i}`);
 
-                        if(!this.entidades[`avion_${i}`].piloto) {
+                        if (!this.entidades[`avion_${i}`].piloto) {
                             const botonObservador = panel.agregarBoton(40, 460, 'Observador')
-                            .on('pointerdown', () => {
-                                this.entidades[`avion_${i}`].observador = true;
-                                botonObservador.setBackgroundColor('#00ff00');
-                            });
-                            
+                                .on('pointerdown', () => {
+                                    this.entidades[`avion_${i}`].observador = true;
+                                    botonObservador.setBackgroundColor('#00ff00');
+                                });
+
                             const botonOperador = panel.agregarBoton(160, 460, 'Operador')
-                            .on('pointerdown', () => {
-                                this.entidades[`avion_${i}`].operador = true;
-                                botonOperador.setBackgroundColor('#00ff00');
-                            });
-                            
+                                .on('pointerdown', () => {
+                                    this.entidades[`avion_${i}`].operador = true;
+                                    botonOperador.setBackgroundColor('#00ff00');
+                                });
+
                             const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
-                            .on('pointerdown', () => {
-                                botonAviones.setBackgroundColor('#00ff00');
-                                const avion = this.entidades[`avion_${i}`];
-                                avion.init(this);
-                                avion.piloto = true;
-                                avion.calcularRangoVision();
-                                avion.calcularAlcanceVuelo();
-                                avion.objetivo.setVisible(true);                                                        
-                                botonDespegar.setVisible(false);
-                                botonOperador.setVisible(false);
-                                botonObservador.setVisible(false);
-                                
-                                //botonPiloto.setVisible(false);
-                            });
+                                .on('pointerdown', () => {
+                                    botonAviones.setBackgroundColor('#00ff00');
+                                    const avion = this.entidades[`avion_${i}`];
+                                    avion.init(this);
+                                    avion.piloto = true;
+                                    avion.calcularRangoVision();
+                                    avion.calcularAlcanceVuelo();
+                                    avion.objetivo.setVisible(true);
+                                    botonDespegar.setVisible(false);
+                                    botonOperador.setVisible(false);
+                                    botonObservador.setVisible(false);
+
+                                    //botonPiloto.setVisible(false);
+                                });
                         }
-                        
+
                     });
                 panel.agregarBotonAlPanel(botonAviones);
             }
@@ -144,14 +147,7 @@ class EscenaPrincipal extends Phaser.Scene {
         }
 
         if (this.rol === "bismarck") {
-            // Configurar la cámara para seguir al Bismarck
-            this.cameras.main.startFollow(this.entidades.bismarck.objetivo);
-            this.entidades.portaaviones.objetivo.setVisible(false);
-            this.equipoAzul.forEach((avion) => {
-                //console.log('Avion:', avion);
-                //console.log('Objetivo del avion:', avion.objetivo);
-                avion.objetivo.setVisible(false);
-            });
+            this.entidades.bismarck.configurar();
         }
 
         // CONTROLES
@@ -161,6 +157,11 @@ class EscenaPrincipal extends Phaser.Scene {
             derecha: "D",
             abajo: "S",
             atacar: "X"
+        });
+
+        this.input.on('pointermove', (cursor) => {
+            this.coordenadasCursor.x = cursor.worldX;
+            this.coordenadasCursor.y = cursor.worldY;
         });
 
         //********************************************************/

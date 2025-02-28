@@ -15,6 +15,14 @@ class Panel {
       .setScrollFactor(0);
   }
 
+  agregarRectangulo(x, y, ancho, alto, color = 0xFFFFFFF) {
+    return this.escena.add.rectangle(x, y, ancho, alto, color).setOrigin(0,0).setScrollFactor(0);
+  }
+
+  agregarTexto(x, y, texto, tamañoFuente = '20px', color = '#000000') {
+    return this.escena.add.text(x, y, texto, { fontSize: tamañoFuente, fill: color }).setScrollFactor(0);
+  }
+
   agregarBotonAlPanel(boton) {
     this.panel.add(boton);
   }
