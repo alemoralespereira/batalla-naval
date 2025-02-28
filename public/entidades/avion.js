@@ -29,7 +29,7 @@ class Avion extends Entity {
             this.objetivo.y = this.escena.entidades.portaaviones.objetivo.y;
         } else {
             this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
-            this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
+            this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
             this.objetivo.rangoVision = this.rangoVision;
             // this.graphics = escena.add.graphics();
             // this.dibujarRangoVision();

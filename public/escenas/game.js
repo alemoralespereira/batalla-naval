@@ -124,6 +124,8 @@ class EscenaPrincipal extends Phaser.Scene {
                                 const avion = this.entidades[`avion_${i}`];
                                 avion.init(this);
                                 avion.piloto = true;
+                                avion.calcularRangoVision();
+                                avion.calcularAlcanceVuelo();
                                 avion.objetivo.setVisible(true);                                                        
                                 botonDespegar.setVisible(false);
                                 botonOperador.setVisible(false);
