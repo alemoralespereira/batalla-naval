@@ -243,18 +243,14 @@ class EscenaPrincipal extends Phaser.Scene {
         this.entidades[`avion_${avion.numeroAvion}`].indicadorCombustible.setVisible(false);
         avion.setVisible(false); 
         let botonAmodificar = this.botonesAviones[`${avion.numeroAvion}`-1];
-        botonAmodificar.setBackgroundColor('#808080'); // Cambiar el color a gris
-
-        //console.log(`Avion Pilot: ${avion.piloto}`)
-        //recargar combustible
-        //recargar torpedo
+        botonAmodificar.setBackgroundColor('#808080');
     }
 
     //Autoriza la superposicion, si el avion esta volando (tiene piloto) y ya despego(La ubicacion del avion esta fuera del portaaviones)
     autorizarSuperposicion(portaaviones, avion){
         //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto}.`);
-        console.log(`Avion: ${this.entidades[`avion_${avion.numeroAvion}`]} Piloto: ${this.entidades[`avion_${avion.numeroAvion}`].piloto}`);
-        console.log("Piloto Objetivo: " , avion.piloto);
+        //console.log(`Avion: ${this.entidades[`avion_${avion.numeroAvion}`]} Piloto: ${this.entidades[`avion_${avion.numeroAvion}`].piloto}`);
+        //console.log("Piloto Objetivo: " , avion.piloto);
         //this.entidades[`avion_${i}`].piloto
         //console.log(`Avion X: ${avion.x} PortaAviones X: ${portaaviones.x} Avion Y: ${avion.y} PortaAviones Y: ${portaaviones.y}`)
 
