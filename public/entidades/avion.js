@@ -19,6 +19,7 @@ class Avion extends Entity {
         this.numeroAvion = numeroAvion;
         this.torpedo = true;
         this.multiplicadorCombustible = 1;
+        this.despego = false;
     }
 
     init(escena) {
@@ -31,6 +32,8 @@ class Avion extends Entity {
             this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
             this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
             this.objetivo.rangoVision = this.rangoVision;
+            
+            
             // this.graphics = escena.add.graphics();
             // this.dibujarRangoVision();
             this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
@@ -40,7 +43,9 @@ class Avion extends Entity {
             this.indicadorCombustible.setVisible(false);
             this.indicadorCombustible.setScrollFactor(0); 
         }      
-
+        this.objetivo.numeroAvion = this.numeroAvion;
+        this.objetivo.piloto = this.piloto;
+        this.objetivo.despego = this.despego;
         super.init(escena);
     }
     
@@ -87,7 +92,17 @@ class Avion extends Entity {
                 const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
                 this.indicadorCombustible.setText(`COMBUSTIBLE: ${combustible}`);
             }
+        }
+        
+        //Si la diferencia entre la posicion del avion y la posicion del portaaviones sobre el eje de las X, es mayor a 150, es porque despegó.
+        if((this.objetivo.x - this.escena.entidades.portaaviones.x) > 250) {          
+            this.despego = true;
+            this.objetivo.despego = true;
         }     
+
+        this.objetivo.piloto = this.piloto;
+        this.objetivo.despego = this.despego;
+
     }
 
     mover(controles) {
@@ -97,7 +112,7 @@ class Avion extends Entity {
         }
         this.calcularCombustible();
 
-        if (this.combustible > 0 || !this.piloto) {
+        if (this.combustible > 0 && this.piloto) {
             // Movimiento con las teclas W, A, S, D
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown) {
 
