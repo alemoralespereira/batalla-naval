@@ -4,7 +4,7 @@ class Arma {
         this.calibre = calibre;
         this.rango = rango;
         this.daño = daño;
-        this.cadenciaDisparo = cadenciaDisparo;
+        this.cadenciaDisparo = cadenciaDisparo; // Disparo cada x cantidad de segundos
         this.cantidadMuniciones = cantidadMuniciones;
         // this.origenX = origenX;
         // this.origenY = origenY;

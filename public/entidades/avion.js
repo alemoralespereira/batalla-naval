@@ -27,12 +27,12 @@ class Avion extends Entity {
         this.escena = escena; 
         if (this.objetivo) {
             // Si el sprite ya existe, actualiza su posición
-            this.objetivo.x = this.escena.entidades.portaaviones.x;
-            this.objetivo.y = this.escena.entidades.portaaviones.y;
-            this.objetivo.angle = this.escena.entidades.portaaviones.angulo;
+            this.objetivo.x = this.escena.entidades.portaaviones.objetivo.x;
+            this.objetivo.y = this.escena.entidades.portaaviones.objetivo.y;
+            this.objetivo.angle = this.escena.entidades.portaaviones.objetivo.angle;
         } else {
-            this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
-            this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
+            this.objetivo = escena.physics.add.sprite(this.xInicial, this.yInicial, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+            this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 250, 250).setOrigin(0.5, 0.5);
             this.objetivo.rangoVision = this.rangoVision;
             
             
@@ -87,7 +87,7 @@ class Avion extends Entity {
        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones") {
             //Si esta seleccionado o si se esta moviendo pero tiene piloto.
-            if(this.seleccionado || ((this.x != this.objetivo.x || this.y != this.objetivo.y) && this.piloto)) {    
+            if(this.seleccionado || ((this.xInicial != this.objetivo.x || this.yInicial != this.objetivo.y) && this.piloto)) {    
                 this.indicadorCombustible.setVisible(true);
                 // El jugador ve que todos los aviones tienen el mismo combustible maximo pero cuanto más tripulantes más rápido se consume
                 const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
@@ -156,9 +156,9 @@ class Avion extends Entity {
                 this.objetivo.setVelocityY(velocityY);
 
                 // Actualizar las posiciones internas
-                this.x = this.objetivo.x;
-                this.y = this.objetivo.y;
-                this.angulo = this.objetivo.angle;
+                // this.x = this.objetivo.x;
+                // this.y = this.objetivo.y;
+                // this.angulo = this.objetivo.angle;
             } else {
                 this.objetivo.setAngularVelocity(0);
             }

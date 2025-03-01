@@ -21,8 +21,8 @@ class Portaaviones extends Barco {
 
     init(escena) {
         this.escena = escena; 
-        this.objetivo = escena.physics.add.sprite(this.x, this.y, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
-        this.rangoVision = escena.add.zone(this.x, this.y, 500, 500).setOrigin(0.5, 0.5);
+        this.objetivo = escena.physics.add.sprite(this.xInicial, this.yInicial, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
+        this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 500, 500).setOrigin(0.5, 0.5);
         this.objetivo.rangoVision = this.rangoVision;
        // this.graphics = escena.add.graphics();
        // this.dibujarRangoVision();
@@ -118,7 +118,7 @@ class Portaaviones extends Barco {
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones") {
-            if(this.x != this.objetivo.x || this.y != this.objetivo.y) {    
+            if(this.xInicial != this.objetivo.x || this.yInicial != this.objetivo.y) {    
                 this.indicadorCombustible.setVisible(true);
                 this.indicadorCombustible.setText(`COMBUSTIBLE PORTAAVIONES: ${this.combustible}`);
             }   
@@ -162,9 +162,9 @@ class Portaaviones extends Barco {
                 this.objetivo.setVelocityY(velocityY);
 
                 // Actualizar las posiciones internas
-                this.x = this.objetivo.x;
-                this.y = this.objetivo.y;
-                this.angulo = this.objetivo.angle;
+                // this.x = this.objetivo.x;
+                // this.y = this.objetivo.y;
+                // this.angulo = this.objetivo.angle;
         
             } else {
                 this.objetivo.setAngularVelocity(0);

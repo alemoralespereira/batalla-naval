@@ -1,10 +1,10 @@
 class Entity {
     constructor(x, y, velocidad, velocidadMaxima, angulo, aceleracion, objetivo, combustible) {
-        this.x = x;
-        this.y = y;
+        this.xInicial = x;
+        this.yInicial = y;
         this.velocidad = velocidad;
         this.velocidadMaxima = velocidadMaxima;
-        this.angulo = angulo;
+        this.anguloInicial = angulo;
         this.aceleracion = aceleracion;
         this.objetivo = objetivo;
         this.combustible = combustible;
