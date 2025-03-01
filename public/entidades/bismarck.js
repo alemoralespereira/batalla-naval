@@ -139,7 +139,7 @@ class Bismarck extends Barco {
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
         // this.dibujarRangoVision();
         if(this.escena.rol === "bismarck") {
-           this.cursorMira.setPosition(this.escena.coordenadasCursor.x, this.escena.coordenadasCursor.y);
+           this.cursorMira.setPosition(this.escena.input.activePointer.worldX, this.escena.input.activePointer.worldY);
 
             if(this.x != this.objetivo.x || this.y != this.objetivo.y) {    
                 this.indicadorCombustible.setVisible(true);

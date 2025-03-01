@@ -44,8 +44,6 @@ class EscenaPrincipal extends Phaser.Scene {
         this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
         const puerto = this.add.image(2800, 0, "puerto").setOrigin(0, 0);
 
-        this.coordenadasCursor = { x: 0, y: 0 };
-
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -105,11 +103,6 @@ class EscenaPrincipal extends Phaser.Scene {
             derecha: "D",
             abajo: "S",
             atacar: "X"
-        });
-
-        this.input.on('pointermove', (cursor) => {
-            this.coordenadasCursor.x = cursor.worldX;
-            this.coordenadasCursor.y = cursor.worldY;
         });
 
         //********************************************************/

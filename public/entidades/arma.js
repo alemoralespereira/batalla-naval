@@ -21,7 +21,7 @@ class Arma {
 
         const circulo = new Phaser.Geom.Circle(x, y, this.rango);
 
-        if (circulo.contains(escena.coordenadasCursor.x, escena.coordenadasCursor.y)) {
+        if (circulo.contains(escena.input.activePointer.worldX, escena.input.activePointer.worldY)) {
             cursorMira.setVisible(true);
 
             this.lineaAtaque = escena.add.line(0, 0, x, y, cursorMira.x, cursorMira.y,  0xffffff).setOrigin(0);

@@ -147,7 +147,7 @@ io.on("connection", (socket) => {
     });*/
 
     socket.on("moverEntidad", (data) => {
-        console.log("📥 Datos recibidos del cliente:", data);
+        // console.log("📥 Datos recibidos del cliente:", data);
     
         // Verificar si la sala existe
         if (!salas[data.sala]) {
