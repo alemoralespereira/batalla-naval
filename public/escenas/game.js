@@ -154,6 +154,30 @@ class EscenaPrincipal extends Phaser.Scene {
                 const entidad = this.equipoAzul[i];
                 if (this.estaEnRangoDeVision(entidad, this.entidades.bismarck)) {
                     this.entidades.bismarck.objetivo.setVisible(true);
+
+                    if(entidad instanceof Avion) {
+                        if(entidad.operador) {
+                            const mensaje = this.add.text(
+                                this.cameras.main.centerX, 
+                                this.cameras.main.centerY, 
+                                `ALERTA: Avion ${entidad.numeroAvion} ha visualizado al Bismarck!!!`,
+                                {
+                                    fontSize: '32px',
+                                    color: '#ffffff',
+                                    backgroundColor: '#000000',
+                                    padding: {
+                                        x: 20,
+                                        y: 10
+                                    }
+                                }).setOrigin(0.5)
+                                .setScrollFactor(0);
+
+                                this.time.delayedCall(2000,() => {
+                                    mensaje.destroy();
+                                })
+                        }
+                    }
+
                     break;
                 } else {
                     this.entidades.bismarck.objetivo.setVisible(false);
