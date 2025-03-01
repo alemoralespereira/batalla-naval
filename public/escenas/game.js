@@ -92,58 +92,7 @@ class EscenaPrincipal extends Phaser.Scene {
         //********************************************************/
         // PANEL INTERACTIVO DEL EQUIPO AZUL
         if (this.rol === "portaaviones") {
-            const panel = new Panel(this);
-
-            // Botón para seleccionar el portaaviones
-            const botonPortaaviones = panel.agregarBoton(-100, 460, 'Portaaviones')
-                .on('pointerdown', () => {
-                    this.seleccionarEntidad('portaaviones');
-                });
-            panel.agregarBotonAlPanel(botonPortaaviones);
-
-            // Botones para seleccionar los aviones
-            for (let i = 1; i < 11; i++) {
-                const botonAviones = panel.agregarBoton(-100, 460 + i * 30, `Avión ${i}`)
-                    .on('pointerdown', () => {
-                        //this.cambiarObjetivoCamara(`avion_${i}`);
-                        this.seleccionarEntidad(`avion_${i}`);
-
-                        if (!this.entidades[`avion_${i}`].piloto) {
-                            const botonObservador = panel.agregarBoton(40, 460, 'Observador')
-                                .on('pointerdown', () => {
-                                    this.entidades[`avion_${i}`].observador = true;
-                                    botonObservador.setBackgroundColor('#00ff00');
-                                });
-
-                            const botonOperador = panel.agregarBoton(160, 460, 'Operador')
-                                .on('pointerdown', () => {
-                                    this.entidades[`avion_${i}`].operador = true;
-                                    botonOperador.setBackgroundColor('#00ff00');
-                                });
-
-                            const botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
-                                .on('pointerdown', () => {
-                                    botonAviones.setBackgroundColor('#00ff00');
-                                    const avion = this.entidades[`avion_${i}`];
-                                    avion.init(this);
-                                    avion.piloto = true;
-                                    avion.calcularRangoVision();
-                                    avion.calcularAlcanceVuelo();
-                                    avion.objetivo.setVisible(true);
-                                    botonDespegar.setVisible(false);
-                                    botonOperador.setVisible(false);
-                                    botonObservador.setVisible(false);
-
-                                    //botonPiloto.setVisible(false);
-                                });
-                        }
-
-                    });
-                panel.agregarBotonAlPanel(botonAviones);
-            }
-
-            //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
-            this.entidades.bismarck.objetivo.setVisible(false);
+            this.entidades.portaaviones.configurar();
         }
 
         if (this.rol === "bismarck") {
