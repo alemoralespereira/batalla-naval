@@ -80,9 +80,7 @@ class EscenaPrincipal extends Phaser.Scene {
             avion.init(this); // Inicializar el avión
             avion.objetivo.setCollideWorldBounds(true);
             this.equipoAzul.push(avion);
-            avion.objetivo.setVisible(false);
-            
-            
+            avion.objetivo.setVisible(false);        
         }
 
         //********************************************************/
@@ -94,6 +92,7 @@ class EscenaPrincipal extends Phaser.Scene {
             const botonPortaaviones = panel.agregarBoton(-100, 460, 'Portaaviones')
                 .on('pointerdown', () => {
                     this.seleccionarEntidad('portaaviones');
+                    this.cambiarObjetivoCamara('portaaviones');
                 });
             panel.agregarBotonAlPanel(botonPortaaviones);
             
@@ -105,8 +104,10 @@ class EscenaPrincipal extends Phaser.Scene {
                 botonAvion.numero = i;
                 this.botonesAviones.push(botonAvion);
                 botonAvion.on('pointerdown', () => {
-                        //this.cambiarObjetivoCamara(`avion_${i}`);
+                        
                         this.seleccionarEntidad(`avion_${i}`);
+                        if(this.entidades[`avion_${i}`].piloto)
+                            this.cambiarObjetivoCamara(`avion_${i}`);
 
                         if(!this.entidades[`avion_${i}`].piloto) {
                             this.botonObservador = panel.agregarBoton(40, 460, 'Observador')
@@ -133,7 +134,7 @@ class EscenaPrincipal extends Phaser.Scene {
                                 this.botonDespegar.setVisible(false);
                                 this.botonOperador.setVisible(false);
                                 this.botonObservador.setVisible(false);
-                                
+                                this.cambiarObjetivoCamara(`avion_${i}`);
                                
                                 this.physics.add.overlap(
                                     this.entidades.portaaviones.objetivo, 
@@ -297,7 +298,7 @@ class EscenaPrincipal extends Phaser.Scene {
             }
             this.nombreEntidadSeleccionada = nombreEntidad;       // Guardar el nombre de la entidad seleccionada
             this.entidades[nombreEntidad].seleccionado = true;
-            this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
+            //this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
             console.log(`Entidad seleccionada: ${nombreEntidad}`);
         } else {
             console.error(`Entidad ${nombreEntidad} no encontrada o rol incorrecto.`);
@@ -347,10 +348,9 @@ class EscenaPrincipal extends Phaser.Scene {
 
             // Log para depuración: Confirmar que los datos se enviaron
             //console.log("✅ Datos enviados correctamente al servidor.");
-
         } else {
             // console.error("No hay entidad seleccionada o no es válida.");
-        }
+        }     
     }
 }
 

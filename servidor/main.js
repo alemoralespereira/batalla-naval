@@ -147,11 +147,19 @@ io.on("connection", (socket) => {
     });*/
 
     socket.on("moverEntidad", (data) => {
-        //console.log("📥 Datos recibidos del cliente:", data);
+        console.log("📥 Datos recibidos del cliente:", data);
     
         // Verificar si la sala existe
         if (!salas[data.sala]) {
             console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+
+        // Verificar si la entidad existe
+        const entidad = salas[data.sala].estadoJuego.entidades[data.nombreEntidad];
+        if (!entidad) {
+            console.error(`❌ Entidad ${data.nombreEntidad} no encontrada en sala ${data.sala}`);
+            //console.log("Entidades actuales:", salas[data.sala].estadoJuego.entidades);
             return;
         }
 
