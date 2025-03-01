@@ -1,4 +1,5 @@
 import Entity from './entity.js';
+import socket from '../socket.js';
 
 class Avion extends Entity {
     constructor(avionData, numeroAvion) {
@@ -19,18 +20,22 @@ class Avion extends Entity {
         this.numeroAvion = numeroAvion;
         this.torpedo = true;
         this.multiplicadorCombustible = 1;
+        this.despego = false;
     }
 
     init(escena) {
         this.escena = escena; 
         if (this.objetivo) {
             // Si el sprite ya existe, actualiza su posición
-            this.objetivo.x = this.escena.entidades.portaaviones.objetivo.x;
-            this.objetivo.y = this.escena.entidades.portaaviones.objetivo.y;
+            this.objetivo.x = this.escena.entidades.portaaviones.x;
+            this.objetivo.y = this.escena.entidades.portaaviones.y;
+            this.objetivo.angle = this.escena.entidades.portaaviones.angulo;
         } else {
             this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
             this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
             this.objetivo.rangoVision = this.rangoVision;
+            
+            
             // this.graphics = escena.add.graphics();
             // this.dibujarRangoVision();
             this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
@@ -40,8 +45,11 @@ class Avion extends Entity {
             this.indicadorCombustible.setVisible(false);
             this.indicadorCombustible.setScrollFactor(0); 
         }      
-
+        this.objetivo.numeroAvion = this.numeroAvion;
+        this.objetivo.piloto = this.piloto;
+        this.objetivo.despego = this.despego;
         super.init(escena);
+
     }
     
     dibujarRangoVision() {
@@ -77,17 +85,40 @@ class Avion extends Entity {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
        // this.dibujarRangoVision();
-       if(this.escena.rol === "portaaviones")
-       {
-        //Si esta seleccionado o si se esta moviendo pero tiene piloto.
-        if(this.seleccionado || ((this.x != this.objetivo.x || this.y != this.objetivo.y) && this.piloto))
-            {    
-                 this.indicadorCombustible.setVisible(true);
+       if(this.escena.rol === "portaaviones") {
+            //Si esta seleccionado o si se esta moviendo pero tiene piloto.
+            if(this.seleccionado || ((this.x != this.objetivo.x || this.y != this.objetivo.y) && this.piloto)) {    
+                this.indicadorCombustible.setVisible(true);
                 // El jugador ve que todos los aviones tienen el mismo combustible maximo pero cuanto más tripulantes más rápido se consume
                 const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
                 this.indicadorCombustible.setText(`COMBUSTIBLE: ${combustible}`);
             }
+        }
+        
+        //Si la diferencia entre la posicion del avion y la posicion del portaaviones sobre el eje de las X, es mayor a 150, es porque despegó.
+        if((this.objetivo.x - this.escena.entidades.portaaviones.x) > 250) {          
+            this.despego = true;
+            this.objetivo.despego = true;
         }     
+
+        this.objetivo.piloto = this.piloto;
+        this.objetivo.despego = this.despego;
+       
+        if(this.piloto){
+        //    console.log("Avion:" , this.numeroAvion);
+            const datosMovimiento = {
+                //idUsuario: socket.id, // ID del socket
+                nombreUsuario: this.escena.nombreUsuario,
+                rol: this.escena.rol,
+                sala: this.escena.sala,
+                nombreEntidad: `avion_${this.numeroAvion}`,
+                x: this.objetivo.x,
+                y: this.objetivo.y,
+                angulo: this.objetivo.angle
+            };
+            // Enviar al servidor
+            socket.emit("moverEntidad", datosMovimiento);
+        }
     }
 
     mover(controles) {
@@ -97,10 +128,10 @@ class Avion extends Entity {
         }
         this.calcularCombustible();
 
-        if (this.combustible > 0 || !this.piloto) {
+        if (this.combustible > 0 && this.piloto) {
             // Movimiento con las teclas W, A, S, D
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown) {
-
+                
                 // Rotación (A y D)
                 if (controles.izquierda.isDown) {
                     this.objetivo.setAngularVelocity(-40);
@@ -127,15 +158,15 @@ class Avion extends Entity {
                 // Actualizar las posiciones internas
                 this.x = this.objetivo.x;
                 this.y = this.objetivo.y;
+                this.angulo = this.objetivo.angle;
             } else {
                 this.objetivo.setAngularVelocity(0);
             }
         } else {
-            this.objetivo.setAngularVelocity(0);  // Detener rotación también cuando el combustible sea 0
-            this.objetivo.setVelocityX(0);        // Detener movimiento horizontal
+            this.objetivo.setAngularVelocity(0);
+            this.objetivo.setVelocityX(0);
             this.objetivo.setVelocityY(0);
         }
-
     }
 }
 

@@ -83,10 +83,7 @@ class EscenaPrincipal extends Phaser.Scene {
             avion.init(this); // Inicializar el avión
             avion.objetivo.setCollideWorldBounds(true);
             this.equipoAzul.push(avion);
-            avion.objetivo.setVisible(false);
-            /*this.rangoVisionAvion = this.add.zone(avion.x, avion.y, 300,300).setOrigin(0.5, 0.5);
-            this.graphics = this.add.graphics();
-            this.dibujarRangoVision();*/
+            avion.objetivo.setVisible(false);        
         }
 
         //********************************************************/
@@ -135,6 +132,8 @@ class EscenaPrincipal extends Phaser.Scene {
                 angulo: data.angulo
             });*/
         });
+
+        
     }
 
     update() {
@@ -169,9 +168,35 @@ class EscenaPrincipal extends Phaser.Scene {
         }
     }
 
+    superposicion(portaaviones, avion) {
+        console.log(`Avion ${avion.numeroAvion} aterrizando en portaaviones`);
 
+        //console.log(`Avion nro: ${avion.numeroAvion} Avion X: ${avion.x} PortaAviones X: ${portaaviones.x} Despego: ${avion.despego}`)
+        //console.log(`Avion Pilot: ${avion.piloto}`)
+        this.entidades[`avion_${avion.numeroAvion}`].piloto = false;
+        this.entidades[`avion_${avion.numeroAvion}`].despego = false;
+        this.entidades[`avion_${avion.numeroAvion}`].torpedo = true;
+        this.entidades[`avion_${avion.numeroAvion}`].seleccionado = false;
+        this.entidades[`avion_${avion.numeroAvion}`].combustible = this.estadoJuego.entidades[`avion_${avion.numeroAvion}`].combustible;
+        this.entidades[`avion_${avion.numeroAvion}`].multiplicadorCombustible = 1;
+        this.entidades[`avion_${avion.numeroAvion}`].indicadorCombustible.setVisible(false);
+        avion.setVisible(false); 
+        let botonAmodificar = this.botonesAviones[`${avion.numeroAvion}`-1];
+        botonAmodificar.setBackgroundColor('#808080');
+    }
 
-    //Funcion para determinar si entidad2 esta dentro del rango de entidad1
+    //Autoriza la superposicion, si el avion esta volando (tiene piloto) y ya despego(La ubicacion del avion esta fuera del portaaviones)
+    autorizarSuperposicion(portaaviones, avion){
+        //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto}.`);
+        //console.log(`Avion: ${this.entidades[`avion_${avion.numeroAvion}`]} Piloto: ${this.entidades[`avion_${avion.numeroAvion}`].piloto}`);
+        //console.log("Piloto Objetivo: " , avion.piloto);
+        //this.entidades[`avion_${i}`].piloto
+        //console.log(`Avion X: ${avion.x} PortaAviones X: ${portaaviones.x} Avion Y: ${avion.y} PortaAviones Y: ${portaaviones.y}`)
+
+        return (avion.piloto && avion.despego);
+    }   
+
+    //Funcion para determinar si entidad2 esta dentro del rango de vision de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
         const limites = entidad2.objetivo.getBounds();
 
@@ -209,7 +234,7 @@ class EscenaPrincipal extends Phaser.Scene {
             }
             this.nombreEntidadSeleccionada = nombreEntidad;       // Guardar el nombre de la entidad seleccionada
             this.entidades[nombreEntidad].seleccionado = true;
-            this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
+            //this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
             console.log(`Entidad seleccionada: ${nombreEntidad}`);
         } else {
             console.error(`Entidad ${nombreEntidad} no encontrada o rol incorrecto.`);
@@ -259,10 +284,9 @@ class EscenaPrincipal extends Phaser.Scene {
 
             // Log para depuración: Confirmar que los datos se enviaron
             //console.log("✅ Datos enviados correctamente al servidor.");
-
         } else {
             // console.error("No hay entidad seleccionada o no es válida.");
-        }
+        }     
     }
 }
 
