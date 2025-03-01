@@ -36,60 +36,60 @@ class Bismarck extends Barco {
         this.indicadorCombustible.setVisible(false);
         this.indicadorCombustible.setScrollFactor(0);
        super.init(escena);
+    }
 
-       if (this.rol === "bismarck") {
-            // Configurar la cámara para seguir al Bismarck
-            this.escena.cameras.main.startFollow(this.escena.entidades.bismarck.objetivo);
-            this.escena.entidades.portaaviones.objetivo.setVisible(false);
-            this.escena.equipoAzul.forEach((avion) => {
-                //console.log('Avion:', avion);
-                //console.log('Objetivo del avion:', avion.objetivo);
-                avion.objetivo.setVisible(false);
+    configurar() {
+        // Configurar la cámara para seguir al Bismarck
+        this.escena.cameras.main.startFollow(this.escena.entidades.bismarck.objetivo);
+        this.escena.entidades.portaaviones.objetivo.setVisible(false);
+        this.escena.equipoAzul.forEach((avion) => {
+            //console.log('Avion:', avion);
+            //console.log('Objetivo del avion:', avion.objetivo);
+            avion.objetivo.setVisible(false);
+        });
+
+        const panel = new Panel(this.escena);
+        const botonesArmas = {};
+
+        // Botones para seleccionar armas biscmarck
+        for (let i = 0; i < this.escena.entidades.bismarck.armas.length; i++) {
+            const arma = this.escena.entidades.bismarck.armas[i];
+            const x = -100;
+            const y = 460 + i * 30;
+            const botonArma = panel.agregarBoton(x, y, arma.nombre);
+            botonesArmas[arma.nombre] = botonArma;
+            const cuadroInformativoAvion = this.escena.add.group();
+            cuadroInformativoAvion.addMultiple([
+                panel.agregarRectangulo(x + 200, y, 300, 130),
+                panel.agregarTexto(x + 205, y + 10, `Calibre:  ${arma.calibre}`),
+                panel.agregarTexto(x + 205, y + 40, `Rango:  ${arma.rango}`),
+                panel.agregarTexto(x + 205, y + 70, `Daño:  ${arma.daño}`),
+                panel.agregarTexto(x + 205, y + 100, `Cadencia disparo:  ${arma.cadenciaDisparo}`),
+            ]);
+            cuadroInformativoAvion.setVisible(false);
+            botonArma.on('pointerover', () => {
+                cuadroInformativoAvion.setVisible(true);
             });
-
-            const panel = new Panel(this.escena);
-            const botonesArmas = {};
-
-            // Botones para seleccionar armas biscmarck
-            for (let i = 0; i < this.escena.entidades.bismarck.armas.length; i++) {
-                const arma = this.escena.entidades.bismarck.armas[i];
-                const x = -100;
-                const y = 460 + i * 30;
-                const botonArma = panel.agregarBoton(x, y, arma.nombre);
-                botonesArmas[arma.nombre] = botonArma;
-                const cuadroInformativoAvion = this.escena.add.group();
-                cuadroInformativoAvion.addMultiple([
-                    panel.agregarRectangulo(x + 200, y, 300, 130),
-                    panel.agregarTexto(x + 205, y + 10, `Calibre:  ${arma.calibre}`),
-                    panel.agregarTexto(x + 205, y + 40, `Rango:  ${arma.rango}`),
-                    panel.agregarTexto(x + 205, y + 70, `Daño:  ${arma.daño}`),
-                    panel.agregarTexto(x + 205, y + 100, `Cadencia disparo:  ${arma.cadenciaDisparo}`),
-                ]);
+            botonArma.on('pointerout', () => {
                 cuadroInformativoAvion.setVisible(false);
-                botonArma.on('pointerover', () => {
-                    cuadroInformativoAvion.setVisible(true);
-                });
-                botonArma.on('pointerout', () => {
-                    cuadroInformativoAvion.setVisible(false);
-                });
-                botonArma.on('pointerdown', () => {
-                    if (this.armaSeleccionada) {
-                        if (this.armaSeleccionada === arma) {
-                            this.armaSeleccionada = null;
-                            botonArma.setBackgroundColor('#808080');
-                        } else {
-                            botonArma.setBackgroundColor('#00ff00')
-                            botonesArmas[this.armaSeleccionada.nombre].setBackgroundColor('#808080')
-                            this.armaSeleccionada = arma;
-                        }
+            });
+            botonArma.on('pointerdown', () => {
+                if (this.armaSeleccionada) {
+                    if (this.armaSeleccionada === arma) {
+                        this.armaSeleccionada = null;
+                        botonArma.setBackgroundColor('#808080');
                     } else {
+                        botonArma.setBackgroundColor('#00ff00')
+                        botonesArmas[this.armaSeleccionada.nombre].setBackgroundColor('#808080')
                         this.armaSeleccionada = arma;
-                        botonArma.setBackgroundColor('#00ff00');
                     }
-                });
-                panel.agregarBotonAlPanel(botonArma);
-            }
-       }
+                } else {
+                    this.armaSeleccionada = arma;
+                    botonArma.setBackgroundColor('#00ff00');
+                }
+            });
+            panel.agregarBotonAlPanel(botonArma);
+        }
     }
     
     dibujarRangoVision() {
