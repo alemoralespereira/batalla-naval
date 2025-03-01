@@ -228,16 +228,17 @@ class EscenaPrincipal extends Phaser.Scene {
                     if(entidad instanceof Avion) {
                         if(entidad.operador) {
                             const mensaje = this.add.text(
-                                this.cameras.main.centerX, 
-                                this.cameras.main.centerY, 
+                                this.cameras.main.centerX,
+                                10, 
                                 `ALERTA: Avion ${entidad.numeroAvion} ha visualizado al Bismarck!!!`,
                                 {
-                                    fontSize: '32px',
-                                    color: '#ffffff',
+                                    fontSize: '24px',
+                                    fontStyle: 'bold',
+                                    color: '#ff0000',
                                     backgroundColor: '#000000',
                                     padding: {
-                                        x: 20,
-                                        y: 10
+                                        x: 15,
+                                        y: 15
                                     }
                                 }).setOrigin(0.5)
                                 .setScrollFactor(0);
