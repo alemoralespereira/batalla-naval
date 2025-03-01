@@ -35,6 +35,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.load.image("avion", "../assets/avion.png");
         this.load.image("puerto", "../assets/puerto.png");
         this.load.image("hit", "../assets/hit.png");
+        this.load.image("mira", "../assets/mira.png");
     }
 
     create() {
@@ -91,7 +92,8 @@ class EscenaPrincipal extends Phaser.Scene {
         if (this.rol === "portaaviones") {
             this.entidades.portaaviones.configurar();
         }
-
+        
+        // PANEL INTERACTIVO DEL EQUIPO ROJO
         if (this.rol === "bismarck") {
             this.entidades.bismarck.configurar();
         }

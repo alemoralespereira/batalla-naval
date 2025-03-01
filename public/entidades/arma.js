@@ -1,29 +1,32 @@
 class Arma {
-    constructor(nombre, calibre, rango, daño, cadenciaDisparo) {
+    constructor({ nombre, calibre, rango, daño, cadenciaDisparo, cantidadMuniciones, origenX, origenY }) {
         this.nombre = nombre;
         this.calibre = calibre;
         this.rango = rango;
         this.daño = daño;
         this.cadenciaDisparo = cadenciaDisparo;
+        this.cantidadMuniciones = cantidadMuniciones;
+        // this.origenX = origenX;
+        // this.origenY = origenY;
     }
 
-    rangoContienePuntero() {
-        return 
-    }
-
-    dibujarRangoAtaque(escena, x, y) {
+    dibujarRangoAtaque(escena, cursorMira, x, y) {
         this.rangoAtaque = escena.add.circle(
             x,
             y,
             this.rango,
             0x00ff00,
             0.2
-        ).setStrokeStyle(2, 0x00ff00);
+        ).setStrokeStyle(2, 0x00ff00).setOrigin(0.5, 0.5); // .setOrigin(this.origenX, this.origenY);
 
         const circulo = new Phaser.Geom.Circle(x, y, this.rango);
 
         if (circulo.contains(escena.coordenadasCursor.x, escena.coordenadasCursor.y)) {
-            console.log('TRUE');
+            cursorMira.setVisible(true);
+
+            this.lineaAtaque = escena.add.line(0, 0, x, y, cursorMira.x, cursorMira.y,  0xffffff).setOrigin(0);
+        } else {
+            cursorMira.setVisible(false);
         }
     }
 }

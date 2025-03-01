@@ -16,10 +16,39 @@ class Bismarck extends Barco {
         );
 
         this.armas = [
-            new Arma("Antiaereo pesado", 38, 200, 150, 30),
-            new Arma("Antiaereo ligero", 19, 250, 100, 60)
+            new Arma({
+                nombre: "Antiaereo pesado 1", 
+                calibre: 38,
+                rango: 200,
+                daño: 150,
+                cadenciaDisparo: 30,
+                cantidadMuniciones: 10,
+                // origenX: 0.7,
+                // origenY: 0.5
+            }),
+            new Arma({
+                nombre: "Antiaereo pesado 2", 
+                calibre: 38,
+                rango: 200,
+                daño: 150,
+                cadenciaDisparo: 30,
+                cantidadMuniciones: 10,
+                // origenX: 0.3,
+                // origenY: 0.5
+            }),
+            new Arma({
+                nombre: "Antiaereo ligero", 
+                calibre: 19,
+                rango: 250,
+                daño: 100,
+                cadenciaDisparo: 60,
+                cantidadMuniciones: 20,
+                // origenX: 0.5,
+                // origenY: 0.5
+            }),
         ]
-        this.armaSeleccionada = null; // this.armas[0];
+        this.armaSeleccionada = null;
+        this.cursorMira = null;
     }
 
     init(escena) {
@@ -39,6 +68,11 @@ class Bismarck extends Barco {
     }
 
     configurar() {
+        this.cursorMira = this.escena.add.image(0, 0, "mira")
+            .setOrigin(0.5, 0.5)
+            .setScale(0.2, 0.2)
+            .setVisible(false);
+
         // Configurar la cámara para seguir al Bismarck
         this.escena.cameras.main.startFollow(this.escena.entidades.bismarck.objetivo);
         this.escena.entidades.portaaviones.objetivo.setVisible(false);
@@ -60,11 +94,12 @@ class Bismarck extends Barco {
             botonesArmas[arma.nombre] = botonArma;
             const cuadroInformativoAvion = this.escena.add.group();
             cuadroInformativoAvion.addMultiple([
-                panel.agregarRectangulo(x + 200, y, 300, 130),
+                panel.agregarRectangulo(x + 200, y, 300, 160),
                 panel.agregarTexto(x + 205, y + 10, `Calibre:  ${arma.calibre}`),
                 panel.agregarTexto(x + 205, y + 40, `Rango:  ${arma.rango}`),
                 panel.agregarTexto(x + 205, y + 70, `Daño:  ${arma.daño}`),
                 panel.agregarTexto(x + 205, y + 100, `Cadencia disparo:  ${arma.cadenciaDisparo}`),
+                panel.agregarTexto(x + 205, y + 130, `Cantidad municiones:  ${arma.cantidadMuniciones}`),
             ]);
             cuadroInformativoAvion.setVisible(false);
             botonArma.on('pointerover', () => {
@@ -102,8 +137,10 @@ class Bismarck extends Barco {
     update() {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
-       // this.dibujarRangoVision();
-       if(this.escena.rol === "bismarck") {
+        // this.dibujarRangoVision();
+        if(this.escena.rol === "bismarck") {
+           this.cursorMira.setPosition(this.escena.coordenadasCursor.x, this.escena.coordenadasCursor.y);
+
             if(this.x != this.objetivo.x || this.y != this.objetivo.y) {    
                 this.indicadorCombustible.setVisible(true);
                 this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${this.combustible}`);
@@ -113,11 +150,15 @@ class Bismarck extends Barco {
         this.armas.forEach((arma) => {
             if (arma.rangoAtaque) {
                 arma.rangoAtaque.destroy();
+
+                if (arma.lineaAtaque) {
+                    arma.lineaAtaque.destroy();
+                }
             }
         });
 
         if (this.armaSeleccionada) {
-            this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.objetivo.x, this.objetivo.y);
+            this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objetivo.x, this.objetivo.y);
         }
     }
 
