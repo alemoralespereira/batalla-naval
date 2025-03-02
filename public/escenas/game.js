@@ -47,11 +47,8 @@ class EscenaPrincipal extends Phaser.Scene {
 
         this.cameras.main.setBounds(0, 0, this.mapa.width, this.mapa.height);
         this.cameras.main.setZoom(0.8);
-        this.cameras.main.scrollX = 0;
-        this.cameras.main.scrollY = 0;
 
         //*********************************************************************************/
-      //*********************************************************************************/
         // MINI MAPA 
         this.camaraMinimapa = this.cameras.add(700, 500, 200, 200) // (x, y, width, height)
             .setZoom(0.0625)
@@ -59,9 +56,7 @@ class EscenaPrincipal extends Phaser.Scene {
             .setName('minimapa');
         
         this.camaraMinimapa.setBounds(0, 0, 3200, 3200);
-        this.camaraMinimapa.scrollX = 0;
-        this.camaraMinimapa.scrollY = 0;
-
+  
         this.camaraMinimapa.ignore(this.mapa);
         this.puntosEntidades = this.add.group();
         this.puntoBismarck = this.add.circle(0,0,50,0xff0000);
