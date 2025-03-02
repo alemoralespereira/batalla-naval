@@ -58,8 +58,9 @@ class EscenaPrincipal extends Phaser.Scene {
         this.camaraMinimapa.setBounds(0, 0, 3200, 3200);
   
         this.camaraMinimapa.ignore(this.mapa);
+
         this.puntosEntidades = this.add.group();
-        this.puntoBismarck = this.add.circle(0,0,50,0xff0000);
+        this.puntoBismarck = this.add.circle(0, 0 , 50, 0xff0000);
         this.puntosEntidades.add(this.puntoBismarck);
         this.cameras.main.ignore(this.puntoBismarck);
 
@@ -113,7 +114,7 @@ class EscenaPrincipal extends Phaser.Scene {
                     this.cambiarObjetivoCamara('portaaviones');
                 });
             panel.agregarBotonAlPanel(botonPortaaviones);
-            
+            this.camaraMinimapa.ignore(botonPortaaviones);
 
             //Array para los botones
             this.botonesAviones = [];

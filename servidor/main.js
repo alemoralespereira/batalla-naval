@@ -101,8 +101,7 @@ io.on("connection", (socket) => {
                 angulo: 0,
                 aceleracion: 1,
                 objetivo: null,
-                combustible: 5000,
-                salud: 3
+                combustible: 5000
             });
 
             for (let i = 1; i < 11; i++) {
