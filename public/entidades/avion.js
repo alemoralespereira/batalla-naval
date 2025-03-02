@@ -20,12 +20,45 @@ class Avion extends Entity {
         this.seleccionado = false;
         this.numeroAvion = numeroAvion;
         this.torpedo = true;
+        this.torpedoActivo = false;
+        this.cursorMira = null;
+        this.torpedos = [];
         this.multiplicadorCombustible = 1;
+<<<<<<< Updated upstream
         this.despego = false;
+=======
+        this.sonidoMotor = null;
+        this.motorEncendido = false;
+>>>>>>> Stashed changes
     }
 
     init(escena) {
         this.escena = escena; 
+        this.cursorMira = this.escena.add.sprite(0,0,"mira").setVisible(false);
+        this.cursorMira.setDepth(2);
+        this.escena.input.keyboard.on("keydown-SPACE",()=>{
+            this.activarModoAtaque();
+        });
+
+        this.escena.input.on("pointermove",(pointer)=>{
+            if(this.torpedoActivo){
+                this.cursorMira.setPosition(pointer.worldX,pointer.worldY);
+            }
+
+
+        });
+
+
+        this.escena.input.on("pointerdown",(pointer)=>{
+
+            if(this.torpedoActivo){
+                this.lanzarTorpedo(pointer.worldX,pointer.worldY)
+            }
+
+        });
+
+
+        this.sonidoMotor = this.escena.sound.add("motor_avion",{loop:true, volume: 0.5});
         if (this.objetivo) {
             // Si el sprite ya existe, actualiza su posición
             this.objetivo.x = this.escena.entidades.portaaviones.x;
@@ -123,6 +156,42 @@ class Avion extends Entity {
         }
     }
 
+
+
+    activarModoAtaque(){
+        this.torpedoActivo = true;
+        this.cursorMira.serVisible(true);
+    }
+
+    lanzarTorpedo(destX, destY) {
+    const torpedo = this.escena.physics.add.sprite(this.x, this.y, "torpedo");
+    torpedo.setScale(0.1);
+    this.escena.physics.moveTo(torpedo, destX, destY, 300);
+
+    // Guardar referencia para manejar colisiones
+    this.torpedos.push(torpedo);
+
+    // Desactivar modo de ataque
+    this.torpedoActivo = false;
+    this.cursorMira.setVisible(false);
+
+    // Detectar colisión con el barco
+    this.escena.physics.add.overlap(torpedo, this.escena.barco, (torpedo, barco) => {
+        this.impactoTorpedo(torpedo, barco);
+    });
+    }
+
+
+    impactoTorpedo(torpedo, barco) {
+    torpedo.destroy(); // Destruir torpedo al impactar
+    console.log("¡Impacto en el barco!");
+    barco.recibirDanio(50); // Aplica daño al barco (debes agregar este método en Barco)
+    }
+
+
+
+
+
     mover(controles) {
         if (!this.objetivo) {
             console.error(`Sprite no encontrado para la entidad`);
@@ -133,7 +202,19 @@ class Avion extends Entity {
         if (this.combustible > 0 && this.piloto) {
             // Movimiento con las teclas W, A, S, D
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown) {
+<<<<<<< Updated upstream
                 
+=======
+
+
+                if(!this.motorEncendido){
+                    this.sonidoMotor.play();
+                    this.motorEncendido = true;
+                }    
+
+
+
+>>>>>>> Stashed changes
                 // Rotación (A y D)
                 if (controles.izquierda.isDown) {
                     this.objetivo.setAngularVelocity(-40);
@@ -168,6 +249,14 @@ class Avion extends Entity {
             this.objetivo.setAngularVelocity(0);
             this.objetivo.setVelocityX(0);
             this.objetivo.setVelocityY(0);
+        
+            if(this.motorEncendido){
+                this.sonidoMotor.stop();
+                this.motorEncendido = false;
+            }
+
+
+
         }
     }
 }
