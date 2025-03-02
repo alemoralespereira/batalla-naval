@@ -1,7 +1,6 @@
 class Arma {
-    constructor({ nombre, calibre, rango, daño, cadenciaDisparo, cantidadMuniciones, origenX, origenY }) {
+    constructor({ nombre, rango, daño, cadenciaDisparo, cantidadMuniciones, origenX, origenY }) {
         this.nombre = nombre;
-        this.calibre = calibre;
         this.rango = rango;
         this.daño = daño;
         this.cadenciaDisparo = cadenciaDisparo; // Disparo cada x cantidad de segundos
@@ -10,7 +9,7 @@ class Arma {
         // this.origenY = origenY;
     }
 
-    dibujarRangoAtaque(escena, cursorMira, x, y) {
+    dibujarRangoAtaque(escena, cursorMira, x, y, destX, destY) {
         this.rangoAtaque = escena.add.circle(
             x,
             y,
@@ -23,12 +22,34 @@ class Arma {
 
         if (circulo.contains(escena.input.activePointer.worldX, escena.input.activePointer.worldY)) {
             cursorMira.setVisible(true);
-
-            this.lineaAtaque = escena.add.line(0, 0, x, y, cursorMira.x, cursorMira.y,  0xffffff).setOrigin(0);
+            this.lineaAtaque = escena.add.line(0, 0, x, y, destX, destY,  0xffffff).setOrigin(0);
+            cursorMira.on('pointerdown', () => {
+                this.dispararArma(destX, destY);
+            });
         } else {
             cursorMira.setVisible(false);
         }
     }
+
+    dibujarLineaAtaque(
+
+    dispararArma(destX, destY) {
+        const torpedo = this.escena.physics.add.sprite(this.x, this.y, "torpedo");
+        
+        this.escena.physics.moveTo(torpedo, destX, destY, 50);
+    
+        // Guardar referencia para manejar colisiones
+        this.torpedos.push(torpedo);
+    
+        // Desactivar modo de ataque
+        this.torpedoActivo = false;
+        this.cursorMira.setVisible(false);
+    
+        // Detectar colisión con el barco
+        this.escena.physics.add.overlap(torpedo, this.escena.barco, (torpedo, barco) => {
+            this.impactoTorpedo(torpedo, barco);
+        });
+        }
 }
 
 export default Arma;

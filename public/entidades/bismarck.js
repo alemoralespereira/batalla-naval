@@ -167,6 +167,25 @@ class Bismarck extends Barco {
         this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
+    disparar(destX, destY) {
+        
+        //const torpedo = this.escena.physics.add.sprite(this.x, this.y, "torpedo");
+        
+        //this.escena.physics.moveTo(torpedo, destX, destY, 50);
+    
+        // Guardar referencia para manejar colisiones
+        //this.torpedos.push(torpedo);
+    
+        // Desactivar modo de ataque
+        //this.torpedoActivo = false;
+        //this.cursorMira.setVisible(false);
+    
+        // Detectar colisión con el barco
+        /*this.escena.physics.add.overlap(torpedo, this.escena.barco, (torpedo, barco) => {
+            this.impactoTorpedo(torpedo, barco);
+        });*/
+    }
+
     update() {
         super.update();
         this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
@@ -192,11 +211,11 @@ class Bismarck extends Barco {
             if (this.armaSeleccionada) {
                 if(this.armaSeleccionada.nombre === "Antiaereo pesado 1")
                 {
-                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.popa.x, this.popa.y);
+                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
                 } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
-                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.proa.x, this.proa.y);
+                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
                 } else {
-                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objetivo.x, this.objetivo.y);
+                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objetivo.x, this.objetivo.y, this.cursorMira.x, this.cursorMira.y);
                 }
                 
             }
