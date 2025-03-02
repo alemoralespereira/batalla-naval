@@ -29,6 +29,7 @@ class Portaaviones extends Barco {
             fontSize: '20px',
             fill: '#ffffff'
         });
+        this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
         this.indicadorCombustible.setVisible(false);
         this.indicadorCombustible.setScrollFactor(0); 
         super.init(escena);

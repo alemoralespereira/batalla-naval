@@ -34,7 +34,7 @@ class Avion extends Entity {
             this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
             this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
             this.objetivo.rangoVision = this.rangoVision;
-            
+     
             
             // this.graphics = escena.add.graphics();
             // this.dibujarRangoVision();
@@ -42,6 +42,7 @@ class Avion extends Entity {
                 fontSize: '20px',
                 fill: '#ffffff'
             });
+            this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
             this.indicadorCombustible.setVisible(false);
             this.indicadorCombustible.setScrollFactor(0); 
         }      

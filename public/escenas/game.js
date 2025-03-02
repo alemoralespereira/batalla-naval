@@ -39,25 +39,46 @@ class EscenaPrincipal extends Phaser.Scene {
     create() {
         //*********************************************************************************/
         // MAPA PRINCIPAL, CAMARA Y LIMITES DEL MUNDO
-        const mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
+        this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
         const puerto = this.add.image(2800, 0, "puerto").setOrigin(0, 0);
 
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
-        this.cameras.main.setBounds(0, 0, mapa.width, mapa.height);
+        this.cameras.main.setBounds(0, 0, this.mapa.width, this.mapa.height);
         this.cameras.main.setZoom(0.8);
+        this.cameras.main.scrollX = 0;
+        this.cameras.main.scrollY = 0;
 
         //*********************************************************************************/
+      //*********************************************************************************/
         // MINI MAPA 
         this.camaraMinimapa = this.cameras.add(700, 500, 200, 200) // (x, y, width, height)
-            .setZoom(0.1)
-            .setBackgroundColor('#00008B')
+            .setZoom(0.0625)
+            .setBackgroundColor('rgba(135, 206, 235, 0.5)')
             .setName('minimapa');
+        
+        this.camaraMinimapa.setBounds(0, 0, 3200, 3200);
+        this.camaraMinimapa.scrollX = 0;
+        this.camaraMinimapa.scrollY = 0;
 
-        this.camaraMinimapa.ignore(mapa);
-        //this.camaraMinimapa.ignore(this.entidades);
+        this.camaraMinimapa.ignore(this.mapa);
         this.puntosEntidades = this.add.group();
+        this.puntoBismarck = this.add.circle(0,0,50,0xff0000);
+        this.puntosEntidades.add(this.puntoBismarck);
+        this.cameras.main.ignore(this.puntoBismarck);
+
+        this.puntoPortaaviones = this.add.circle(0,0,50,0x0000ff);
+        this.puntosEntidades.add(this.puntoPortaaviones);
+        this.cameras.main.ignore(this.puntoPortaaviones);
+
+        this.puntosAviones = {};
+        for(let i=1; i<11; i++){
+            const nombreAvion = `avion_${i}`;
+            this.puntosAviones[nombreAvion] = this.add.circle(0,0,50,0xffff00);
+            this.puntosEntidades.add(this.puntosAviones[nombreAvion]);
+            this.cameras.main.ignore(this.puntosAviones[nombreAvion]);
+        }
 
         //********************************************************/
         // CREAR EQUIPOS
@@ -68,10 +89,12 @@ class EscenaPrincipal extends Phaser.Scene {
         // Bismarck
         this.entidades.bismarck.init(this);
         this.entidades.bismarck.objetivo.setCollideWorldBounds(true);
+        this.camaraMinimapa.ignore(this.entidades.bismarck.objetivo);
 
         // Portaaviones
         this.entidades.portaaviones.init(this);
         this.entidades.portaaviones.objetivo.setCollideWorldBounds(true);
+        this.camaraMinimapa.ignore(this.entidades.portaaviones.objetivo);
         this.equipoAzul.push(this.entidades.portaaviones);
 
         // Aviones
@@ -96,6 +119,7 @@ class EscenaPrincipal extends Phaser.Scene {
                 });
             panel.agregarBotonAlPanel(botonPortaaviones);
             
+
             //Array para los botones
             this.botonesAviones = [];
             // Botones para seleccionar los aviones
@@ -116,11 +140,13 @@ class EscenaPrincipal extends Phaser.Scene {
                                 this.botonObservador.setBackgroundColor('#00ff00');
                             });
                             
+
                             this.botonOperador = panel.agregarBoton(160, 460, 'Operador')
                             .on('pointerdown', () => {
                                 this.entidades[`avion_${i}`].operador = true;
                                 this.botonOperador.setBackgroundColor('#00ff00');
                             });
+                            
                             
                             this.botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
                             .on('pointerdown', () => {
@@ -133,9 +159,10 @@ class EscenaPrincipal extends Phaser.Scene {
                                 avion.objetivo.setVisible(true);                                                        
                                 this.botonDespegar.setVisible(false);
                                 this.botonOperador.setVisible(false);
-                                this.botonObservador.setVisible(false);
+                                this.botonObservador.setVisible(false);// Ignorar botones individuales cuando se crean
+                                                    this.camaraMinimapa.ignore([this.botonObservador, this.botonOperador, this.botonDespegar]);
                                 this.cambiarObjetivoCamara(`avion_${i}`);
-                               
+                                
                                 this.physics.add.overlap(
                                     this.entidades.portaaviones.objetivo, 
                                     avion.objetivo, 
@@ -145,11 +172,16 @@ class EscenaPrincipal extends Phaser.Scene {
                                 
                                 //botonPiloto.setVisible(false);
                             });
+                        // Ignorar botones individuales cuando se crean
+                        this.camaraMinimapa.ignore([this.botonObservador, this.botonOperador, this.botonDespegar]);
                         }
-                        
                     });
                 panel.agregarBotonAlPanel(botonAvion);
+                //this.camaraMinimapa.ignore(this.botonesAviones);
             }
+            
+            this.camaraMinimapa.ignore(this.botonesAviones);
+           
 
             //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
             this.entidades.bismarck.objetivo.setVisible(false);
@@ -202,6 +234,19 @@ class EscenaPrincipal extends Phaser.Scene {
     }
 
     update() {
+        // Actualizar posiciones de los puntos en el minimapa
+        if (this.entidades.bismarck) {
+            this.puntoBismarck.setPosition(this.entidades.bismarck.objetivo.x, this.entidades.bismarck.objetivo.y);
+        }
+        if (this.entidades.portaaviones) {
+            this.puntoPortaaviones.setPosition(this.entidades.portaaviones.objetivo.x, this.entidades.portaaviones.objetivo.y);
+        }
+        for (let i = 1; i < 11; i++) {
+            const nombreAvion = `avion_${i}`;
+            if (this.entidades[nombreAvion]) {
+                this.puntosAviones[nombreAvion].setPosition(this.entidades[nombreAvion].objetivo.x, this.entidades[nombreAvion].objetivo.y);
+            }
+        }
 
         this.moverEntidad();
 
