@@ -10,6 +10,6 @@ export const game = new Phaser.Game({
     scene: [Menu, EscenaPrincipal, EscenaAtaque],
     physics: {
         default: "arcade",
-        arcade: { debug: false }
+        arcade: { debug: true }
     }
 });

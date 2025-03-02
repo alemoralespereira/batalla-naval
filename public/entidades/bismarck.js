@@ -23,17 +23,46 @@ class Bismarck extends Barco {
     init(escena) {
         this.escena = escena; 
         this.objetivo = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setScale(0.8).setOrigin(0.5, 0.5);
+        this.objetivo.body.setCircle(40, 210, 85);
+
+        this.proa = escena.physics.add.sprite(this.xInicial, this.yInicial, null);
+        this.proa.body.setSize(20,10);
+        this.proa.setVisible(false);
+
+        this.popa = escena.physics.add.sprite(this.xInicial, this.yInicial, null);
+        this.popa.body.setSize(20,10);
+        this.popa.setVisible(false);
+
+        this.updateHitboxes();
+
         this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 500, 500).setOrigin(0.5, 0.5);
         this.objetivo.rangoVision = this.rangoVision;
-    //    this.graphics = escena.add.graphics();
-    //    this.dibujarRangoVision();
+      //  this.graphics = escena.add.graphics();
+       // this.dibujarRangoVision();
        this.indicadorCombustible = escena.add.text(-100, 760, `COMBUSTIBLE BISMARCK:  ${this.combustible}`,{
             fontSize: '20px',
             fill: '#ffffff'
         });
+        //this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
         this.indicadorCombustible.setVisible(false);
         this.indicadorCombustible.setScrollFactor(0);
-       super.init(escena);
+        super.init(escena);
+    }
+
+    updateHitboxes() {
+        const angleRad = this.objetivo.rotation;
+        const offsetProa = 80; // Distancia desde el centro hacia la proa
+        const offsetPopa = -80; // Distancia desde el centro hacia la popa
+
+        // Posición de la proa
+        this.proa.x = this.objetivo.x + Math.cos(angleRad) * offsetProa;
+        this.proa.y = this.objetivo.y + Math.sin(angleRad) * offsetProa;
+        this.proa.rotation = angleRad;
+
+        // Posición de la popa
+        this.popa.x = this.objetivo.x + Math.cos(angleRad) * offsetPopa;
+        this.popa.y = this.objetivo.y + Math.sin(angleRad) * offsetPopa;
+        this.popa.rotation = angleRad;
     }
 
     configurar() {
@@ -150,19 +179,23 @@ class Bismarck extends Barco {
             }
 
             this.armas.forEach((arma) => {
-                if (arma.rangoAtaque) {
-                    arma.rangoAtaque.destroy();
+                if (arma.rangoAtaque1 && arma.rangoAtaque2) {
+                    arma.rangoAtaque1.destroy();
+                    arma.rangoAtaque2.destroy();
     
-                    if (arma.lineaAtaque) {
-                        arma.lineaAtaque.destroy();
+                    if (arma.lineaAtaque1 && arma.lineaAtaque2) {
+                        arma.lineaAtaque1.destroy();
+                        arma.lineaAtaque2.destroy();
                     }
                 }
             });
     
             if (this.armaSeleccionada) {
-                this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objetivo.x, this.objetivo.y);
+                this.armaSeleccionada.dibujarRangoAtaque1(this.escena, this.cursorMira, this.popa.x, this.popa.y);
+                this.armaSeleccionada.dibujarRangoAtaque2(this.escena, this.cursorMira, this.proa.x, this.proa.y);
             }
         }
+        this.updateHitboxes();
     }
 
     mover(controles) {
