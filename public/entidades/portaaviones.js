@@ -13,6 +13,7 @@ class Portaaviones extends Barco {
             portaavionesData.aceleracion,
             portaavionesData.objetivo,
             portaavionesData.combustible,
+            portaavionesData.salud
             
         );
         this.seleccionado = false;

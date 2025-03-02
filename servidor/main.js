@@ -90,7 +90,8 @@ io.on("connection", (socket) => {
                 angulo: 0,
                 aceleracion: 1,
                 objetivo: null,
-                combustible: 50000
+                combustible: 50000,
+                salud: 3
             });
             entidades.portaaviones = new Portaaviones({
                 x: 50,
@@ -100,7 +101,8 @@ io.on("connection", (socket) => {
                 angulo: 0,
                 aceleracion: 1,
                 objetivo: null,
-                combustible: 5000
+                combustible: 5000,
+                salud: 3
             });
 
             for (let i = 1; i < 11; i++) {
@@ -116,6 +118,7 @@ io.on("connection", (socket) => {
                     piloto: false,
                     observador: false,
                     operador: false,
+                    salud: 1
                 });
             }
 

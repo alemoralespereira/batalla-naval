@@ -68,14 +68,14 @@ class EscenaPrincipal extends Phaser.Scene {
         this.puntosEntidades.add(this.puntoBismarck);
         this.cameras.main.ignore(this.puntoBismarck);
 
-        this.puntoPortaaviones = this.add.circle(0,0,50,0x0000ff);
+        this.puntoPortaaviones = this.add.circle(0,0,50,0xffff00);
         this.puntosEntidades.add(this.puntoPortaaviones);
         this.cameras.main.ignore(this.puntoPortaaviones);
 
         this.puntosAviones = {};
         for(let i=1; i<11; i++){
             const nombreAvion = `avion_${i}`;
-            this.puntosAviones[nombreAvion] = this.add.circle(0,0,50,0xffff00);
+            this.puntosAviones[nombreAvion] = this.add.circle(0,0,50,0x0000ff);
             this.puntosEntidades.add(this.puntosAviones[nombreAvion]);
             this.cameras.main.ignore(this.puntosAviones[nombreAvion]);
         }

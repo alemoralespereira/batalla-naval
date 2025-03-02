@@ -1,5 +1,5 @@
 class Entity {
-    constructor(x, y, velocidad, velocidadMaxima, angulo, aceleracion, objetivo, combustible) {
+    constructor(x, y, velocidad, velocidadMaxima, angulo, aceleracion, objetivo, combustible, salud) {
         this.x = x;
         this.y = y;
         this.velocidad = velocidad;
@@ -8,6 +8,7 @@ class Entity {
         this.aceleracion = aceleracion;
         this.objetivo = objetivo;
         this.combustible = combustible;
+        this.salud = salud;
     }
 
     init(escena) {      

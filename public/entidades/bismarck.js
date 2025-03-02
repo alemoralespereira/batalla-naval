@@ -13,6 +13,7 @@ class Bismarck extends Barco {
             bismarckData.aceleracion,
             bismarckData.objetivo,
             bismarckData.combustible,
+            bismarckData.salud
         );
     }
 

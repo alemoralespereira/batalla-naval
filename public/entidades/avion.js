@@ -12,6 +12,7 @@ class Avion extends Entity {
             avionData.aceleracion,
             avionData.objetivo,
             avionData.combustible,
+            avionData.salud
         );
         this.piloto = avionData.piloto;
         this.observador = avionData.observador;
