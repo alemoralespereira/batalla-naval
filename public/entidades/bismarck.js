@@ -22,15 +22,16 @@ class Bismarck extends Barco {
 
     init(escena) {
         this.escena = escena; 
-        this.objetivo = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setScale(0.8).setOrigin(0.5, 0.5);
+        this.objetivo = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setOrigin(0.5, 0.5);
         this.objetivo.body.setCircle(40, 210, 85);
+        this.objetivo.setVisible(true);
 
-        this.proa = escena.physics.add.sprite(this.xInicial, this.yInicial, null);
-        this.proa.body.setSize(20,10);
+        this.proa = escena.physics.add.sprite(this.objetivo.x, this.objetivo.y, null).setOrigin(0.5, 0.5);
+        this.proa.body.setCircle(40, -25, -25);
         this.proa.setVisible(false);
 
-        this.popa = escena.physics.add.sprite(this.xInicial, this.yInicial, null);
-        this.popa.body.setSize(20,10);
+        this.popa = escena.physics.add.sprite(this.objetivo.x, this.objetivo.y, null).setOrigin(0.5, 0.5);
+        this.popa.body.setCircle(40, -25, -25);
         this.popa.setVisible(false);
 
         this.updateHitboxes();
@@ -51,8 +52,8 @@ class Bismarck extends Barco {
 
     updateHitboxes() {
         const angleRad = this.objetivo.rotation;
-        const offsetProa = 80; // Distancia desde el centro hacia la proa
-        const offsetPopa = -80; // Distancia desde el centro hacia la popa
+        const offsetProa = 90; // Distancia desde el centro hacia la proa
+        const offsetPopa = -85; // Distancia desde el centro hacia la popa
 
         // Posición de la proa
         this.proa.x = this.objetivo.x + Math.cos(angleRad) * offsetProa;
@@ -68,7 +69,7 @@ class Bismarck extends Barco {
     configurar() {
         this.armas = [
             new Arma({
-                nombre: "Antiaereo pesado", 
+                nombre: "Antiaereo pesado 1", 
                 calibre: 38,
                 rango: 200,
                 daño: 150,
@@ -77,16 +78,16 @@ class Bismarck extends Barco {
                 // origenX: 0.7,
                 // origenY: 0.5
             }),
-            // new Arma({
-            //     nombre: "Antiaereo pesado 2", 
-            //     calibre: 38,
-            //     rango: 200,
-            //     daño: 150,
-            //     cadenciaDisparo: 30,
-            //     cantidadMuniciones: 10,
-            //     origenX: 0.3,
-            //     origenY: 0.5
-            // }),
+             new Arma({
+                 nombre: "Antiaereo pesado 2", 
+                 calibre: 38,
+                 rango: 200,
+                 daño: 150,
+                 cadenciaDisparo: 10,
+                 cantidadMuniciones: 5,
+                 //origenX: 0.3,
+                 //origenY: 0.5
+             }),
             new Arma({
                 nombre: "Antiaereo ligero", 
                 calibre: 19,
@@ -179,20 +180,25 @@ class Bismarck extends Barco {
             }
 
             this.armas.forEach((arma) => {
-                if (arma.rangoAtaque1 && arma.rangoAtaque2) {
-                    arma.rangoAtaque1.destroy();
-                    arma.rangoAtaque2.destroy();
-    
-                    if (arma.lineaAtaque1 && arma.lineaAtaque2) {
-                        arma.lineaAtaque1.destroy();
-                        arma.lineaAtaque2.destroy();
+                if (arma.rangoAtaque) {
+                    arma.rangoAtaque.destroy();
+                    
+                    if (arma.lineaAtaque) {
+                        arma.lineaAtaque.destroy();
                     }
                 }
             });
     
             if (this.armaSeleccionada) {
-                this.armaSeleccionada.dibujarRangoAtaque1(this.escena, this.cursorMira, this.popa.x, this.popa.y);
-                this.armaSeleccionada.dibujarRangoAtaque2(this.escena, this.cursorMira, this.proa.x, this.proa.y);
+                if(this.armaSeleccionada.nombre === "Antiaereo pesado 1")
+                {
+                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.popa.x, this.popa.y);
+                } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
+                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.proa.x, this.proa.y);
+                } else {
+                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objetivo.x, this.objetivo.y);
+                }
+                
             }
         }
         this.updateHitboxes();
