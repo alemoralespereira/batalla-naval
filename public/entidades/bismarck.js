@@ -5,13 +5,13 @@ import Arma from './arma.js';
 class Bismarck extends Barco {
     constructor(bismarckData) {
         super(
-            bismarckData.x,
-            bismarckData.y,
+            bismarckData.x, //xInicial
+            bismarckData.y, //yInicial
             bismarckData.velocidad,
             bismarckData.velocidadMaxima,
             bismarckData.angulo,
             bismarckData.aceleracion,
-            bismarckData.objetivo,
+            bismarckData.objeto,
             bismarckData.combustible,
         );
 
@@ -22,25 +22,28 @@ class Bismarck extends Barco {
 
     init(escena) {
         this.escena = escena; 
-        this.objetivo = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setOrigin(0.5, 0.5);
-        this.objetivo.body.setCircle(40, 210, 85);
-        this.objetivo.setVisible(true);
+        this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setOrigin(0.5, 0.5);
+        this.objeto.body.setCircle(40, 210, 85);
+        this.objeto.setVisible(true);
 
-        this.proa = escena.physics.add.sprite(this.objetivo.x, this.objetivo.y, null).setOrigin(0.5, 0.5);
+        this.proa = escena.physics.add.sprite(this.objeto.x, this.objeto.y, null).setOrigin(0.5, 0.5);
         this.proa.body.setCircle(40, -25, -25);
         this.proa.setVisible(false);
 
-        this.popa = escena.physics.add.sprite(this.objetivo.x, this.objetivo.y, null).setOrigin(0.5, 0.5);
+        this.popa = escena.physics.add.sprite(this.objeto.x, this.objeto.y, null).setOrigin(0.5, 0.5);
         this.popa.body.setCircle(40, -25, -25);
         this.popa.setVisible(false);
 
         this.updateHitboxes();
 
+        this.puntosDeColision = escena.add.group();
+        this.puntosDeColision.addMultiple([this.objeto, this.proa, this.popa]);
+
         this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 500, 500).setOrigin(0.5, 0.5);
-        this.objetivo.rangoVision = this.rangoVision;
-      //  this.graphics = escena.add.graphics();
-       // this.dibujarRangoVision();
-       this.indicadorCombustible = escena.add.text(-100, 760, `COMBUSTIBLE BISMARCK:  ${this.combustible}`,{
+        this.objeto.rangoVision = this.rangoVision;
+        //this.graphics = escena.add.graphics();
+        //this.dibujarRangoVision();
+        this.indicadorCombustible = escena.add.text(-100, 760, `COMBUSTIBLE BISMARCK:  ${this.combustible}`,{
             fontSize: '20px',
             fill: '#ffffff'
         });
@@ -51,19 +54,20 @@ class Bismarck extends Barco {
     }
 
     updateHitboxes() {
-        const angleRad = this.objetivo.rotation;
+        const angleRad = this.objeto.rotation;
         const offsetProa = 90; // Distancia desde el centro hacia la proa
         const offsetPopa = -85; // Distancia desde el centro hacia la popa
 
         // Posición de la proa
-        this.proa.x = this.objetivo.x + Math.cos(angleRad) * offsetProa;
-        this.proa.y = this.objetivo.y + Math.sin(angleRad) * offsetProa;
+        this.proa.x = this.objeto.x + Math.cos(angleRad) * offsetProa;
+        this.proa.y = this.objeto.y + Math.sin(angleRad) * offsetProa;
         this.proa.rotation = angleRad;
 
         // Posición de la popa
-        this.popa.x = this.objetivo.x + Math.cos(angleRad) * offsetPopa;
-        this.popa.y = this.objetivo.y + Math.sin(angleRad) * offsetPopa;
+        this.popa.x = this.objeto.x + Math.cos(angleRad) * offsetPopa;
+        this.popa.y = this.objeto.y + Math.sin(angleRad) * offsetPopa;
         this.popa.rotation = angleRad;
+
     }
 
     configurar() {
@@ -71,7 +75,8 @@ class Bismarck extends Barco {
             new Arma({
                 nombre: "Antiaereo pesado 1", 
                 calibre: 38,
-                rango: 200,
+                rango: 300,
+                velocidad: 150,
                 daño: 150,
                 cadenciaDisparo: 10,
                 cantidadMuniciones: 5,
@@ -81,7 +86,8 @@ class Bismarck extends Barco {
              new Arma({
                  nombre: "Antiaereo pesado 2", 
                  calibre: 38,
-                 rango: 200,
+                 rango: 300,
+                 velocidad: 150,
                  daño: 150,
                  cadenciaDisparo: 10,
                  cantidadMuniciones: 5,
@@ -92,6 +98,7 @@ class Bismarck extends Barco {
                 nombre: "Antiaereo ligero", 
                 calibre: 19,
                 rango: 250,
+                velocidad: 250,
                 daño: 100,
                 cadenciaDisparo: 4,
                 cantidadMuniciones: 10,
@@ -103,15 +110,31 @@ class Bismarck extends Barco {
         this.cursorMira = this.escena.add.image(0, 0, "mira")
             .setOrigin(0.5, 0.5)
             .setScale(0.2, 0.2)
-            .setVisible(false);
+            .setVisible(false)
+            .setInteractive();
+        
+        this.cursorMira.on('pointerdown', () => {
+            if (this.cursorMira.visible) {
+                    if(!this.armaSeleccionada.disparoActivado) {
+                        this.armaSeleccionada.disparoActivado = true;
+                        if(this.armaSeleccionada.nombre === "Antiaereo pesado 1") {
+                            this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
+                        } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
+                            this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
+                        } else {
+                            this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
+                        }
+                    }
+            }
+        });
 
         // Configurar la cámara para seguir al Bismarck
-        this.escena.cameras.main.startFollow(this.escena.entidades.bismarck.objetivo);
-        this.escena.entidades.portaaviones.objetivo.setVisible(false);
+        this.escena.cameras.main.startFollow(this.escena.entidades.bismarck.objeto);
+        this.escena.entidades.portaaviones.objeto.setVisible(false);
         this.escena.equipoAzul.forEach((avion) => {
             //console.log('Avion:', avion);
-            //console.log('Objetivo del avion:', avion.objetivo);
-            avion.objetivo.setVisible(false);
+            //console.log('Objetivo del avion:', avion.objeto);
+            avion.objeto.setVisible(false);
         });
 
         const panel = new Panel(this.escena);
@@ -188,12 +211,13 @@ class Bismarck extends Barco {
 
     update() {
         super.update();
-        this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
-        // this.dibujarRangoVision();
+        this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
+        //this.dibujarRangoVision();
+        this.updateHitboxes();
         if(this.escena.rol === "bismarck") {
            this.cursorMira.setPosition(this.escena.input.activePointer.worldX, this.escena.input.activePointer.worldY);
 
-            if(this.xInicial != this.objetivo.x || this.yInicial != this.objetivo.y) {    
+            if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
                 this.indicadorCombustible.setVisible(true);
                 this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${this.combustible}`);
             }
@@ -215,16 +239,16 @@ class Bismarck extends Barco {
                 } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
                     this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
                 } else {
-                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objetivo.x, this.objetivo.y, this.cursorMira.x, this.cursorMira.y);
+                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
                 }
                 
             }
         }
-        this.updateHitboxes();
+        
     }
 
     mover(controles) {
-        if (!this.objetivo) {
+        if (!this.objeto) {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
@@ -235,11 +259,11 @@ class Bismarck extends Barco {
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown || controles.abajo.isDown) {
                 // Rotación (A y D)
                 if (controles.izquierda.isDown) {
-                    this.objetivo.setAngularVelocity(-25);
+                    this.objeto.setAngularVelocity(-25);
                 } else if (controles.derecha.isDown) {
-                    this.objetivo.setAngularVelocity(25);
+                    this.objeto.setAngularVelocity(25);
                 } else {
-                    this.objetivo.setAngularVelocity(0);
+                    this.objeto.setAngularVelocity(0);
                 }
 
                 // Aceleración (W y S)
@@ -250,25 +274,25 @@ class Bismarck extends Barco {
                 }
 
                 // Calcular nueva velocidad
-                const angle = Phaser.Math.DegToRad(this.objetivo.angle);
+                const angle = Phaser.Math.DegToRad(this.objeto.angle);
                 const velocityX = Math.cos(angle) * this.velocidad;
                 const velocityY = Math.sin(angle) * this.velocidad;
 
                 // Actualizar las posiciones
-                this.objetivo.setVelocityX(velocityX);
-                this.objetivo.setVelocityY(velocityY);
+                this.objeto.setVelocityX(velocityX);
+                this.objeto.setVelocityY(velocityY);
 
                 // Actualizar las posiciones internas
-                // this.x = this.objetivo.x;
-                // this.y = this.objetivo.y;
-                // this.angulo = this.objetivo.angle;
+                // this.x = this.objeto.x;
+                // this.y = this.objeto.y;
+                // this.angulo = this.objeto.angle;
             } else {
-                this.objetivo.setAngularVelocity(0);
+                this.objeto.setAngularVelocity(0);
             }
         } else {
-            this.objetivo.setAngularVelocity(0);
-            this.objetivo.setVelocityX(0);
-            this.objetivo.setVelocityY(0);
+            this.objeto.setAngularVelocity(0);
+            this.objeto.setVelocityX(0);
+            this.objeto.setVelocityY(0);
         }
     }
 }

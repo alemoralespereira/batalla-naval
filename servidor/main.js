@@ -89,7 +89,7 @@ io.on("connection", (socket) => {
                 velocidadMaxima: 100,
                 angulo: 0,
                 aceleracion: 1,
-                objetivo: null,
+                objeto: null,
                 combustible: 50000
             });
             entidades.portaaviones = new Portaaviones({
@@ -99,7 +99,7 @@ io.on("connection", (socket) => {
                 velocidadMaxima: 100,
                 angulo: 0,
                 aceleracion: 1,
-                objetivo: null,
+                objeto: null,
                 combustible: 5000
             });
 
@@ -111,7 +111,7 @@ io.on("connection", (socket) => {
                     velocidadMaxima: 100,
                     angulo: 0,
                     aceleracion: 2,
-                    objetivo: null,
+                    objeto: null,
                     combustible: 100000,
                     piloto: false,
                     observador: false,

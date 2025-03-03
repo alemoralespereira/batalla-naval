@@ -1,12 +1,12 @@
 class Entity {
-    constructor(x, y, velocidad, velocidadMaxima, angulo, aceleracion, objetivo, combustible) {
+    constructor(x, y, velocidad, velocidadMaxima, angulo, aceleracion, objeto, combustible) {
         this.xInicial = x;
         this.yInicial = y;
         this.velocidad = velocidad;
         this.velocidadMaxima = velocidadMaxima;
         this.anguloInicial = angulo;
         this.aceleracion = aceleracion;
-        this.objetivo = objetivo;
+        this.objeto = objeto;
         this.combustible = combustible;
     }
 
@@ -20,8 +20,8 @@ class Entity {
 
     calcularCombustible() {
         // Calcular la distancia recorrida usando las velocidades
-        const deltaX = this.objetivo.body.velocity.x * 0.016; // Ajuste para frame rate
-        const deltaY = this.objetivo.body.velocity.y * 0.016;
+        const deltaX = this.objeto.body.velocity.x * 0.016; // Ajuste para frame rate
+        const deltaY = this.objeto.body.velocity.y * 0.016;
 
         let distancia = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         distancia = Math.round(distancia);

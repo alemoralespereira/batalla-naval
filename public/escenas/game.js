@@ -65,24 +65,26 @@ class EscenaPrincipal extends Phaser.Scene {
         // CREAR EQUIPOS
         this.equipoAzul = [];
 
+        this.proyectiles = this.add.group();
+
         //********************************************************/
         // INICIALIZAR ENTIDADES
         // Bismarck
         this.entidades.bismarck.init(this);
-        this.entidades.bismarck.objetivo.setCollideWorldBounds(true);
+        this.entidades.bismarck.objeto.setCollideWorldBounds(true);
 
         // Portaaviones
         this.entidades.portaaviones.init(this);
-        this.entidades.portaaviones.objetivo.setCollideWorldBounds(true);
+        this.entidades.portaaviones.objeto.setCollideWorldBounds(true);
         this.equipoAzul.push(this.entidades.portaaviones);
 
         // Aviones
         for (let i = 1; i < 11; i++) {
             const avion = this.entidades[`avion_${i}`];
             avion.init(this); // Inicializar el avión
-            avion.objetivo.setCollideWorldBounds(true);
+            avion.objeto.setCollideWorldBounds(true);
             this.equipoAzul.push(avion);
-            avion.objetivo.setVisible(false);        
+            avion.objeto.setVisible(false);        
         }
 
         //********************************************************/
@@ -114,23 +116,48 @@ class EscenaPrincipal extends Phaser.Scene {
             }
 
             const entidad = this.entidades[data.nombreEntidad];
-            if (entidad.objetivo) {
-                entidad.objetivo.setPosition(data.x, data.y);
+            if (entidad.objeto) {
+                entidad.objeto.setPosition(data.x, data.y);
                 if (typeof data.angulo === "number") {
-                    entidad.objetivo.setAngle(data.angulo);
+                    entidad.objeto.setAngle(data.angulo);
                 }
             }
-            // Log para confirmar que la entidad se actualizó correctamente
-            /*console.log(`🔄 Entidad ${data.entidad} actualizada:`, {
-                x: data.x,
-                y: data.y,
-                angulo: data.angulo
-            });*/
         });
 
-        
+         //********************************************************/
+        // MANEJO DE OVERLAPS
+
+        // Overlap entre portaaviones y aviones
+        this.equipoAzul.forEach((avion) => {
+            if (avion instanceof Avion) {
+                this.physics.add.overlap(
+                    this.entidades.portaaviones.objeto, 
+                    avion.objeto, 
+                    () => this.aterrizar(avion), 
+                    () => this.autorizarAterrizaje(avion), 
+                    this
+                );
+            }
+        });
+
+        //Overlap entre proyectiles Bismarck y aviones
+        /*this.equipoAzul.forEach((avion) => {
+            if (avion instanceof Avion) {
+                this.physics.add.overlap(
+                    this.proyectiles,
+                    avion.objeto, 
+                    this.impacto, 
+                    //this.autorizarImpacto, 
+                    this
+                );
+            }
+        });*/
     }
 
+    /*impacto(avion, proyectil) {
+        proyectil.destroy();
+        avion.recibirDaño(proyectil.daño);
+    }*/
     update() {
 
         this.moverEntidad();
@@ -143,9 +170,9 @@ class EscenaPrincipal extends Phaser.Scene {
         if (this.rol === "bismarck") {
             this.equipoAzul.forEach((entidad) => {
                 if (this.estaEnRangoDeVision(this.entidades.bismarck, entidad)) {
-                    entidad.objetivo.setVisible(true);
+                    entidad.objeto.setVisible(true);
                 } else {
-                    entidad.objetivo.setVisible(false);
+                    entidad.objeto.setVisible(false);
                 }
             });
         } else {
@@ -153,7 +180,7 @@ class EscenaPrincipal extends Phaser.Scene {
             while (i < this.equipoAzul.length) {
                 const entidad = this.equipoAzul[i];
                 if (this.estaEnRangoDeVision(entidad, this.entidades.bismarck)) {
-                    this.entidades.bismarck.objetivo.setVisible(true);
+                    this.entidades.bismarck.objeto.setVisible(true);
 
                     if(entidad instanceof Avion) {
                         if(entidad.operador) {
@@ -180,18 +207,17 @@ class EscenaPrincipal extends Phaser.Scene {
 
                     break;
                 } else {
-                    this.entidades.bismarck.objetivo.setVisible(false);
+                    this.entidades.bismarck.objeto.setVisible(false);
                 }
                 i++;
             }
         }
     }
 
-    superposicion(portaaviones, avion) {
+    aterrizar(avion) {
+        //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto} despego: ${avion.despego}`);
         console.log(`Avion ${avion.numeroAvion} aterrizando en portaaviones`);
 
-        //console.log(`Avion nro: ${avion.numeroAvion} Avion X: ${avion.x} PortaAviones X: ${portaaviones.x} Despego: ${avion.despego}`)
-        //console.log(`Avion Pilot: ${avion.piloto}`)
         this.entidades[`avion_${avion.numeroAvion}`].piloto = false;
         this.entidades[`avion_${avion.numeroAvion}`].despego = false;
         this.entidades[`avion_${avion.numeroAvion}`].torpedo = true;
@@ -199,32 +225,29 @@ class EscenaPrincipal extends Phaser.Scene {
         this.entidades[`avion_${avion.numeroAvion}`].combustible = this.estadoJuego.entidades[`avion_${avion.numeroAvion}`].combustible;
         this.entidades[`avion_${avion.numeroAvion}`].multiplicadorCombustible = 1;
         this.entidades[`avion_${avion.numeroAvion}`].indicadorCombustible.setVisible(false);
-        avion.setVisible(false); 
+        avion.objeto.setVisible(false); 
         let botonAmodificar = this.botonesAviones[`${avion.numeroAvion}`-1];
         botonAmodificar.setBackgroundColor('#808080');
+
     }
 
     //Autoriza la superposicion, si el avion esta volando (tiene piloto) y ya despego(La ubicacion del avion esta fuera del portaaviones)
-    autorizarSuperposicion(portaaviones, avion){
-        //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto}.`);
-        //console.log(`Avion: ${this.entidades[`avion_${avion.numeroAvion}`]} Piloto: ${this.entidades[`avion_${avion.numeroAvion}`].piloto}`);
-        //console.log("Piloto Objetivo: " , avion.piloto);
-        //this.entidades[`avion_${i}`].piloto
-        //console.log(`Avion X: ${avion.x} PortaAviones X: ${portaaviones.x} Avion Y: ${avion.y} PortaAviones Y: ${portaaviones.y}`)
-
-        return (avion.piloto && avion.despego);
+    autorizarAterrizaje(avion){
+        //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto} despego: ${avion.despego}`);
+        return (avion.piloto === true && avion.despego === true);
     }   
 
     //Funcion para determinar si entidad2 esta dentro del rango de vision de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
-        const limites = entidad2.objetivo.getBounds();
+        const limites = entidad2.objeto.getBounds();
 
         const topLeft = { x: limites.x, y: limites.y };
         const topRight = { x: limites.x + limites.width, y: limites.y };
         const bottomLeft = { x: limites.x, y: limites.y + limites.height };
         const bottomRight = { x: limites.x + limites.width, y: limites.y + limites.height };
 
-        const limitesRangoVision = entidad1.objetivo.rangoVision.getBounds();
+        const limitesRangoVision = entidad1.objeto.rangoVision.getBounds();
+        
         return (
             Phaser.Geom.Rectangle.Contains(limitesRangoVision, topLeft.x, topLeft.y) ||
             Phaser.Geom.Rectangle.Contains(limitesRangoVision, topRight.x, topRight.y) ||
@@ -235,8 +258,8 @@ class EscenaPrincipal extends Phaser.Scene {
 
     //Función para cambiar la cámara a la entidad seleccionada.
     cambiarObjetivoCamara(nombreEntidad) {
-        if (this.entidades[nombreEntidad] && this.entidades[nombreEntidad].objetivo) {
-            this.cameras.main.startFollow(this.entidades[nombreEntidad].objetivo);
+        if (this.entidades[nombreEntidad] && this.entidades[nombreEntidad].objeto) {
+            this.cameras.main.startFollow(this.entidades[nombreEntidad].objeto);
             console.log(`Cámara siguiendo a ${nombreEntidad}`);
         } else {
             console.error(`Entidad ${nombreEntidad} no encontrada.`);
@@ -290,9 +313,9 @@ class EscenaPrincipal extends Phaser.Scene {
                 rol: this.rol, // Rol del jugador (bismarck o portaaviones)
                 sala: this.sala, // Sala a la que pertenece el jugador
                 nombreEntidad, // Entidad que se está moviendo (bismarck, portaaviones, avion_X)
-                x: entidad.objetivo.x, // Posición X de la entidad
-                y: entidad.objetivo.y, // Posición Y de la entidad
-                angulo: entidad.objetivo.angle // Ángulo de la entidad
+                x: entidad.objeto.x, // Posición X de la entidad
+                y: entidad.objeto.y, // Posición Y de la entidad
+                angulo: entidad.objeto.angle // Ángulo de la entidad
             };
 
             // Log para depuración: Verificar los datos antes de enviarlos
