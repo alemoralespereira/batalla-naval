@@ -89,9 +89,9 @@ io.on("connection", (socket) => {
                 velocidadMaxima: 100,
                 angulo: 0,
                 aceleracion: 1,
-                objetivo: null,
-                combustible: 50000,
-                salud: 3
+                salud: 3,
+                objeto: null,
+                combustible: 50000
             });
             entidades.portaaviones = new Portaaviones({
                 x: 50,
@@ -100,7 +100,7 @@ io.on("connection", (socket) => {
                 velocidadMaxima: 100,
                 angulo: 0,
                 aceleracion: 1,
-                objetivo: null,
+                objeto: null,
                 combustible: 5000
             });
 
@@ -112,7 +112,7 @@ io.on("connection", (socket) => {
                     velocidadMaxima: 100,
                     angulo: 0,
                     aceleracion: 2,
-                    objetivo: null,
+                    objeto: null,
                     combustible: 100000,
                     piloto: false,
                     observador: false,
@@ -149,7 +149,7 @@ io.on("connection", (socket) => {
     });*/
 
     socket.on("moverEntidad", (data) => {
-        console.log("📥 Datos recibidos del cliente:", data);
+        // console.log("📥 Datos recibidos del cliente:", data);
     
         // Verificar si la sala existe
         if (!salas[data.sala]) {

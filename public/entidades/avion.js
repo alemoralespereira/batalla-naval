@@ -4,13 +4,13 @@ import socket from '../socket.js';
 class Avion extends Entity {
     constructor(avionData, numeroAvion) {
         super(
-            avionData.x,
-            avionData.y,
+            avionData.x, //xInicial
+            avionData.y, //yInicial
             avionData.velocidad,
             avionData.velocidadMaxima,
             avionData.angulo,
             avionData.aceleracion,
-            avionData.objetivo,
+            avionData.objeto,
             avionData.combustible,
         );
         this.piloto = avionData.piloto;
@@ -26,16 +26,16 @@ class Avion extends Entity {
 
     init(escena) {
         this.escena = escena; 
-        if (this.objetivo) {
+        if (this.objeto) {
             // Si el sprite ya existe, actualiza su posición
-            this.objetivo.x = this.escena.entidades.portaaviones.x;
-            this.objetivo.y = this.escena.entidades.portaaviones.y;
-            this.objetivo.angle = this.escena.entidades.portaaviones.angulo;
+            this.objeto.x = this.escena.entidades.portaaviones.objeto.x;
+            this.objeto.y = this.escena.entidades.portaaviones.objeto.y;
+            this.objeto.angle = this.escena.entidades.portaaviones.objeto.angle;
         } else {
-            this.objetivo = escena.physics.add.sprite(this.x, this.y, "avion").setScale(0.2).setOrigin(0.5, 0.5);
-            this.rangoVision = escena.add.zone(this.x, this.y, 250, 250).setOrigin(0.5, 0.5);
-            this.objetivo.rangoVision = this.rangoVision;
-     
+            this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+            this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 250, 250).setOrigin(0.5, 0.5);
+            this.objeto.rangoVision = this.rangoVision;
+            
             
             // this.graphics = escena.add.graphics();
             // this.dibujarRangoVision();
@@ -47,13 +47,13 @@ class Avion extends Entity {
             this.indicadorCombustible.setVisible(false);
             this.indicadorCombustible.setScrollFactor(0); 
         }      
-        this.objetivo.numeroAvion = this.numeroAvion;
-        this.objetivo.piloto = this.piloto;
-        this.objetivo.despego = this.despego;
+        this.objeto.numeroAvion = this.numeroAvion;
+        this.objeto.piloto = this.piloto;
+        this.objeto.despego = this.despego;
         super.init(escena);
 
     }
-    
+   
     dibujarRangoVision() {
         this.graphics.clear();
         this.graphics.lineStyle(2, 0x0000FF); 
@@ -85,11 +85,11 @@ class Avion extends Entity {
 
     update() {
         super.update();
-        this.rangoVision.setPosition(this.objetivo.x, this.objetivo.y);
+        this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones") {
             //Si esta seleccionado o si se esta moviendo pero tiene piloto.
-            if(this.seleccionado || ((this.x != this.objetivo.x || this.y != this.objetivo.y) && this.piloto)) {    
+            if(this.seleccionado || ((this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) && this.piloto)) {    
                 this.indicadorCombustible.setVisible(true);
                 // El jugador ve que todos los aviones tienen el mismo combustible maximo pero cuanto más tripulantes más rápido se consume
                 const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
@@ -98,13 +98,15 @@ class Avion extends Entity {
         }
         
         //Si la diferencia entre la posicion del avion y la posicion del portaaviones sobre el eje de las X, es mayor a 150, es porque despegó.
-        if((this.objetivo.x - this.escena.entidades.portaaviones.x) > 250) {          
+        if((this.objeto.x - this.escena.entidades.portaaviones.objeto.x) > 250) {          
             this.despego = true;
-            this.objetivo.despego = true;
+            //this.objeto.despego = true;
         }     
 
-        this.objetivo.piloto = this.piloto;
-        this.objetivo.despego = this.despego;
+        //this.piloto = this.objeto.piloto;
+        //this.despego = this.objeto.despego;
+        this.objeto.piloto = this.piloto;
+        this.objeto.despego = this.despego;
        
         if(this.piloto){
         //    console.log("Avion:" , this.numeroAvion);
@@ -114,9 +116,9 @@ class Avion extends Entity {
                 rol: this.escena.rol,
                 sala: this.escena.sala,
                 nombreEntidad: `avion_${this.numeroAvion}`,
-                x: this.objetivo.x,
-                y: this.objetivo.y,
-                angulo: this.objetivo.angle
+                x: this.objeto.x,
+                y: this.objeto.y,
+                angulo: this.objeto.angle
             };
             // Enviar al servidor
             socket.emit("moverEntidad", datosMovimiento);
@@ -124,7 +126,7 @@ class Avion extends Entity {
     }
 
     mover(controles) {
-        if (!this.objetivo) {
+        if (!this.objeto) {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
@@ -136,11 +138,11 @@ class Avion extends Entity {
                 
                 // Rotación (A y D)
                 if (controles.izquierda.isDown) {
-                    this.objetivo.setAngularVelocity(-40);
+                    this.objeto.setAngularVelocity(-40);
                 } else if (controles.derecha.isDown) {
-                    this.objetivo.setAngularVelocity(40);
+                    this.objeto.setAngularVelocity(40);
                 } else {
-                    this.objetivo.setAngularVelocity(0);
+                    this.objeto.setAngularVelocity(0);
                 }
 
                 // Aceleración (W)
@@ -149,25 +151,25 @@ class Avion extends Entity {
                 }
 
                 // Calcular nueva velocidad
-                const angle = Phaser.Math.DegToRad(this.objetivo.angle);
+                const angle = Phaser.Math.DegToRad(this.objeto.angle);
                 const velocityX = Math.cos(angle) * this.velocidad;
                 const velocityY = Math.sin(angle) * this.velocidad;
 
                 // Actualizar las posiciones
-                this.objetivo.setVelocityX(velocityX);
-                this.objetivo.setVelocityY(velocityY);
+                this.objeto.setVelocityX(velocityX);
+                this.objeto.setVelocityY(velocityY);
 
                 // Actualizar las posiciones internas
-                this.x = this.objetivo.x;
-                this.y = this.objetivo.y;
-                this.angulo = this.objetivo.angle;
+                // this.x = this.objeto.x;
+                // this.y = this.objeto.y;
+                // this.angulo = this.objeto.angle;
             } else {
-                this.objetivo.setAngularVelocity(0);
+                this.objeto.setAngularVelocity(0);
             }
         } else {
-            this.objetivo.setAngularVelocity(0);
-            this.objetivo.setVelocityX(0);
-            this.objetivo.setVelocityY(0);
+            this.objeto.setAngularVelocity(0);
+            this.objeto.setVelocityX(0);
+            this.objeto.setVelocityY(0);
         }
     }
 }
