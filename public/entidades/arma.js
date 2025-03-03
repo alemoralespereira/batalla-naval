@@ -40,7 +40,7 @@ class Arma {
         const proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectil");
         this.escena.proyectiles.add(proyectil);
         proyectil.daño = this.daño;
-
+        
         console.log(`Proyectil creado en (${proyectil.x}, ${proyectil.y}) con daño ${proyectil.daño}`);
         this.escena.physics.moveTo(proyectil, destX, destY, this.velocidad);
         

@@ -53,6 +53,15 @@ class Avion extends Entity {
         super.init(escena);
 
     }
+
+    recibirDaño(daño) {
+        console.log("Daño recibido: ", daño);   
+        this.salud -= daño;
+        if (this.salud <= 0) {
+            this.salud = 0;
+         //   this.objeto.destroy();
+        }
+    }
    
     dibujarRangoVision() {
         this.graphics.clear();

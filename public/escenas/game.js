@@ -161,23 +161,27 @@ class EscenaPrincipal extends Phaser.Scene {
         });
 
         //Overlap entre proyectiles Bismarck y aviones
-        /*this.equipoAzul.forEach((avion) => {
+        this.equipoAzul.forEach((avion) => {
             if (avion instanceof Avion) {
                 this.physics.add.overlap(
                     this.proyectiles,
                     avion.objeto, 
-                    this.impacto, 
-                    //this.autorizarImpacto, 
+                    (avion_, proyectil) => this.impacto(avion, proyectil), 
+                    null,
                     this
                 );
             }
-        });*/
+        });
     }
 
-    /*impacto(avion, proyectil) {
-        proyectil.destroy();
+    impacto(avion, proyectil) {
+        console.log("Impacto recibido");
+        console.log(`Proyectil: ${proyectil}`);
+        //proyectil.destroy();
         avion.recibirDaño(proyectil.daño);
-    }*/
+        //cambiar color del boton a rojo
+    }
+
     update() {
         // Actualizar posiciones de los puntos en el minimapa
         if (this.entidades.bismarck) {
