@@ -181,15 +181,15 @@ class EscenaPrincipal extends Phaser.Scene {
     update() {
         // Actualizar posiciones de los puntos en el minimapa
         if (this.entidades.bismarck) {
-            this.puntoBismarck.setPosition(this.entidades.bismarck.objetivo.x, this.entidades.bismarck.objetivo.y);
+            this.puntoBismarck.setPosition(this.entidades.bismarck.objeto.x, this.entidades.bismarck.objeto.y);
         }
         if (this.entidades.portaaviones) {
-            this.puntoPortaaviones.setPosition(this.entidades.portaaviones.objetivo.x, this.entidades.portaaviones.objetivo.y);
+            this.puntoPortaaviones.setPosition(this.entidades.portaaviones.objeto.x, this.entidades.portaaviones.objeto.y);
         }
         for (let i = 1; i < 11; i++) {
             const nombreAvion = `avion_${i}`;
             if (this.entidades[nombreAvion]) {
-                this.puntosAviones[nombreAvion].setPosition(this.entidades[nombreAvion].objetivo.x, this.entidades[nombreAvion].objetivo.y);
+                this.puntosAviones[nombreAvion].setPosition(this.entidades[nombreAvion].objeto.x, this.entidades[nombreAvion].objeto.y);
             }
         }
 
