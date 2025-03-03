@@ -25,7 +25,8 @@ class Arma {
         
         if (circulo.contains(escena.input.activePointer.worldX, escena.input.activePointer.worldY)) {
             cursorMira.setVisible(true);
-            this.lineaAtaque = escena.add.line(0, 0, x, y, destX, destY,  0xffffff).setOrigin(0);
+            const colorLinea = this.disparoActivado ? 0xff0000 : 0xffffff;
+            this.lineaAtaque = escena.add.line(0, 0, x, y, destX, destY,  colorLinea).setOrigin(0);
             
         } else {
             cursorMira.setVisible(false);

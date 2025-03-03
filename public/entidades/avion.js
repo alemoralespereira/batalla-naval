@@ -55,12 +55,15 @@ class Avion extends Entity {
     }
 
     recibirDaño(daño) {
-        console.log("Daño recibido: ", daño);   
         this.salud -= daño;
+        console.log("Daño recibido: ", daño, " Salud actual: ", this.salud);
+
         if (this.salud <= 0) {
             this.salud = 0;
-         //   this.objeto.destroy();
+            this.escena.eliminarAvion(this);
         }
+
+        socket.emit("dañarEntidad", { nombreEntidad: `avion_${this.numeroAvion}`, sala: this.escena.sala, salud: this.salud });
     }
    
     dibujarRangoVision() {

@@ -150,8 +150,8 @@ class Bismarck extends Barco {
             const cuadroInformativoAvion = this.escena.add.group();
             cuadroInformativoAvion.addMultiple([
                 panel.agregarRectangulo(x + 200, y, 460, 160),
-                panel.agregarTexto(x + 205, y + 10, `Calibre:  ${arma.calibre}`),
-                panel.agregarTexto(x + 205, y + 40, `Rango:  ${arma.rango}`),
+                panel.agregarTexto(x + 205, y + 10, `Rango:  ${arma.rango}m`),
+                panel.agregarTexto(x + 205, y + 40, `Velocidad disapro:  ${arma.velocidad}m/s`),
                 panel.agregarTexto(x + 205, y + 70, `Daño:  ${arma.daño}`),
                 panel.agregarTexto(x + 205, y + 100, `Cadencia disparo:  1 cada ${arma.cadenciaDisparo} segundos`),
                 panel.agregarTexto(x + 205, y + 130, `Cantidad municiones:  ${arma.cantidadMuniciones} / ${arma.cantidadMuniciones}`),

@@ -144,6 +144,16 @@ class EscenaPrincipal extends Phaser.Scene {
             }
         });
 
+        socket.on("eliminarEntidad", (data) => {
+            if (!this.entidades[data.nombreEntidad]) {
+                console.error(`Entidad ${data.nombreEntidad} no encontrada.`);
+                return;
+            }
+
+            const entidad = this.entidades[data.nombreEntidad];
+            this.eliminarAvion(entidad);
+        });
+
          //********************************************************/
         // MANEJO DE OVERLAPS
 
@@ -166,7 +176,7 @@ class EscenaPrincipal extends Phaser.Scene {
                 this.physics.add.overlap(
                     this.proyectiles,
                     avion.objeto, 
-                    (avion_, proyectil) => this.impacto(avion, proyectil), 
+                    (proyectil) => this.impacto(avion, proyectil), 
                     null,
                     this
                 );
@@ -175,11 +185,24 @@ class EscenaPrincipal extends Phaser.Scene {
     }
 
     impacto(avion, proyectil) {
-        console.log("Impacto recibido");
-        console.log(`Proyectil: ${proyectil}`);
-        //proyectil.destroy();
+        proyectil.destroy();
         avion.recibirDaño(proyectil.daño);
-        //cambiar color del boton a rojo
+    }
+
+    eliminarAvion(avion) {
+        const nombreEntidad = `avion_${avion.numeroAvion}`;
+        avion.objeto.destroy();
+        this.equipoAzul = this.equipoAzul.filter((a) => a.numeroAvion !== avion.numeroAvion);
+
+        if (this.rol === "portaaviones") {
+            // Una posible mejora sería "desactivar" el boton en vez de eliminarlo
+            this.botonesAviones[avion.numeroAvion - 1].destroy();
+        }
+
+        delete this.entidades[nombreEntidad];
+
+        // Condicion de victoria si se eliminan los 10 aviones
+        // ...
     }
 
     update() {

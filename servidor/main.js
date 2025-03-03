@@ -177,6 +177,30 @@ io.on("connection", (socket) => {
         });
     });
 
+    socket.on("dañarEntidad", (data) => {
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+
+        // Verificar si la entidad existe
+        const entidad = salas[data.sala].estadoJuego.entidades[data.nombreEntidad];
+        if (!entidad) {
+            console.error(`❌ Entidad ${data.nombreEntidad} no encontrada en sala ${data.sala}`);
+            //console.log("Entidades actuales:", salas[data.sala].estadoJuego.entidades);
+            return;
+        }
+
+        entidad.setSalud(Number(data.salud));
+
+        if (entidad.getSalud() <= 0) {
+            delete salas[data.sala].estadoJuego.entidades[data.nombreEntidad];
+            // Emitir la actualización a todos los jugadores en la sala
+           socket.to(data.sala).emit("eliminarEntidad", { nombreEntidad: data.nombreEntidad });
+        }
+    });
+
     // Desconexión del jugador
     socket.on("disconnect", () => {
         for (const sala in salas) {
