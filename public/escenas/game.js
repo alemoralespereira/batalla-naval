@@ -124,8 +124,7 @@ class EscenaPrincipal extends Phaser.Scene {
             arriba: "W",
             izquierda: "A",
             derecha: "D",
-            abajo: "S",
-            atacar: "X"
+            abajo: "S"
         });
 
         //********************************************************/
@@ -192,6 +191,40 @@ class EscenaPrincipal extends Phaser.Scene {
             null,
             this
         );
+
+        //Overlap entre torpedo y helice de Bismarck
+        this.physics.add.overlap(
+            this.proyectiles,
+            this.entidades.bismarck.helice,
+            () => this.inmovilizarBismarck(),
+            null,
+            this
+        );
+
+        //Colision entre bismarck y portaaviones
+        this.physics.add.collider(
+            this.entidades.bismarck.objeto, 
+            this.entidades.portaaviones.objeto
+        );
+    }
+
+    inmovilizarBismarck() {
+        this.entidades.bismarck.objeto.setVelocity(0, 0);
+        const mensaje = this.add.text(
+            this.cameras.main.centerX,
+            200, 
+            `¡¡¡BISMARCK INMOVILIZADO!!!`,
+            {
+                fontSize: '32px',
+                fontStyle: 'bold',
+                color: 'rgba(246, 248, 246, 0.87)',
+                backgroundColor: 'rgba(16, 181, 21, 0.5)',
+                padding: {
+                    x: 15,
+                    y: 15
+                }
+            }).setOrigin(0.5)
+            .setScrollFactor(0);
     }
 
     victoriaBismarck() {
@@ -401,11 +434,6 @@ class EscenaPrincipal extends Phaser.Scene {
 
 
     moverEntidad() {
-
-        if (this.controles.atacar.isDown) {
-            this.scene.pause("EscenaPrincipal");
-            this.scene.start('EscenaAtaque');//,{estadoJuego: this.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
-        }
 
         let entidad = null;
         let nombreEntidad = "";
