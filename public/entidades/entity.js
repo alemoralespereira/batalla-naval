@@ -20,6 +20,11 @@ class Entity {
 
     calcularCombustible() {
         // Calcular la distancia recorrida usando las velocidades
+    if (!this.objeto || !this.objeto.body) {
+        console.warn("Intento de calcular combustible en una entidad destruida.");
+        return; //Evita calcular combustible si el objeto ya no existe
+    }
+
         const deltaX = this.objeto.body.velocity.x * 0.016; // Ajuste para frame rate
         const deltaY = this.objeto.body.velocity.y * 0.016;
 

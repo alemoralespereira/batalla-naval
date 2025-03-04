@@ -1,5 +1,6 @@
 import Entity from './entity.js';
 import socket from '../socket.js';
+import Arma from "./arma.js";
 
 class Avion extends Entity {
     constructor(avionData, numeroAvion) {
@@ -13,6 +14,7 @@ class Avion extends Entity {
             avionData.objeto,
             avionData.combustible,
         );
+        this.sonidoMotor = null;
         this.piloto = avionData.piloto;
         this.observador = avionData.observador;
         this.operador = avionData.operador;
@@ -22,10 +24,75 @@ class Avion extends Entity {
         this.multiplicadorCombustible = 1;
         this.despego = false;
         this.salud = avionData.salud;
+        this.arma = new Arma({
+            nombre: "Torpedo aéreo",
+            rango: 500,
+            velocidad: 300,
+            daño: 5,
+            cadenciaDisparo: 0,  // Sin cadencia, ya que solo tiene 1 disparo
+            cantidadMuniciones: 1
+            });
+    }
+
+    disparar(){
+        if(!this.torpedo) return; // No puede disparar sin munición
+
+        const anguloRad = Phaser.Math.DegToRad(this.objeto.angle);
+        const destinoX = this.objeto.x + Math.cos(anguloRad) * this.arma.rango;
+        const destinoY = this.objeto.y + Math.sin(anguloRad) * this.arma.rango;
+
+        console.log(`Avión ${this.numeroAvion} disparando torpedo.`);
+        this.escena.sound.play('disparoAvion'); // Reproducir sonido de disparo
+        this.arma.dispararArma(this.objeto.x, this.objeto.y, destinoX, destinoY,this);
+
+        this.torpedo = false; // Torpedo agotado hasta recargar
+
+
+
+
+        // **Restablecer movimiento después del disparo**
+        this.escena.time.delayedCall(100, () => {
+        if (this.objeto && this.objeto.body) {
+            const angle = Phaser.Math.DegToRad(this.objeto.angle);
+            const velocityX = Math.cos(angle) * this.velocidad;
+            const velocityY = Math.sin(angle) * this.velocidad;
+            this.objeto.setVelocity(velocityX, velocityY);
+        }else{
+            console.warn(`El avión ${this.numeroAvion} no pudo restablecer su velocidad después de disparar.`);
+        }
+        });
+        }
+
+    recargar(){
+        console.log(`Avión ${this.numeroAvion} recargando torpedo.`);
+        this.torpedo = true;
     }
 
     init(escena) {
-        this.escena = escena; 
+        this.escena = escena;
+        this.teclas = this.escena.input.keyboard.addKeys({
+            disparo: Phaser.Input.Keyboard.KeyCodes.SPACE
+            });
+
+       // Cargar el sonido del motor del avión
+        this.sonidoMotor = this.escena.sound.add('motoravion', { loop: true, volume: 0.5 });
+
+        if (!this.sonidoMotor.isPlaying) {
+            this.sonidoMotor.play(); // Inicia el sonido del motor al despegar
+        }
+
+
+        this.arma = new Arma({
+            nombre: "Torpedo aéreo",
+            rango: 500,
+            velocidad: 300,
+            daño: 5,
+            cadenciaDisparo:0,
+            cantidadMuniciones:1
+            },this.escena);
+
+        this.torpedo = true;  // Cada avión obtiene un torpedo al despegar
+
         if (this.objeto) {
             // Si el sprite ya existe, actualiza su posición
             this.objeto.x = this.escena.entidades.portaaviones.objeto.x;
@@ -61,6 +128,7 @@ class Avion extends Entity {
         if (this.salud <= 0) {
             this.salud = 0;
             this.escena.eliminarAvion(this);
+            this.escena.sound.play('explosion');
         }
 
         socket.emit("dañarEntidad", { nombreEntidad: `avion_${this.numeroAvion}`, sala: this.escena.sala, salud: this.salud });
@@ -97,6 +165,10 @@ class Avion extends Entity {
 
     update() {
         super.update();
+        console.log(`Avión ${this.numeroAvion}: Velocidad (${this.objeto.body.velocity.x}, ${this.objeto.body.velocity.y})`);
+        if(Phaser.Input.Keyboard.JustDown(this.teclas.disparo)){
+            this.disparar();
+            }
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones") {
