@@ -35,10 +35,14 @@ class Bismarck extends Barco {
         this.popa.body.setCircle(40, -25, -25);
         this.popa.setVisible(false);
 
+        this.helices = escena.physics.add.sprite(this.objeto.x, this.objeto.y, null).setOrigin(0.5, 0.5);
+        this.helices.body.setSize(10,10);
+        this.helices.setVisible(false);
+
         this.updateHitboxes();
 
         this.puntosDeColision = escena.add.group();
-        this.puntosDeColision.addMultiple([this.objeto, this.proa, this.popa]);
+        this.puntosDeColision.addMultiple([this.objeto, this.proa, this.popa, this.helices]);
 
         this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 500, 500).setOrigin(0.5, 0.5);
         this.objeto.rangoVision = this.rangoVision;
@@ -58,6 +62,7 @@ class Bismarck extends Barco {
         const angleRad = this.objeto.rotation;
         const offsetProa = 90; // Distancia desde el centro hacia la proa
         const offsetPopa = -85; // Distancia desde el centro hacia la popa
+        const offsetHelices = -150; // Distancia desde el centro hacia las hélices
 
         // Posición de la proa
         this.proa.x = this.objeto.x + Math.cos(angleRad) * offsetProa;
@@ -69,6 +74,10 @@ class Bismarck extends Barco {
         this.popa.y = this.objeto.y + Math.sin(angleRad) * offsetPopa;
         this.popa.rotation = angleRad;
 
+        // Posición de las hélices
+        this.helices.x = this.objeto.x + Math.cos(angleRad) * offsetHelices;
+        this.helices.y = this.objeto.y + Math.sin(angleRad) * offsetHelices;   
+        this.helices.rotation = angleRad;
     }
 
     configurar() {
