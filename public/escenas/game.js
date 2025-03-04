@@ -47,7 +47,8 @@ class EscenaPrincipal extends Phaser.Scene {
         //*********************************************************************************/
         // MAPA PRINCIPAL, CAMARA Y LIMITES DEL MUNDO
         this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
-        const puerto = this.add.image(2800, 0, "puerto").setOrigin(0, 0);
+        this.puerto = this.add.image(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
+        this.puerto = this.physics.add.sprite(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
 
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
@@ -187,6 +188,36 @@ class EscenaPrincipal extends Phaser.Scene {
                 );
             }
         });
+
+        //Overlap entre puerto y Bismarck
+        this.physics.add.overlap(
+            this.puerto,
+            this.entidades.bismarck.objeto,
+            () => this.victoriaBismarck(),
+            null,
+            this
+        );
+    }
+
+    victoriaBismarck() {
+        this.entidades.bismarck.objeto.setVisible(false);
+        const mensaje = this.add.text(
+            this.cameras.main.centerX,
+            200, 
+            `¡¡¡VICTORIA PARA EL BISMARCK!!!`,
+            {
+                fontSize: '32px',
+                fontStyle: 'bold',
+                color: 'rgba(246, 248, 246, 0.87)',
+                backgroundColor: 'rgba(16, 181, 21, 0.5)',
+                padding: {
+                    x: 15,
+                    y: 15
+                }
+            }).setOrigin(0.5)
+            .setScrollFactor(0);
+        this.scene.pause("EscenaPrincipal");
+        //this.scene.start('EscenaVictoria', { rol: this.rol });
     }
 
     impacto(avion, proyectil) {

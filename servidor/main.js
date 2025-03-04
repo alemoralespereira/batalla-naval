@@ -27,6 +27,64 @@ let salas = {};
 //const conexion = db.getConnection();
 //const query = new consultas(conexion);
 
+function posicionRandomPuerto() {
+    const esquinas = [
+        { x: 0, y: 0 },
+        { x: 2800, y: 0 }, 
+        { x: 0, y: 2800 },
+        { x: 2800, y: 2800 }
+    ];
+
+    return esquinas[Math.floor(Math.random() * 4)];
+}
+
+function posicionRandomBismarck(posicionPuerto){    
+    const distanciaMinPuerto = 2000;
+    let posicionBismarck;
+    let distancia;
+
+    do {
+        posicionBismarck = {
+            x: Math.floor(Math.random() * 3200),
+            y: Math.floor(Math.random() * 3200)
+        };
+        
+        distancia = Math.sqrt(
+            Math.pow(posicionBismarck.x - posicionPuerto.x, 2) + 
+            Math.pow(posicionBismarck.y - posicionPuerto.y, 2)
+        );
+
+    } while (distancia < distanciaMinPuerto);
+
+    return posicionBismarck;
+}
+
+function posicionRandomPortaaviones(posicionBismarck, posicionPuerto){
+    const distanciaMinBismarck = 2000;
+    const distanciaMinPuerto = 1500;
+    let posicionPortaaviones;
+    let distanciaDeBismarck;
+    let distanciaDePuerto;
+
+    do {
+        posicionPortaaviones = {
+            x: Math.floor(Math.random() * 3200),
+            y: Math.floor(Math.random() * 3200)
+        };
+
+        distanciaDeBismarck = Math.sqrt(
+            Math.pow(posicionPortaaviones.x - posicionBismarck.x, 2) + 
+            Math.pow(posicionPortaaviones.y - posicionBismarck.y, 2)
+        );
+
+        distanciaDePuerto = Math.sqrt(
+            Math.pow(posicionPortaaviones.x - posicionPuerto.x, 2) + 
+            Math.pow(posicionPortaaviones.y - posicionPuerto.y, 2)
+        );
+    } while (distanciaDeBismarck < distanciaMinBismarck || distanciaDePuerto < distanciaMinPuerto);
+
+    return posicionPortaaviones;
+}   
 
 
 io.on("connection", (socket) => {
@@ -80,11 +138,17 @@ io.on("connection", (socket) => {
 
         // Iniciar juego cuando hay dos jugadores
         if (salas[sala].jugadores.length === 2) {
+            // Inicializar el estado del juego
+           
+            const puerto = posicionRandomPuerto();
+            const posicionBismarck = posicionRandomBismarck(puerto);
+            const posicionPortaaviones = posicionRandomPortaaviones(posicionBismarck, puerto);
+
             const entidades = {};
 
             entidades.bismarck = new Bismarck({
-                x: 1500,
-                y: 200,
+                x: posicionBismarck.x,
+                y: posicionBismarck.y,
                 velocidad: 0,
                 velocidadMaxima: 100,
                 angulo: 0,
@@ -94,8 +158,8 @@ io.on("connection", (socket) => {
                 combustible: 50000
             });
             entidades.portaaviones = new Portaaviones({
-                x: 50,
-                y: 500,
+                x: posicionPortaaviones.x,
+                y: posicionPortaaviones.y,
                 velocidad: 0,
                 velocidadMaxima: 100,
                 angulo: 0,
@@ -106,8 +170,8 @@ io.on("connection", (socket) => {
 
             for (let i = 1; i < 11; i++) {
                 entidades[`avion_${i}`] = new Avion({
-                    x: 50,
-                    y: 500,
+                    x: posicionPortaaviones.x,
+                    y: posicionPortaaviones.y,
                     velocidad: 0,
                     velocidadMaxima: 100,
                     angulo: 0,
@@ -122,6 +186,7 @@ io.on("connection", (socket) => {
             }
 
             salas[sala].estadoJuego.entidades = entidades;
+            salas[sala].estadoJuego.puerto = puerto;
 
             io.to(sala).emit("juegoIniciado", {
                 mensaje: "El juego ha comenzado",
