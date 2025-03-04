@@ -1,5 +1,7 @@
+import Bismarck from './bismarck.js';
+
 class Arma {
-    constructor({ nombre, rango, velocidad, daño, cadenciaDisparo, cantidadMuniciones, origenX, origenY }) {
+    constructor({ nombre, rango, velocidad, daño, cadenciaDisparo, cantidadMuniciones, origenX, origenY }, escena) {
         this.nombre = nombre;
         this.rango = rango;
         this.velocidad = velocidad;
@@ -9,6 +11,7 @@ class Arma {
         this.disparoActivado = false;
         // this.origenX = origenX;
         // this.origenY = origenY;
+        this.escena = escena;
     }
 
     dibujarRangoAtaque(escena, cursorMira, x, y, destX, destY) {
@@ -35,7 +38,12 @@ class Arma {
 
     //dibujarLineaAtaque(
 
-    dispararArma(origenX, origenY, destX, destY) {
+    dispararArma(origenX, origenY, destX, destY, avionDisparador=null) {
+        if(!this.escena){
+            console.error("Error: La escena no está definida en el arma.");
+            return;
+            }
+
         console.log(`Disparando arma desde (${origenX}, ${origenY}) hacia (${destX}, ${destY})`);
         
         const proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectil");
@@ -44,7 +52,11 @@ class Arma {
         
         console.log(`Proyectil creado en (${proyectil.x}, ${proyectil.y}) con daño ${proyectil.daño}`);
         this.escena.physics.moveTo(proyectil, destX, destY, this.velocidad);
-        
+
+        // Si el disparo es del Bismarck, reproducir su sonido
+        if (avionDisparador && avionDisparador instanceof Bismarck) {
+        this.escena.sound.play('disparoBismarck');
+        }
       
         //proyectil.destroy();
         //Se multiplica la cadenciaDisparo en segundos por 1000 para convertirlo en milisegundos.
@@ -58,8 +70,34 @@ class Arma {
         this.escena.time.delayedCall(duracion, () => {
             proyectil.destroy();
         });
-        
+
+    // **Colisión con el Bismarck**
+    if (this.escena.entidades.bismarck) {
+        const bismarck = this.escena.entidades.bismarck; // Obtener la instancia real del Bismarck
+        this.escena.physics.add.overlap(proyectil, bismarck.objeto, (proy, obj) => {
+        console.log("Torpedo impactó al Bismarck!");
+
+        if (typeof bismarck.recibirDaño === "function") {
+            bismarck.recibirDaño(proyectil.daño);
+            proy.destroy(); // Eliminar el proyectil tras la colisión
+        } else {
+            console.error("Error: Bismarck no tiene el método recibirDaño()");
+        }
+    });
+    }
+
+    // **Evitar que el proyectil impacte contra el avión que lo disparó**
+    if (avionDisparador) {
+        proyectil.body.checkCollision.none = true; // Evita la colisión con todo por unos milisegundos
+        this.escena.time.delayedCall(200, () => {
+            proyectil.body.checkCollision.none = false; // Reactivar colisiones después de 0.2 segundos
+        });
+
+        this.escena.physics.add.collider(proyectil, avionDisparador.objeto, (proy, avion) => {
+            console.log(`Proyectil ignorado por el avión ${avionDisparador.numeroAvion}`);
+        }, null, this);
+    }
+
     }
 }
-
 export default Arma;

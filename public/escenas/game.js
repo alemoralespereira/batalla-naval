@@ -36,6 +36,11 @@ class EscenaPrincipal extends Phaser.Scene {
         this.load.image("puerto", "../assets/puerto.png");
         this.load.image("hit", "../assets/hit.png");
         this.load.image("mira", "../assets/mira.png");
+        this.load.audio('motoravion', 'assets/sonidos/motoravion.mp3');
+        this.load.audio('disparoAvion', 'assets/sonidos/disparoAvion.mp3');
+        this.load.audio('disparoBismarck', 'assets/sonidos/disparoBismarck.mp3');
+        this.load.audio('barco', 'assets/sonidos/barco.mp3');
+        this.load.audio('explosion', 'assets/sonidos/explosion.mp3');
     }
 
     create() {

@@ -15,14 +15,19 @@ class Bismarck extends Barco {
             bismarckData.objeto,
             bismarckData.combustible,
         );
-        this.salud = bismarckData.salud;
+        this.salud = 15;
         this.armas = []
         this.armaSeleccionada = null;
         this.cursorMira = null;
+        this.indicadorSalud = null;
+        this.sonidoMotor = null;
     }
 
     init(escena) {
-        this.escena = escena; 
+        this.escena = escena;
+
+        this.sonidoMotor = this.escena.sound.add('barco', { loop: true, volume: 0.4 });
+
         this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setOrigin(0.5, 0.5);
         this.objeto.body.setCircle(40, 210, 85);
         this.objeto.setVisible(true);
@@ -48,6 +53,17 @@ class Bismarck extends Barco {
             fontSize: '20px',
             fill: '#ffffff'
         });
+
+        this.indicadorSalud = this.escena.add.text(this.objeto.x, this.objeto.y - 30, `Vida: ${this.salud}`, {
+            fontSize: "16px",
+            fill: "#ff0000",
+            fontWeight: "bold",
+            backgroundColor: "#ffffff"
+        }).setOrigin(0.5);
+
+        super.init(escena);
+
+
         this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
         this.indicadorCombustible.setVisible(false);
         this.indicadorCombustible.setScrollFactor(0);
@@ -223,6 +239,21 @@ class Bismarck extends Barco {
         
         super.update();
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
+
+        if (this.objeto) {
+            this.indicadorSalud.setPosition(this.objeto.x, this.objeto.y - 30); // Mantener indicador de vida en la posición del barco
+        }
+
+        // Si el barco está en movimiento, reproducir sonido del motor
+        if (this.velocidad > 0 && !this.sonidoMotor.isPlaying) {
+            this.sonidoMotor.play();
+        }
+
+        // Si el barco se detiene, detener el sonido del motor
+        if (this.velocidad === 0 && this.sonidoMotor.isPlaying) {
+            this.sonidoMotor.stop();
+        }
+
         //this.dibujarRangoVision();
         this.updateHitboxes();
         if(this.escena.rol === "bismarck") {
@@ -309,6 +340,26 @@ class Bismarck extends Barco {
             this.objeto.setVelocityY(0);
         }
     }
+
+    recibirDaño(daño) {
+        this.salud -= daño;
+        console.log(`El Bismarck recibió ${daño} de daño. Salud restante: ${this.salud}`);
+
+        // Actualizar el indicador de salud
+        this.indicadorSalud.setText(`Vida: ${this.salud}`);
+        this.indicadorSalud.setPosition(this.objeto.x, this.objeto.y - 30);
+
+        if (this.salud <= 0) {
+            this.salud = 0;
+            console.log("Bismarck destruido!");
+            this.escena.sound.play('explosion'); // Sonido de explosión
+            this.objeto.destroy(); // Eliminar el barco si se queda sin salud
+        }
+    }
+
+
+
+
 }
 
 export default Bismarck;
