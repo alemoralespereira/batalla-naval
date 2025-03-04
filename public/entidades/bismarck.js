@@ -1,6 +1,7 @@
 import Panel from '../ui/panel.js';
 import Barco from './barco.js';
 import Arma from './arma.js';
+import Avion from './avion.js';
 
 class Bismarck extends Barco {
     constructor(bismarckData) {
@@ -130,11 +131,18 @@ class Bismarck extends Barco {
 
         // Configurar la cámara para seguir al Bismarck
         this.escena.cameras.main.startFollow(this.escena.entidades.bismarck.objeto);
+        
+        //Hacer invisibles los sprites y los puntos en el minimapa, del equipo Azul.
         this.escena.entidades.portaaviones.objeto.setVisible(false);
+        this.escena.puntoPortaaviones.setVisible(false);
         this.escena.equipoAzul.forEach((avion) => {
             //console.log('Avion:', avion);
             //console.log('Objetivo del avion:', avion.objeto);
             avion.objeto.setVisible(false);
+            if(avion instanceof Avion) {
+                const nombreAvion = `avion_${avion.numeroAvion}`;
+                this.escena.puntosAviones[nombreAvion].setVisible(false);
+            }
         });
 
         const panel = new Panel(this.escena);
@@ -146,6 +154,7 @@ class Bismarck extends Barco {
             const x = -100;
             const y = 460 + i * 30;
             const botonArma = panel.agregarBoton(x, y, arma.nombre);
+            this.escena.camaraMinimapa.ignore(botonArma);
             botonesArmas[arma.nombre] = botonArma;
             const cuadroInformativoAvion = this.escena.add.group();
             cuadroInformativoAvion.addMultiple([
@@ -156,6 +165,7 @@ class Bismarck extends Barco {
                 panel.agregarTexto(x + 205, y + 100, `Cadencia disparo:  1 cada ${arma.cadenciaDisparo} segundos`),
                 panel.agregarTexto(x + 205, y + 130, `Cantidad municiones:  ${arma.cantidadMuniciones} / ${arma.cantidadMuniciones}`),
             ]);
+            this.escena.camaraMinimapa.ignore(cuadroInformativoAvion);
             cuadroInformativoAvion.setVisible(false);
             botonArma.on('pointerover', () => {
                 cuadroInformativoAvion.setVisible(true);
@@ -210,6 +220,7 @@ class Bismarck extends Barco {
     }
 
     update() {
+        
         super.update();
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
         //this.dibujarRangoVision();
@@ -217,7 +228,10 @@ class Bismarck extends Barco {
         if(this.escena.rol === "bismarck") {
            this.cursorMira.setPosition(this.escena.input.activePointer.worldX, this.escena.input.activePointer.worldY);
 
-            if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
+            //if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
+                console.log("Velocidad: ", this.velocidad);
+            if(this.velocidad > 0) {
+                console.log("Adentro del if velocidad: ", this.velocidad);    
                 this.indicadorCombustible.setVisible(true);
                 this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${this.combustible}`);
             }

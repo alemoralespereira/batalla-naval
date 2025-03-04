@@ -215,7 +215,7 @@ io.on("connection", (socket) => {
     });
 });
 
-// Iniciar servidor en el puerto 3000
+// Iniciar servidor en el puerto
 servidor.listen(PUERTO, () => {
     console.log(`✅ Servidor corriendo en el puerto ${PUERTO}`);
 });

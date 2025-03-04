@@ -185,7 +185,11 @@ class EscenaPrincipal extends Phaser.Scene {
     }
 
     impacto(avion, proyectil) {
+        this.explosion = this.add.image(avion.objeto.x, avion.objeto.y, "hit");
         proyectil.destroy();
+        this.time.delayedCall(250, () => {
+            this.explosion.destroy();
+        });
         avion.recibirDaño(proyectil.daño);
     }
 
@@ -196,7 +200,10 @@ class EscenaPrincipal extends Phaser.Scene {
 
         if (this.rol === "portaaviones") {
             // Una posible mejora sería "desactivar" el boton en vez de eliminarlo
-            this.botonesAviones[avion.numeroAvion - 1].destroy();
+            //this.botonesAviones[avion.numeroAvion - 1].destroy();
+            this.botonesAviones[avion.numeroAvion - 1].setBackgroundColor('rgba(195, 19, 19, 0.9)');
+            this.botonesAviones[avion.numeroAvion - 1].disableInteractive();
+            //this.avion.indicadorCombustible.setVisible(false);
         }
 
         delete this.entidades[nombreEntidad];
@@ -228,13 +235,24 @@ class EscenaPrincipal extends Phaser.Scene {
 
         //RANGOS DE VISION DE LAS ENTIDADES
         if (this.rol === "bismarck") {
-            this.equipoAzul.forEach((entidad) => {
+            /*this.equipoAzul.forEach((entidad) => {
                 if (this.estaEnRangoDeVision(this.entidades.bismarck, entidad)) {
                     entidad.objeto.setVisible(true);
                 } else {
                     entidad.objeto.setVisible(false);
                 }
-            });
+            });*/
+            let i = 0;
+            while (i < this.equipoAzul.length) {
+                const entidad = this.equipoAzul[i];
+                if (this.estaEnRangoDeVision(this.entidades.bismarck, entidad)) {
+                    entidad.objeto.setVisible(true);
+                    break;
+                } else {
+                    entidad.objeto.setVisible(false);
+                }
+                i++;
+            }
         } else {
             let i = 0;
             while (i < this.equipoAzul.length) {
@@ -244,6 +262,11 @@ class EscenaPrincipal extends Phaser.Scene {
 
                     if(entidad instanceof Avion) {
                         if(entidad.operador) {
+                         //Si el avion con operador ve al Bismarck, se muestra un mensaje de alerta y el punto aparece en el minimapa por 10 segundos.   
+                         this.puntoBismarck.setVisible(true);
+                            this.time.delayedCall(10000, () => {
+                                this.puntoBismarck.setVisible(false);
+                            });
                             const mensaje = this.add.text(
                                 this.cameras.main.centerX,
                                 10, 
@@ -259,6 +282,7 @@ class EscenaPrincipal extends Phaser.Scene {
                                     }
                                 }).setOrigin(0.5)
                                 .setScrollFactor(0);
+                                this.camaraMinimapa.ignore(mensaje);
 
                                 this.time.delayedCall(2000,() => {
                                     mensaje.destroy();

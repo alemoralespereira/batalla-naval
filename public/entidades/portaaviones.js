@@ -46,6 +46,7 @@ class Portaaviones extends Barco {
                 this.escena.cambiarObjetivoCamara('portaaviones');
             });
         panel.agregarBotonAlPanel(botonPortaaviones);
+        this.escena.camaraMinimapa.ignore(botonPortaaviones);
         
         //Array para los botones
         this.escena.botonesAviones = [];
@@ -54,6 +55,7 @@ class Portaaviones extends Barco {
             let botonAvion = panel.agregarBoton(-100, 460 + i * 30, `Avión ${i}`);
             botonAvion.numero = i;
             this.escena.botonesAviones.push(botonAvion);
+            this.escena.camaraMinimapa.ignore(botonAvion);
             botonAvion.on('pointerdown', () => {
                     
                     this.escena.seleccionarEntidad(`avion_${i}`);
@@ -86,18 +88,19 @@ class Portaaviones extends Barco {
                             this.escena.botonOperador.setVisible(false);
                             this.escena.botonObservador.setVisible(false);
                             this.escena.cambiarObjetivoCamara(`avion_${i}`);
-                            
-                            
-                            //botonPiloto.setVisible(false);
                         });
                     }
-                    
+                    this.escena.camaraMinimapa.ignore(this.escena.botonObservador);
+                    this.escena.camaraMinimapa.ignore(this.escena.botonOperador);
+                    this.escena.camaraMinimapa.ignore(this.escena.botonDespegar);
                 });
             panel.agregarBotonAlPanel(botonAvion);
         }
 
         //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
         this.escena.entidades.bismarck.objeto.setVisible(false);
+        //this.escena.camaraMinimapa.ignore(this.escena.puntoBismarck);
+        this.escena.puntoBismarck.setVisible(false);
     }
     
     

@@ -55,7 +55,7 @@ class Arma {
         //
         const duracion = (this.rango / this.velocidad) * 1000;
         console.log(`Duración del proyectil: ${duracion}`);
-        this.escena.time.delayedCall(duracion, () => { //5*820=4100
+        this.escena.time.delayedCall(duracion, () => {
             proyectil.destroy();
         });
         

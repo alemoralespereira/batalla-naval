@@ -47,9 +47,9 @@ class Avion extends Entity {
             this.indicadorCombustible.setVisible(false);
             this.indicadorCombustible.setScrollFactor(0); 
         }      
-        this.objeto.numeroAvion = this.numeroAvion;
-        this.objeto.piloto = this.piloto;
-        this.objeto.despego = this.despego;
+        //this.objeto.numeroAvion = this.numeroAvion;
+        //this.objeto.piloto = this.piloto;
+        //this.objeto.despego = this.despego;
         super.init(escena);
 
     }
@@ -117,8 +117,8 @@ class Avion extends Entity {
 
         //this.piloto = this.objeto.piloto;
         //this.despego = this.objeto.despego;
-        this.objeto.piloto = this.piloto;
-        this.objeto.despego = this.despego;
+        //this.objeto.piloto = this.piloto;
+        //this.objeto.despego = this.despego;
        
         if(this.piloto){
         //    console.log("Avion:" , this.numeroAvion);
