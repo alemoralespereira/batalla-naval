@@ -99,6 +99,7 @@ class Bismarck extends Barco {
     configurar() {
         this.armas = [
             new Arma({
+                escena: this.escena,
                 nombre: "Antiaereo pesado 1", 
                 calibre: 38,
                 rango: 300,
@@ -106,10 +107,9 @@ class Bismarck extends Barco {
                 daño: 1,
                 cadenciaDisparo: 10,
                 cantidadMuniciones: 5,
-                // origenX: 0.7,
-                // origenY: 0.5
             }),
              new Arma({
+                 escena: this.escena,
                  nombre: "Antiaereo pesado 2", 
                  calibre: 38,
                  rango: 300,
@@ -117,10 +117,9 @@ class Bismarck extends Barco {
                  daño: 1,
                  cadenciaDisparo: 10,
                  cantidadMuniciones: 5,
-                 //origenX: 0.3,
-                 //origenY: 0.5
              }),
             new Arma({
+                escena: this.escena,
                 nombre: "Antiaereo ligero", 
                 calibre: 19,
                 rango: 250,
@@ -128,10 +127,9 @@ class Bismarck extends Barco {
                 daño: 0.5,
                 cadenciaDisparo: 4,
                 cantidadMuniciones: 10,
-                // origenX: 0.5,
-                // origenY: 0.5
             })
         ];
+        const textosMuniciones = {};
     
         this.cursorMira = this.escena.add.image(0, 0, "mira")
             .setOrigin(0.5, 0.5)
@@ -141,8 +139,9 @@ class Bismarck extends Barco {
         
         this.cursorMira.on('pointerdown', () => {
             if (this.cursorMira.visible) {
-                    if(!this.armaSeleccionada.disparoActivado) {
+                    if(!this.armaSeleccionada.disparoActivado && this.armaSeleccionada.contadorMuniciones > 0) {
                         this.armaSeleccionada.disparoActivado = true;
+
                         if(this.armaSeleccionada.nombre === "Antiaereo pesado 1") {
                             this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
                         } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
@@ -150,6 +149,8 @@ class Bismarck extends Barco {
                         } else {
                             this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
                         }
+
+                        textosMuniciones[this.armaSeleccionada.nombre].setText(`Cantidad municiones:  ${this.armaSeleccionada.contadorMuniciones} / ${this.armaSeleccionada.cantidadMuniciones}`);
                     }
             }
         });
@@ -188,8 +189,9 @@ class Bismarck extends Barco {
                 panel.agregarTexto(x + 205, y + 40, `Velocidad disapro:  ${arma.velocidad}m/s`),
                 panel.agregarTexto(x + 205, y + 70, `Daño:  ${arma.daño}`),
                 panel.agregarTexto(x + 205, y + 100, `Cadencia disparo:  1 cada ${arma.cadenciaDisparo} segundos`),
-                panel.agregarTexto(x + 205, y + 130, `Cantidad municiones:  ${arma.cantidadMuniciones} / ${arma.cantidadMuniciones}`),
             ]);
+            textosMuniciones[arma.nombre] = panel.agregarTexto(x + 205, y + 130, `Cantidad municiones:  ${arma.contadorMuniciones} / ${arma.cantidadMuniciones}`);
+            cuadroInformativoAvion.add(textosMuniciones[arma.nombre]);
             this.escena.camaraMinimapa.ignore(cuadroInformativoAvion);
             cuadroInformativoAvion.setVisible(false);
             botonArma.on('pointerover', () => {
@@ -269,7 +271,6 @@ class Bismarck extends Barco {
            this.cursorMira.setPosition(this.escena.input.activePointer.worldX, this.escena.input.activePointer.worldY);
 
             //if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
-                console.log("Velocidad: ", this.velocidad);
             if(this.velocidad > 0) {
                 console.log("Adentro del if velocidad: ", this.velocidad);    
                 this.indicadorCombustible.setVisible(true);
@@ -289,11 +290,11 @@ class Bismarck extends Barco {
             if (this.armaSeleccionada) {
                 if(this.armaSeleccionada.nombre === "Antiaereo pesado 1")
                 {
-                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
+                    this.armaSeleccionada.dibujarRangoAtaque(this.cursorMira, this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
                 } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
-                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
+                    this.armaSeleccionada.dibujarRangoAtaque(this.cursorMira, this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
                 } else {
-                    this.armaSeleccionada.dibujarRangoAtaque(this.escena, this.cursorMira, this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
+                    this.armaSeleccionada.dibujarRangoAtaque(this.cursorMira, this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
                 }
                 
             }

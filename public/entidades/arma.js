@@ -1,22 +1,20 @@
 import Bismarck from './bismarck.js';
 
 class Arma {
-    constructor({ nombre, rango, velocidad, daño, cadenciaDisparo, cantidadMuniciones, origenX, origenY }, escena) {
+    constructor({ nombre, rango, velocidad, daño, cadenciaDisparo, cantidadMuniciones, escena }) {
         this.nombre = nombre;
         this.rango = rango;
         this.velocidad = velocidad;
         this.daño = daño;
         this.cadenciaDisparo = cadenciaDisparo; // Disparo cada x cantidad de segundos
         this.cantidadMuniciones = cantidadMuniciones;
+        this.contadorMuniciones = cantidadMuniciones;
         this.disparoActivado = false;
-        // this.origenX = origenX;
-        // this.origenY = origenY;
         this.escena = escena;
     }
 
-    dibujarRangoAtaque(escena, cursorMira, x, y, destX, destY) {
-        this.escena = escena;
-        this.rangoAtaque = escena.add.circle(
+    dibujarRangoAtaque(cursorMira, x, y, destX, destY) {
+        this.rangoAtaque = this.escena.add.circle(
             x,
             y,
             this.rango,
@@ -26,10 +24,10 @@ class Arma {
 
         const circulo = new Phaser.Geom.Circle(x, y, this.rango);
         
-        if (circulo.contains(escena.input.activePointer.worldX, escena.input.activePointer.worldY)) {
+        if (circulo.contains(this.escena.input.activePointer.worldX, this.escena.input.activePointer.worldY)) {
             cursorMira.setVisible(true);
             const colorLinea = this.disparoActivado ? 0xff0000 : 0xffffff;
-            this.lineaAtaque = escena.add.line(0, 0, x, y, destX, destY,  colorLinea).setOrigin(0);
+            this.lineaAtaque = this.escena.add.line(0, 0, x, y, destX, destY,  colorLinea).setOrigin(0);
             
         } else {
             cursorMira.setVisible(false);
@@ -45,7 +43,9 @@ class Arma {
             }
 
         console.log(`Disparando arma desde (${origenX}, ${origenY}) hacia (${destX}, ${destY})`);
-        
+
+        this.contadorMuniciones -= 1;
+
         const proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectil");
         this.escena.proyectiles.add(proyectil);
         proyectil.daño = this.daño;
