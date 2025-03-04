@@ -30,7 +30,8 @@ class Avion extends Entity {
             velocidad: 300,
             daño: 5,
             cadenciaDisparo: 0,  // Sin cadencia, ya que solo tiene 1 disparo
-            cantidadMuniciones: 1
+            cantidadMuniciones: 1,
+            escena: this.escena
             });
     }
 
@@ -88,8 +89,9 @@ class Avion extends Entity {
             velocidad: 300,
             daño: 5,
             cadenciaDisparo:0,
-            cantidadMuniciones:1
-            },this.escena);
+            cantidadMuniciones:1,
+            escena: this.escena
+            });
 
         this.torpedo = true;  // Cada avión obtiene un torpedo al despegar
 
