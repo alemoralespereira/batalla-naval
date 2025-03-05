@@ -183,7 +183,7 @@ class EscenaPrincipal extends Phaser.Scene {
                 this.physics.add.overlap(
                     this.proyectiles,
                     avion.objeto, 
-                    (proyectil) => this.impactoEntidad(avion, proyectil, `avion_${avion.numeroAvion}`), 
+                    (proyectil) => this.impactoEntidad(avion, proyectil), 
                     (proyectil) => this.autorizarImpactoAvion(proyectil),
                     this
                 );
@@ -194,7 +194,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.physics.add.overlap(
             this.proyectiles,
             this.entidades.bismarck.objeto, 
-            (proyectil) => this.impactoEntidad(this.entidades.bismarck, proyectil, "bismarck"), 
+            (proyectil) => this.impactoEntidad(this.entidades.bismarck, proyectil), 
             (proyectil) => this.autorizarImpactoBismarck(proyectil),
             this
         );
