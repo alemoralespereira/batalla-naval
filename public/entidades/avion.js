@@ -28,8 +28,6 @@ class Avion extends Entity {
     }
 
     disparar(){
-        if(!this.torpedo) return; // No puede disparar sin munición
-
         const anguloRad = Phaser.Math.DegToRad(this.objeto.angle);
         const destinoX = this.objeto.x + Math.cos(anguloRad) * this.arma.rango;
         const destinoY = this.objeto.y + Math.sin(anguloRad) * this.arma.rango;
@@ -140,12 +138,15 @@ class Avion extends Entity {
     update() {
         super.update();
 
-        if(this.escena.controles.disparo.isDown && this.escena.nombreEntidadSeleccionada === `avion_${this.numeroAvion}`){
-            this.disparar();
-            socket.emit("disparar", { 
-                nombreEntidad: `avion_${this.numeroAvion}`, 
-                sala: this.escena.sala,
-            });
+        if (this.escena.controles.disparo.isDown && this.escena.nombreEntidadSeleccionada === `avion_${this.numeroAvion}`) {
+            // No puede disparar sin munición
+            if (this.torpedo) {
+                this.disparar();
+                socket.emit("disparar", { 
+                    nombreEntidad: `avion_${this.numeroAvion}`, 
+                    sala: this.escena.sala,
+                });
+            }
         }
 
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
