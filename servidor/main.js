@@ -241,8 +241,8 @@ io.on("connection", (socket) => {
             angulo: data.angulo    
         });
     });
-
-    socket.on("dañarEntidad", (data) => {
+    
+    socket.on("disparar", (data) => {
         // Verificar si la sala existe
         if (!salas[data.sala]) {
             console.error(`❌ Sala ${data.sala} no encontrada.`);
@@ -256,14 +256,15 @@ io.on("connection", (socket) => {
             //console.log("Entidades actuales:", salas[data.sala].estadoJuego.entidades);
             return;
         }
-
-        entidad.setSalud(Number(data.salud));
-
-        if (entidad.getSalud() <= 0) {
-            delete salas[data.sala].estadoJuego.entidades[data.nombreEntidad];
-            // Emitir la actualización a todos los jugadores en la sala
-           socket.to(data.sala).emit("eliminarEntidad", { nombreEntidad: data.nombreEntidad });
-        }
+        
+        socket.to(data.sala).emit("ejecutarDisparo", {
+            nombreEntidad: data.nombreEntidad,
+            nombreArma: data.nombreArma,
+            origenX: data.origenX,
+            origenY: data.origenY,
+            destX: data.destX,
+            destY: data.destY
+        });
     });
 
     // Desconexión del jugador

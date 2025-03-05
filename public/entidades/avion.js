@@ -24,15 +24,7 @@ class Avion extends Entity {
         this.multiplicadorCombustible = 1;
         this.despego = false;
         this.salud = avionData.salud;
-        this.arma = new Arma({
-            nombre: "Torpedo aéreo",
-            rango: 500,
-            velocidad: 300,
-            daño: 5,
-            cadenciaDisparo: 0,  // Sin cadencia, ya que solo tiene 1 disparo
-            cantidadMuniciones: 1,
-            escena: this.escena
-            });
+        this.arma = null;
     }
 
     disparar(){
@@ -47,22 +39,7 @@ class Avion extends Entity {
         this.arma.dispararArma(this.objeto.x, this.objeto.y, destinoX, destinoY,this);
 
         this.torpedo = false; // Torpedo agotado hasta recargar
-
-
-
-
-        // **Restablecer movimiento después del disparo**
-        this.escena.time.delayedCall(100, () => {
-        if (this.objeto && this.objeto.body) {
-            const angle = Phaser.Math.DegToRad(this.objeto.angle);
-            const velocityX = Math.cos(angle) * this.velocidad;
-            const velocityY = Math.sin(angle) * this.velocidad;
-            this.objeto.setVelocity(velocityX, velocityY);
-        }else{
-            console.warn(`El avión ${this.numeroAvion} no pudo restablecer su velocidad después de disparar.`);
-        }
-        });
-        }
+    }
 
     recargar(){
         console.log(`Avión ${this.numeroAvion} recargando torpedo.`);
@@ -71,9 +48,6 @@ class Avion extends Entity {
 
     init(escena) {
         this.escena = escena;
-        this.teclas = this.escena.input.keyboard.addKeys({
-            disparo: Phaser.Input.Keyboard.KeyCodes.SPACE
-            });
 
        // Cargar el sonido del motor del avión
         this.sonidoMotor = this.escena.sound.add('motoravion', { loop: true, volume: 0.5 });
@@ -84,7 +58,7 @@ class Avion extends Entity {
 
 
         this.arma = new Arma({
-            nombre: "Torpedo aéreo",
+            nombre: "Torpedo avion",
             rango: 500,
             velocidad: 300,
             daño: 5,
@@ -132,8 +106,6 @@ class Avion extends Entity {
             this.escena.eliminarAvion(this);
             this.escena.sound.play('explosion');
         }
-
-        socket.emit("dañarEntidad", { nombreEntidad: `avion_${this.numeroAvion}`, sala: this.escena.sala, salud: this.salud });
     }
    
     dibujarRangoVision() {
@@ -167,10 +139,15 @@ class Avion extends Entity {
 
     update() {
         super.update();
-        console.log(`Avión ${this.numeroAvion}: Velocidad (${this.objeto.body.velocity.x}, ${this.objeto.body.velocity.y})`);
-        if(Phaser.Input.Keyboard.JustDown(this.teclas.disparo)){
+
+        if(this.escena.controles.disparo.isDown && this.escena.nombreEntidadSeleccionada === `avion_${this.numeroAvion}`){
             this.disparar();
-            }
+            socket.emit("disparar", { 
+                nombreEntidad: `avion_${this.numeroAvion}`, 
+                sala: this.escena.sala,
+            });
+        }
+
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones") {

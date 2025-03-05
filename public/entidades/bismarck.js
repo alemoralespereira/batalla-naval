@@ -2,6 +2,7 @@ import Panel from '../ui/panel.js';
 import Barco from './barco.js';
 import Arma from './arma.js';
 import Avion from './avion.js';
+import socket from '../socket.js';
 
 class Bismarck extends Barco {
     constructor(bismarckData) {
@@ -65,38 +66,12 @@ class Bismarck extends Barco {
             backgroundColor: "#ffffff"
         }).setOrigin(0.5);
 
-        super.init(escena);
-
 
         this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
         this.indicadorCombustible.setVisible(false);
         this.indicadorCombustible.setScrollFactor(0);
         super.init(escena);
-    }
 
-    updateHitboxes() {
-        const angleRad = this.objeto.rotation;
-        const offsetProa = 90; // Distancia desde el centro hacia la proa
-        const offsetPopa = -85; // Distancia desde el centro hacia la popa
-        const offsetHelices = -150; // Distancia desde el centro hacia las hélices
-
-        // Posición de la proa
-        this.proa.x = this.objeto.x + Math.cos(angleRad) * offsetProa;
-        this.proa.y = this.objeto.y + Math.sin(angleRad) * offsetProa;
-        this.proa.rotation = angleRad;
-
-        // Posición de la popa
-        this.popa.x = this.objeto.x + Math.cos(angleRad) * offsetPopa;
-        this.popa.y = this.objeto.y + Math.sin(angleRad) * offsetPopa;
-        this.popa.rotation = angleRad;
-
-        // Posición de las hélices
-        this.helices.x = this.objeto.x + Math.cos(angleRad) * offsetHelices;
-        this.helices.y = this.objeto.y + Math.sin(angleRad) * offsetHelices;   
-        this.helices.rotation = angleRad;
-    }
-
-    configurar() {
         this.armas = [
             new Arma({
                 escena: this.escena,
@@ -129,6 +104,31 @@ class Bismarck extends Barco {
                 cantidadMuniciones: 10,
             })
         ];
+    }
+
+    updateHitboxes() {
+        const angleRad = this.objeto.rotation;
+        const offsetProa = 90; // Distancia desde el centro hacia la proa
+        const offsetPopa = -85; // Distancia desde el centro hacia la popa
+        const offsetHelices = -150; // Distancia desde el centro hacia las hélices
+
+        // Posición de la proa
+        this.proa.x = this.objeto.x + Math.cos(angleRad) * offsetProa;
+        this.proa.y = this.objeto.y + Math.sin(angleRad) * offsetProa;
+        this.proa.rotation = angleRad;
+
+        // Posición de la popa
+        this.popa.x = this.objeto.x + Math.cos(angleRad) * offsetPopa;
+        this.popa.y = this.objeto.y + Math.sin(angleRad) * offsetPopa;
+        this.popa.rotation = angleRad;
+
+        // Posición de las hélices
+        this.helices.x = this.objeto.x + Math.cos(angleRad) * offsetHelices;
+        this.helices.y = this.objeto.y + Math.sin(angleRad) * offsetHelices;   
+        this.helices.rotation = angleRad;
+    }
+
+    configurar() {
         const textosMuniciones = {};
     
         this.cursorMira = this.escena.add.image(0, 0, "mira")
@@ -141,16 +141,35 @@ class Bismarck extends Barco {
             if (this.cursorMira.visible) {
                     if(!this.armaSeleccionada.disparoActivado && this.armaSeleccionada.contadorMuniciones > 0) {
                         this.armaSeleccionada.disparoActivado = true;
+                        this.escena.sound.play('disparoBismarck');
+                        let origenX;
+                        let origenY;
 
                         if(this.armaSeleccionada.nombre === "Antiaereo pesado 1") {
+                            origenX = this.popa.x;
+                            origenY = this.popa.y;
                             this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
                         } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
+                            origenX = this.proa.x;
+                            origenY = this.proa.y;
                             this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
                         } else {
+                            origenX = this.objeto.x;
+                            origenY = this.objeto.y;
                             this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
                         }
 
                         textosMuniciones[this.armaSeleccionada.nombre].setText(`Cantidad municiones:  ${this.armaSeleccionada.contadorMuniciones} / ${this.armaSeleccionada.cantidadMuniciones}`);
+
+                        socket.emit("disparar", { 
+                            nombreEntidad: "bismarck", 
+                            sala: this.escena.sala,
+                            nombreArma: this.armaSeleccionada.nombre,
+                            origenX, 
+                            origenY, 
+                            destX: this.cursorMira.x,
+                            destY: this.cursorMira.y 
+                        });
                     }
             }
         });
@@ -227,23 +246,11 @@ class Bismarck extends Barco {
         this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
-    disparar(destX, destY) {
-        
-        //const torpedo = this.escena.physics.add.sprite(this.x, this.y, "torpedo");
-        
-        //this.escena.physics.moveTo(torpedo, destX, destY, 50);
-    
-        // Guardar referencia para manejar colisiones
-        //this.torpedos.push(torpedo);
-    
-        // Desactivar modo de ataque
-        //this.torpedoActivo = false;
-        //this.cursorMira.setVisible(false);
-    
-        // Detectar colisión con el barco
-        /*this.escena.physics.add.overlap(torpedo, this.escena.barco, (torpedo, barco) => {
-            this.impactoTorpedo(torpedo, barco);
-        });*/
+    disparar(origenX, origenY, destX, destY, nombreArma) {
+        console.log(nombreArma);
+        console.log(this.armas);
+        const arma = this.armas.find((arma) => arma.nombre === nombreArma);
+        arma.dispararArma(origenX, origenY, destX, destY);
     }
 
     update() {
@@ -272,7 +279,7 @@ class Bismarck extends Barco {
 
             //if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
             if(this.velocidad > 0) {
-                console.log("Adentro del if velocidad: ", this.velocidad);    
+                // console.log("Adentro del if velocidad: ", this.velocidad);    
                 this.indicadorCombustible.setVisible(true);
                 this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${this.combustible}`);
             }

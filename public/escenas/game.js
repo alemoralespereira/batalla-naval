@@ -130,7 +130,7 @@ class EscenaPrincipal extends Phaser.Scene {
             izquierda: "A",
             derecha: "D",
             abajo: "S",
-            atacar: "X"
+            disparo: Phaser.Input.Keyboard.KeyCodes.SPACE
         });
 
         //********************************************************/
@@ -150,14 +150,15 @@ class EscenaPrincipal extends Phaser.Scene {
             }
         });
 
-        socket.on("eliminarEntidad", (data) => {
-            if (!this.entidades[data.nombreEntidad]) {
+        socket.on("ejecutarDisparo", (data) => {
+            const entidad = this.entidades[data.nombreEntidad];
+
+            if (!entidad) {
                 console.error(`Entidad ${data.nombreEntidad} no encontrada.`);
                 return;
             }
 
-            const entidad = this.entidades[data.nombreEntidad];
-            this.eliminarAvion(entidad);
+            entidad.disparar(data.origenX, data.origenY, data.destX, data.destY, data.nombreArma);
         });
 
          //********************************************************/
@@ -182,12 +183,22 @@ class EscenaPrincipal extends Phaser.Scene {
                 this.physics.add.overlap(
                     this.proyectiles,
                     avion.objeto, 
-                    (proyectil) => this.impacto(avion, proyectil), 
-                    null,
+                    (proyectil) => this.impactoEntidad(avion, proyectil, `avion_${avion.numeroAvion}`), 
+                    (proyectil) => this.autorizarImpactoAvion(proyectil),
                     this
                 );
             }
         });
+
+        //Overlap entre proyectiles avion y Bismarck
+        this.physics.add.overlap(
+            this.proyectiles,
+            this.entidades.bismarck.objeto, 
+            (proyectil) => this.impactoEntidad(this.entidades.bismarck, proyectil, "bismarck"), 
+            (proyectil) => this.autorizarImpactoBismarck(proyectil),
+            this
+        );
+
 
         //Overlap entre puerto y Bismarck
         this.physics.add.overlap(
@@ -220,13 +231,21 @@ class EscenaPrincipal extends Phaser.Scene {
         //this.scene.start('EscenaVictoria', { rol: this.rol });
     }
 
-    impacto(avion, proyectil) {
-        this.explosion = this.add.image(avion.objeto.x, avion.objeto.y, "hit");
+    impactoEntidad(entidad, proyectil) {
+        this.explosion = this.add.image(entidad.objeto.x, entidad.objeto.y, "hit");
         proyectil.destroy();
         this.time.delayedCall(250, () => {
             this.explosion.destroy();
         });
-        avion.recibirDaño(proyectil.daño);
+        entidad.recibirDaño(proyectil.daño);
+    }
+
+    autorizarImpactoAvion(proyectil) {
+        return proyectil.nombre !== "Torpedo avion";
+    }
+
+    autorizarImpactoBismarck(proyectil) {
+        return proyectil.nombre === "Torpedo avion";
     }
 
     eliminarAvion(avion) {
@@ -406,12 +425,6 @@ class EscenaPrincipal extends Phaser.Scene {
 
 
     moverEntidad() {
-
-        if (this.controles.atacar.isDown) {
-            this.scene.pause("EscenaPrincipal");
-            this.scene.start('EscenaAtaque');//,{estadoJuego: this.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
-        }
-
         let entidad = null;
         let nombreEntidad = "";
 
