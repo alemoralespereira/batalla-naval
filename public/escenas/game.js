@@ -282,25 +282,6 @@ class EscenaPrincipal extends Phaser.Scene {
         return proyectil.nombre === "Torpedo avion";
     }
 
-    eliminarAvion(avion) {
-        const nombreEntidad = `avion_${avion.numeroAvion}`;
-        avion.objeto.destroy();
-        this.equipoAzul = this.equipoAzul.filter((a) => a.numeroAvion !== avion.numeroAvion);
-
-        if (this.rol === "portaaviones") {
-            // Una posible mejora sería "desactivar" el boton en vez de eliminarlo
-            //this.botonesAviones[avion.numeroAvion - 1].destroy();
-            this.botonesAviones[avion.numeroAvion - 1].setBackgroundColor('rgba(195, 19, 19, 0.9)');
-            this.botonesAviones[avion.numeroAvion - 1].disableInteractive();
-            //this.avion.indicadorCombustible.setVisible(false);
-        }
-
-        delete this.entidades[nombreEntidad];
-
-        // Condicion de victoria si se eliminan los 10 aviones
-        // ...
-    }
-
     update() {
         // Actualizar posiciones de los puntos en el minimapa
         if (this.entidades.bismarck) {

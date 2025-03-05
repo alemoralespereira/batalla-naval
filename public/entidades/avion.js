@@ -100,9 +100,23 @@ class Avion extends Entity {
         console.log("Daño recibido: ", daño, " Salud actual: ", this.salud);
 
         if (this.salud <= 0) {
-            this.salud = 0;
-            this.escena.eliminarAvion(this);
             this.escena.sound.play('explosion');
+            this.salud = 0;
+            const nombreEntidad = `avion_${this.numeroAvion}`;
+            this.objeto.destroy();
+            this.objeto = null;
+            this.escena.equipoAzul = this.escena.equipoAzul.filter((a) => a.numeroAvion !== this.numeroAvion);
+
+            if (this.escena.rol === "portaaviones") {
+                this.escena.botonesAviones[this.numeroAvion - 1].setBackgroundColor('rgba(195, 19, 19, 0.9)');
+                this.escena.botonesAviones[this.numeroAvion - 1].disableInteractive();
+                //this.avion.indicadorCombustible.setVisible(false);
+            }
+
+            delete this.escena.entidades[nombreEntidad];
+
+            // Condicion de victoria si se eliminan los 10 aviones
+            // ...
         }
     }
    
