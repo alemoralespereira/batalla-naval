@@ -39,7 +39,9 @@ class Arma {
             console.error("Error: La escena no está definida en el arma.");
             return;
             }
-
+        
+        this.escena.scene.launch('EscenaAtaque'); 
+        
         console.log(`Disparando arma desde (${origenX}, ${origenY}) hacia (${destX}, ${destY})`);
 
         this.contadorMuniciones -= 1;
@@ -51,7 +53,7 @@ class Arma {
         
         console.log(`Proyectil creado en (${proyectil.x}, ${proyectil.y}) con daño ${proyectil.daño}`);
         this.escena.physics.moveTo(proyectil, destX, destY, this.velocidad);
-      
+        
         //Se multiplica la cadenciaDisparo en segundos por 1000 para convertirlo en milisegundos.
         this.escena.time.delayedCall(this.cadenciaDisparo*1000, () => {
             this.disparoActivado = false;
