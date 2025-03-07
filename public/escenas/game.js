@@ -130,7 +130,9 @@ class EscenaPrincipal extends Phaser.Scene {
             izquierda: "A",
             derecha: "D",
             abajo: "S",
-            disparo: Phaser.Input.Keyboard.KeyCodes.SPACE
+            disparo: Phaser.Input.Keyboard.KeyCodes.SPACE,
+            //pausa: Phaser.Input.Keyboard.KeyCodes.ESC,
+            guardar: Phaser.Input.Keyboard.KeyCodes.G
         });
 
         //********************************************************/
@@ -181,6 +183,28 @@ class EscenaPrincipal extends Phaser.Scene {
                this.scene.pause();
 
                //AGREGAR TRANSICION A OTRA ESCENA O MENU PRINCIPAL
+        });
+
+        socket.on("partidaGuardada", (data) => {
+            const mensaje = this.add.text(
+                this.cameras.main.centerX,
+                200, 
+                `¡¡¡${data.mensaje}!!!`,
+                {
+                    fontSize: '32px',
+                    fontStyle: 'bold',
+                    color: 'rgba(246, 248, 246, 0.87)',
+                    backgroundColor: 'rgba(16, 181, 21, 0.5)',
+                    padding: {
+                        x: 15,
+                        y: 15
+                    }
+                }).setOrigin(0.5)
+                .setScrollFactor(0);
+            
+            this.time.delayedCall(2000, () => {
+                mensaje.destroy();
+            });
         });
 
          //********************************************************/
@@ -245,6 +269,68 @@ class EscenaPrincipal extends Phaser.Scene {
             this.entidades.bismarck.objeto, 
             this.entidades.portaaviones.objeto
         );
+        
+        // Evento para guardar partida.
+        this.controles.guardar.on('down', () => {
+            // Actualizar this.estadoJuego con el estado actual de las entidades
+            this.estadoJuego.entidades.bismarck = {
+                x: this.entidades.bismarck.objeto.x,
+                y: this.entidades.bismarck.objeto.y,
+                angulo: this.entidades.bismarck.objeto.angle,
+                velocidad: this.entidades.bismarck.velocidad,
+                velocidadMaxima: this.entidades.bismarck.velocidadMaxima,
+                aceleracion: this.entidades.bismarck.aceleracion,
+                salud: this.entidades.bismarck.salud,
+                combustible: this.entidades.bismarck.combustible,
+
+            };
+
+            this.estadoJuego.entidades.portaaviones = {
+                x: this.entidades.portaaviones.objeto.x,
+                y: this.entidades.portaaviones.objeto.y,
+                angulo: this.entidades.portaaviones.objeto.angle,
+                velocidad: this.entidades.portaaviones.velocidad,
+                velocidadMaxima: this.entidades.portaaviones.velocidadMaxima,
+                aceleracion: this.entidades.portaaviones.aceleracion,
+                combustible: this.entidades.portaaviones.combustible,
+                seleccionado: this.entidades.portaaviones.seleccionado
+            };
+
+            for (let i = 1; i < 11; i++) {
+                const nombreAvion = `avion_${i}`;
+                this.estadoJuego.entidades[nombreAvion] = {
+                    x: this.entidades[nombreAvion].objeto.x,
+                    y: this.entidades[nombreAvion].objeto.y,
+                    angulo: this.entidades[nombreAvion].objeto.angle,
+                    velocidad: this.entidades[nombreAvion].velocidad,
+                    velocidadMaxima: this.entidades[nombreAvion].velocidadMaxima,
+                    aceleracion: this.entidades[nombreAvion].aceleracion,
+                    combustible: this.entidades[nombreAvion].combustible,
+                    piloto: this.entidades[nombreAvion].piloto,
+                    observador: this.entidades[nombreAvion].observador,
+                    operador: this.entidades[nombreAvion].operador,
+                    salud: this.entidades[nombreAvion].salud,
+                    seleccionado: this.entidades[nombreAvion].seleccionado,
+                    numeroAvion: this.entidades[nombreAvion].numeroAvion,
+                    torpedo: this.entidades[nombreAvion].torpedo,
+                    multiplicadorCombustible: this.entidades[nombreAvion].multiplicadorCombustible,
+                    despego: this.entidades[nombreAvion].despego
+
+
+                };
+            }
+
+            const datosGuardar = {
+                //idUsuario: socket.id,
+                //nombreUsuario: this.nombreUsuario,
+                //rol: this.rol,
+                sala: this.sala,
+                jugadores: this.sala.jugadores,
+                estadoJuego: this.estadoJuego
+            };
+
+            socket.emit("guardarPartida", datosGuardar);
+        });
     }
 
     inmovilizarBismarck() {
@@ -421,7 +507,7 @@ class EscenaPrincipal extends Phaser.Scene {
     estaEnRangoDeVision(entidad1, entidad2) {
 
         if (!this.entidad1 || !this.entidad2) {
-            console.warn("Intento de calcular rango de vision en entidades destruidas.");
+            //console.warn("Intento de calcular rango de vision en entidades destruidas.");
             return; 
         }
 

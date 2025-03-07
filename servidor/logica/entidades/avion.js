@@ -1,13 +1,18 @@
 const Entidad = require('./entidad');
 
 class Avion extends Entidad {
-    constructor({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible, rangoVision, piloto, observador, operador, salud }) {
-        super({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible, rangoVision });
+    constructor({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible, piloto, observador, operador, salud, numeroAvion, torpedo, multiplicadorCombustible, despego, seleccionado}) {
+        super({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible, });
 
         this.piloto = piloto;
         this.observador = observador;
         this.operador = operador;
         this.salud = salud;
+        this.numeroAvion = numeroAvion;
+        this.torpedo = torpedo;
+        this.multiplicadorCombustible = multiplicadorCombustible;
+        this.despego = despego;
+        this.seleccionado = seleccionado;
     }
 
     getPiloto() {

@@ -16,7 +16,7 @@ class Bismarck extends Barco {
             bismarckData.objeto,
             bismarckData.combustible,
         );
-        this.salud = 15;
+        this.salud = bismarckData.salud;
         this.armas = []
         this.armaSeleccionada = null;
         this.cursorMira = null;

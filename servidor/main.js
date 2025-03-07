@@ -22,10 +22,10 @@ app.use(express.static(path.join(__dirname, "../public")));
 // Almacenar información de las salas y jugadores
 let salas = {};
 
-//const db = new mainDB();
-//db.connect();
-//const conexion = db.getConnection();
-//const query = new consultas(conexion);
+const db = new mainDB();
+db.connect();
+const conexion = db.getConnection();
+const query = new consultas(conexion);
 
 function posicionRandomPuerto() {
     const esquinas = [
@@ -102,16 +102,6 @@ io.on("connection", (socket) => {
             return; // No permite que el jugador se una si el rol ya está ocupado
         }
 
-       // const fecha = new Date();
-        /*query.insertarDatosSala(sala, socket.id, nombreUsuario, rol, fecha, (error, resultados) => {
-            if (error) {
-                console.error('Error al insertar datos:', error);
-                return;
-            }
-            console.log('Datos insertados:', resultados);
-        });*/
-       
-
         // Agregar jugador a la sala
         salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
         socket.join(sala);
@@ -150,12 +140,12 @@ io.on("connection", (socket) => {
                 x: posicionBismarck.x,
                 y: posicionBismarck.y,
                 velocidad: 0,
-                velocidadMaxima: 1000,
+                velocidadMaxima: 100,
                 angulo: 0,
-                aceleracion: 10,
+                aceleracion: 1,
                 salud: 3,
                 objeto: null,
-                combustible: 1000
+                combustible: 10000
             });
             entidades.portaaviones = new Portaaviones({
                 x: posicionPortaaviones.x,
@@ -165,7 +155,8 @@ io.on("connection", (socket) => {
                 angulo: 0,
                 aceleracion: 1,
                 objeto: null,
-                combustible: 5000
+                combustible: 5000,
+                seleccionado: false
             });
 
             for (let i = 1; i < 11; i++) {
@@ -177,16 +168,23 @@ io.on("connection", (socket) => {
                     angulo: 0,
                     aceleracion: 2,
                     objeto: null,
-                    combustible: 100000,
+                    combustible: 10000,
                     piloto: false,
                     observador: false,
                     operador: false,
-                    salud: 1
+                    salud: 1,
+                    numeroAvion: i,
+                    torpedo: false,
+                    multiplicadorCombustible: 1,
+                    despego: false,
+                    seleccionado: false
                 });
             }
 
             salas[sala].estadoJuego.entidades = entidades;
             salas[sala].estadoJuego.puerto = puerto;
+
+    
 
             io.to(sala).emit("juegoIniciado", {
                 mensaje: "El juego ha comenzado",
@@ -202,16 +200,6 @@ io.on("connection", (socket) => {
             });
         }
     });
-
-    /*socket.on("moverEntidad", ({ sala, entidad, x, y, angulo }) => {
-        if (!salas[sala]) return;
-
-        // Actualizar la posición de la entidad
-        salas[sala].estadoJuego.entidades[entidad] = { x, y, angulo };
-
-        // Emitir la actualización a todos los jugadores en la sala
-        socket.to(sala).emit("actualizarPosicionEntidad", { entidad, x, y, angulo });
-    });*/
 
     socket.on("moverEntidad", (data) => {
         // console.log("📥 Datos recibidos del cliente:", data);
@@ -276,6 +264,87 @@ io.on("connection", (socket) => {
 
         io.to(data.sala).emit("finJuego", {
             mensaje: data.mensaje
+        });
+    });
+
+    /*socket.on("recuperarPartida", ({ sala, rol }) => {
+        if (!salas[sala]) {
+            salas[sala] = { jugadores: [], estadoJuego: { entidades: {} } };
+        }
+
+        // Emitir la actualización a todos los jugadores en la sala
+        socket.to(sala).emit("actualizarPosicionEntidad", { entidad, x, y, angulo });
+        // Verificar si el rol ya está ocupado
+        const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
+        if (rolOcupado) {
+            socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
+            return; 
+        }*/
+		
+    socket.on("guardarPartida", (data) => {
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+        const fecha = new Date();
+        const jugadores = salas[data.sala].jugadores;
+        const entidades = data.estadoJuego.entidades;
+                
+        console.log("📥 Datos recibidos del cliente:", data.sala, jugadores, data.estadoJuego);
+        
+       
+        query.existeSala(data.sala, (error, resultados) => {
+            if(error) {
+                console.log('Error:', error);
+                return;
+            }
+            console.log("Resu", resultados.length);    
+     
+            if(resultados.length > 0) {
+                jugadores.forEach(jugador => {
+                    query.actualizarDatosSala(data.sala, jugador.nombreUsuario, jugador.rol, fecha, (error, resultados) => {
+                        if(error) {
+                            console.log('Error al sobreescribir datos:', error);
+                            return;
+                        }
+                    })
+                })
+                for (let key in entidades) {
+                    const entidad = entidades[key];
+                    query.actualizarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, entidad.combustible, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
+                        if(error) {
+                            console.error('Error al insertar entidad:', error);
+                            return;
+                        }
+                    });
+                }
+            } else {
+                jugadores.forEach(jugador => {
+                    query.insertarDatosSala(data.sala, jugador.nombreUsuario, jugador.rol, fecha, (error, resultados) => {
+                        if (error) {
+                            console.error('Error al insertar datos:', error);
+                            return;
+                        }
+                        console.log('Datos insertados:', resultados);
+                    });
+                });
+                for (let key in entidades) {
+                    const entidad = entidades[key];
+                    query.insertarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, entidad.combustible, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
+                        if(error) {
+                            console.error('Error al insertar entidad:', error);
+                            return;
+                        }
+                    });
+                }
+                
+            }
+        })
+        
+        // Emitir evento de confirmación
+        io.to(data.sala).emit("partidaGuardada", { 
+            mensaje: "Partida guardada correctamente."
         });
     });
 
