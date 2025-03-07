@@ -115,8 +115,9 @@ class Avion extends Entity {
 
             delete this.escena.entidades[nombreEntidad];
 
-            // Condicion de victoria si se eliminan los 10 aviones
-            // ...
+            if (this.escena.equipoAzul.length === 1) {
+                this.escena.victoriaBismarck();
+            }
         }
     }
    

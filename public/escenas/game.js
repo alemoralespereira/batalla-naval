@@ -161,6 +161,28 @@ class EscenaPrincipal extends Phaser.Scene {
             entidad.disparar(data.origenX, data.origenY, data.destX, data.destY, data.nombreArma);
         });
 
+        socket.on("finJuego", (data) => {
+            this.mensaje = this.add.text(
+                this.cameras.main.centerX,
+                200, 
+                `¡¡¡${data.mensaje}!!!`,
+                {
+                    fontSize: '32px',
+                    fontStyle: 'bold',
+                    color: 'rgba(246, 248, 246, 0.87)',
+                    backgroundColor: 'rgba(16, 181, 21, 0.5)',
+                    padding: {
+                        x: 15,
+                        y: 15
+                    }
+                }).setOrigin(0.5)
+                .setScrollFactor(0);
+                
+               this.scene.pause();
+
+               //AGREGAR TRANSICION A OTRA ESCENA O MENU PRINCIPAL
+        });
+
          //********************************************************/
         // MANEJO DE OVERLAPS
 
@@ -193,7 +215,7 @@ class EscenaPrincipal extends Phaser.Scene {
         //Overlap entre proyectiles avion y Bismarck
         this.physics.add.overlap(
             this.proyectiles,
-            this.entidades.bismarck.objeto, 
+            this.entidades.bismarck.puntosDeColision, 
             (proyectil) => this.impactoEntidad(this.entidades.bismarck, proyectil), 
             (proyectil) => this.autorizarImpactoBismarck(proyectil),
             this
@@ -212,9 +234,9 @@ class EscenaPrincipal extends Phaser.Scene {
         //Overlap entre torpedo y helice de Bismarck
         this.physics.add.overlap(
             this.proyectiles,
-            this.entidades.bismarck.helice,
-            () => this.inmovilizarBismarck(),
-            null,
+            this.entidades.bismarck.helices,
+            (proyectil) => this.inmovilizarBismarck(this.entidades.bismarck, proyectil),
+            (proyectil) => this.autorizarImpactoBismarck(proyectil),
             this
         );
 
@@ -227,7 +249,8 @@ class EscenaPrincipal extends Phaser.Scene {
 
     inmovilizarBismarck() {
         this.entidades.bismarck.objeto.setVelocity(0, 0);
-        const mensaje = this.add.text(
+
+        /*const mensaje = this.add.text(
             this.cameras.main.centerX,
             200, 
             `¡¡¡BISMARCK INMOVILIZADO!!!`,
@@ -241,28 +264,25 @@ class EscenaPrincipal extends Phaser.Scene {
                     y: 15
                 }
             }).setOrigin(0.5)
-            .setScrollFactor(0);
+            .setScrollFactor(0);*/
+        this.victoriaEquipoAzul();
     }
 
     victoriaBismarck() {
-        this.entidades.bismarck.objeto.setVisible(false);
-        const mensaje = this.add.text(
-            this.cameras.main.centerX,
-            200, 
-            `¡¡¡VICTORIA PARA EL BISMARCK!!!`,
-            {
-                fontSize: '32px',
-                fontStyle: 'bold',
-                color: 'rgba(246, 248, 246, 0.87)',
-                backgroundColor: 'rgba(16, 181, 21, 0.5)',
-                padding: {
-                    x: 15,
-                    y: 15
-                }
-            }).setOrigin(0.5)
-            .setScrollFactor(0);
+        this.entidades.bismarck.objeto.setVisible(false);                
+        socket.emit("victoria", { 
+                sala: this.sala, 
+                mensaje: "¡¡¡VICTORIA DEL EQUIPO ROJO!!!"
+            });
         this.scene.pause("EscenaPrincipal");
-        //this.scene.start('EscenaVictoria', { rol: this.rol });
+    }
+
+    victoriaEquipoAzul() {
+        socket.emit("victoria", {
+            sala: this.sala,
+            mensaje: "¡¡¡VICTORIA DEL EQUIPO AZUL!!!"
+        });
+        this.scene.pause("EscenaPrincipal");
     }
 
     impactoEntidad(entidad, proyectil) {
@@ -304,7 +324,7 @@ class EscenaPrincipal extends Phaser.Scene {
         }
 
         //RANGOS DE VISION DE LAS ENTIDADES
-        if (this.rol === "bismarck") {
+        if (this.rol === "bismarck" && this.entidades.bismarck) {
             /*this.equipoAzul.forEach((entidad) => {
                 if (this.estaEnRangoDeVision(this.entidades.bismarck, entidad)) {
                     entidad.objeto.setVisible(true);
@@ -362,7 +382,12 @@ class EscenaPrincipal extends Phaser.Scene {
 
                     break;
                 } else {
-                    this.entidades.bismarck.objeto.setVisible(false);
+                        if(!this.entidades.bismarck){
+                            console.warn("Intento actualizar visibilidad de bismarck destruido.");
+                            return;
+                        }
+                        this.entidades.bismarck.objeto.setVisible(false);
+                    
                 }
                 i++;
             }
@@ -394,6 +419,12 @@ class EscenaPrincipal extends Phaser.Scene {
 
     //Funcion para determinar si entidad2 esta dentro del rango de vision de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
+
+        if (!this.entidad1 || !this.entidad2) {
+            console.warn("Intento de calcular rango de vision en entidades destruidas.");
+            return; 
+        }
+
         const limites = entidad2.objeto.getBounds();
 
         const topLeft = { x: limites.x, y: limites.y };

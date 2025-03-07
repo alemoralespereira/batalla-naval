@@ -150,12 +150,12 @@ io.on("connection", (socket) => {
                 x: posicionBismarck.x,
                 y: posicionBismarck.y,
                 velocidad: 0,
-                velocidadMaxima: 100,
+                velocidadMaxima: 1000,
                 angulo: 0,
-                aceleracion: 1,
+                aceleracion: 10,
                 salud: 3,
                 objeto: null,
-                combustible: 50000
+                combustible: 1000
             });
             entidades.portaaviones = new Portaaviones({
                 x: posicionPortaaviones.x,
@@ -264,6 +264,18 @@ io.on("connection", (socket) => {
             origenY: data.origenY,
             destX: data.destX,
             destY: data.destY
+        });
+    });
+
+    socket.on("victoria", (data) => {
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+
+        io.to(data.sala).emit("finJuego", {
+            mensaje: data.mensaje
         });
     });
 
