@@ -73,7 +73,7 @@
         </select>
         <br><br>
 
-        <button onclick="unirseJuego()">Unirse</button>
+        <button onclick="unirseSala()">Unirse</button>
         <button onclick="volverMenu()">Volver al Menú</button>
     </div>
 
@@ -121,7 +121,7 @@
             document.getElementById('pantalla-menu').classList.add('activa');
         }
 
-        function unirseJuego() {
+        function unirseSala() {
             const nombre = document.getElementById('nombreUsuario').value;
             const sala = document.getElementById('sala').value;
             const rol = document.getElementById('rol').value;
@@ -130,7 +130,7 @@
             document.getElementById('contenedor-juego').style.display = 'block';
         }
 
-        function recuperarJuego() {
+        function recuperarPartida() {
             const sala = document.getElementById('sala-recuperar').value;
             const rol = document.getElementById('rol-recuperar').value;
             console.log('Recuperando partida de sala:', sala, 'con rol:', rol);

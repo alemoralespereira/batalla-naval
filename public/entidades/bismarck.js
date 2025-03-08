@@ -7,13 +7,12 @@ import socket from '../socket.js';
 class Bismarck extends Barco {
     constructor(bismarckData) {
         super(
-            bismarckData.x, //xInicial
-            bismarckData.y, //yInicial
+            Number(bismarckData.x), //xInicial
+            Number(bismarckData.y), //yInicial
             bismarckData.velocidad,
             bismarckData.velocidadMaxima,
-            bismarckData.angulo,
+            Number(bismarckData.angulo),
             bismarckData.aceleracion,
-            bismarckData.objeto,
             bismarckData.combustible,
         );
         this.salud = bismarckData.salud;

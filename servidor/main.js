@@ -21,6 +21,8 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // Almacenar información de las salas y jugadores
 let salas = {};
+let recuperandoPartida = false;
+
 
 const db = new mainDB();
 db.connect();
@@ -91,9 +93,21 @@ io.on("connection", (socket) => {
     console.log("🟢 Nuevo jugador conectado:", socket.id);
 
     socket.on("unirseSala", ({ nombreUsuario, sala, rol }) => {
+
+        console.log("ENTRO A UNIRSE PARTIDA");
+
+        //Si no existe la sala, la inicializo con estado "iniciando". 
         if (!salas[sala]) {
-            salas[sala] = { jugadores: [], estadoJuego: { entidades: {} } };
-        }
+            salas[sala] = { jugadores: [], estadoJuego: { entidades: {} }, estadoPartida: "iniciando" };
+        } // Si existe sala pero ya hay dos jugadores jugando, salgo.
+            else if (salas[sala].jugadores.length === 2) { 
+                socket.emit("errorUnirse", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
+                return;
+            } // Si existe sala, hay 1 jugador esperando pero esta recuperando partida, salgo.
+                else if (salas[sala].estadoPartida === "recuperando") {
+                    socket.emit("errorUnirse", { mensaje: `Un jugador esta recuperando la partida de la ${sala}. Por favor elige otra sala o ingrese en la opcion de recuperar partida.`});
+                    return;
+                }
 
         // Verificar si el rol ya está ocupado
         const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
@@ -106,8 +120,7 @@ io.on("connection", (socket) => {
         salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
         socket.join(sala);
         
-
-        console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
+        console.log(`📌 ${nombreUsuario} se unió a ${sala} como ${rol}`);
         console.log("Detalles del jugador:", {
             socketId: socket.id,
             nombreUsuario,
@@ -147,6 +160,7 @@ io.on("connection", (socket) => {
                 objeto: null,
                 combustible: 10000
             });
+
             entidades.portaaviones = new Portaaviones({
                 x: posicionPortaaviones.x,
                 y: posicionPortaaviones.y,
@@ -184,15 +198,13 @@ io.on("connection", (socket) => {
             salas[sala].estadoJuego.entidades = entidades;
             salas[sala].estadoJuego.puerto = puerto;
 
-    
-
             io.to(sala).emit("juegoIniciado", {
                 mensaje: "El juego ha comenzado",
                 jugadores: salas[sala].jugadores,
                 estadoJuego: salas[sala].estadoJuego,
             });
 
-            console.log(`🎮 Juego iniciado en la sala ${sala}`);
+            console.log(`🎮 Juego iniciado en ${sala}`);
             console.log("Detalles del juego:", {
                 sala,
                 jugadores: salas[sala].jugadores,
@@ -206,7 +218,7 @@ io.on("connection", (socket) => {
     
         // Verificar si la sala existe
         if (!salas[data.sala]) {
-            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            console.error(`❌ ${data.sala} no encontrada.`);
             return;
         }
 
@@ -267,31 +279,164 @@ io.on("connection", (socket) => {
         });
     });
 
-    /*socket.on("recuperarPartida", ({ sala, rol }) => {
-        if (!salas[sala]) {
-            salas[sala] = { jugadores: [], estadoJuego: { entidades: {} } };
-        }
+    socket.on("recuperarPartida", ({ sala, rol }) => {
+        query.obtenerDatosDeSala(sala, (error, resultados) => {
+            if(error) {
+                console.error('Error al recuperar datos sala:', error);
+                return;
+            }
+            let nombreUsuario = null;
+            resultados.forEach(resultado => {
+                if(resultado.idSala === sala && resultado.rol === rol)
+                {
+                    console.log("Nombre Usuario BD:", resultado.nombreJugador);
+                    nombreUsuario = resultado.nombreJugador;
+                }
+            })
 
-        // Emitir la actualización a todos los jugadores en la sala
-        socket.to(sala).emit("actualizarPosicionEntidad", { entidad, x, y, angulo });
-        // Verificar si el rol ya está ocupado
-        const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
-        if (rolOcupado) {
-            socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
-            return; 
-        }*/
-		
+            //Si no existe la sala, la inicializo con estado "recuperando". 
+            if (!salas[sala]) {
+                salas[sala] = { jugadores: [], estadoJuego: { entidades: {} }, estadoPartida: "recuperando" };
+            } // Si existe sala pero ya hay dos jugadores jugando, salgo.
+                else if (salas[sala].jugadores.length === 2) {
+                    socket.emit("errorUnirse", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
+                    return;
+                } // Si existe sala, hay 1 jugador esperando pero esta iniciando partida, salgo.
+                    else if (salas[sala].estadoPartida === "iniciando") {
+                        socket.emit("errorUnirse", { mensaje: `Un jugador esta iniciando nueva partida en ${sala}. Por favor intente mas tarde o ingrese en la opcion de iniciar partida.`});
+                        return;
+                    }
+            
+            // Verificar si el rol ya está ocupado
+            const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
+            if (rolOcupado) {
+                socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
+                return; // No permite que el jugador se una si el rol ya está ocupado
+            }
+
+             // Agregar jugador a la sala
+            salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
+            socket.join(sala);
+
+            console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
+            console.log("Detalles del jugador:", {
+                socketId: socket.id,
+                nombreUsuario,
+                rol,
+                sala,
+            });
+
+            // Notificar a todos en la sala
+            io.to(sala).emit("jugadorConectado", {
+                mensaje: `${nombreUsuario} se unió como ${rol}`,
+                jugadores: salas[sala].jugadores.map(j => ({ nombreUsuario: j.nombreUsuario, rol: j.rol }))
+            });
+
+            // Si solo hay un jugador, enviar evento de espera
+            if (salas[sala].jugadores.length === 1) {
+                io.to(sala).emit("esperandoJugadores");
+            }
+
+            // Recuperar juego cuando hay dos jugadores
+            if (salas[sala].jugadores.length === 2) {
+                // Inicializar el estado del juego con el ultimo estado guardado
+            
+                //const puerto = posicionRandomPuerto();
+                //const posicionBismarck = posicionRandomBismarck(puerto);
+                //const posicionPortaaviones = posicionRandomPortaaviones(posicionBismarck, puerto);
+                query.obtenerDatosEntidades(sala, (error, resultados) => {
+                    if(error) {
+                        console.error('Error al recuperar datos entidades:', error);
+                        return;
+                    }
+                    //try - catch
+                
+                
+                    const puerto = posicionRandomPuerto();
+                    const entidades = {};
+                    
+                    resultados.forEach(resultado => {
+                        //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
+                        console.log("Entidad", resultado);
+                        if(resultado.idEntidad === "bismarck") {
+                            entidades.bismarck = new Bismarck({
+                                x: resultado.posX,
+                                y: resultado.posY,
+                                velocidad: resultado.velocidad,
+                                velocidadMaxima: resultado.velocidadMaxima,
+                                angulo: resultado.angulo,
+                                aceleracion: resultado.aceleracion,
+                                salud: resultado.salud,
+                                objeto: null,
+                                combustible: resultado.combustible
+                            });
+                        } else if(resultado.idEntidad === "portaaviones") {
+                                entidades.portaaviones = new Portaaviones({
+                                    x: resultado.posX,
+                                    y: resultado.posY,
+                                    velocidad: resultado.velocidad,
+                                    velocidadMaxima: resultado.velocidadMaxima,
+                                    angulo: resultado.angulo,
+                                    aceleracion: resultado.aceleracion,
+                                    salud: resultado.salud,
+                                    objeto: null,
+                                    combustible: resultado.combustible,
+                                    seleccionado: false
+                                });
+                            } else {
+                                entidades[`avion_${resultado.numeroAvion}`] = new Avion({
+                                    x: resultado.posX,
+                                    y: resultado.posY,
+                                    velocidad: resultado.velocidad,
+                                    velocidadMaxima: resultado.velocidadMaxima,
+                                    angulo: resultado.angulo,
+                                    aceleracion: resultado.aceleracion,
+                                    objeto: null,
+                                    combustible: resultado.combustible,
+                                    piloto: resultado.piloto,
+                                    observador: resultado.observador,
+                                    operador: resultado.operador,
+                                    salud: resultado.salud,
+                                    numeroAvion: resultado.numeroAvion,
+                                    torpedo: resultado.torpedo,
+                                    multiplicadorCombustible: resultado.multiplicadorCombustible,
+                                    despego: resultado.despego,
+                                    seleccionado: false
+                                });
+                            }
+                    })
+
+                    salas[sala].estadoJuego.entidades = entidades;
+                    salas[sala].estadoJuego.puerto = puerto;
+
+                    io.to(sala).emit("juegoIniciado", {
+                        mensaje: "El juego se ha restaurado",
+                        jugadores: salas[sala].jugadores,
+                        estadoJuego: salas[sala].estadoJuego,
+                    });
+
+                    console.log(`🎮 Juego recuperado en ${sala}`);
+                    console.log("Detalles del juego:", {
+                        sala,
+                        jugadores: salas[sala].jugadores,
+                        estadoJuego: salas[sala].estadoJuego,
+                    });
+                });
+            }
+        });
+    });
+
     socket.on("guardarPartida", (data) => {
         // Verificar si la sala existe
         if (!salas[data.sala]) {
-            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            console.error(`❌ ${data.sala} no encontrada.`);
             return;
         }
         const fecha = new Date();
         const jugadores = salas[data.sala].jugadores;
         const entidades = data.estadoJuego.entidades;
                 
-        console.log("📥 Datos recibidos del cliente:", data.sala, jugadores, data.estadoJuego);
+        //console.log("📥 Datos recibidos del cliente:", data.sala, jugadores, data.estadoJuego);
         
        
         query.existeSala(data.sala, (error, resultados) => {
@@ -299,7 +444,7 @@ io.on("connection", (socket) => {
                 console.log('Error:', error);
                 return;
             }
-            console.log("Resu", resultados.length);    
+            //console.log("Resu", resultados.length);    
      
             if(resultados.length > 0) {
                 jugadores.forEach(jugador => {

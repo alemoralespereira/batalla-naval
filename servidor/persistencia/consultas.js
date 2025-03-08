@@ -3,7 +3,7 @@ class consultas {
         this.connection = connection;
     }
 
-    existeSala(idSala, callback){
+    existeSala(idSala, callback) {
         const query = 'SELECT 1 FROM proyecto.salas WHERE idSala = ?';
         this.connection.query(query, [idSala], (error, resultados) => {
             if(error) {
@@ -14,7 +14,7 @@ class consultas {
     }
 
     obtenerDatosDeSala(idSala, callback) {
-        const query = 'SELECT * FROM proyecto.saldas WHERE idSala = ?';
+        const query = 'SELECT * FROM proyecto.salas WHERE idSala = ?';
         this.connection.query(query, [idSala], (error, resultados) => {
             if (error) {
                 return;
@@ -23,6 +23,16 @@ class consultas {
         });
     }
     
+    obtenerDatosEntidades(idSala, callback) {
+        const query = 'SELECT * FROM proyecto.entidades WHERE idSala = ?';
+        this.connection.query(query, [idSala], (error, resultados) => {
+            if (error) {
+                return;
+            }
+            callback(null, resultados);
+        });
+    }
+
     insertarDatosSala(idSala,  nombreUsuario, rol, fecha, callback) {
         const query = 'INSERT INTO proyecto.salas (idSala, nombreJugador, rol, fechaActualizacion) VALUES (?,?,?,?)';
         this.connection.query(query, [idSala, nombreUsuario, rol, fecha], (error, resultados) => {

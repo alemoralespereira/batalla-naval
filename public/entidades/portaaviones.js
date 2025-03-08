@@ -6,15 +6,13 @@ import socket from '../socket.js';
 class Portaaviones extends Barco {
     constructor(portaavionesData) {
         super(
-            portaavionesData.x, //xInicial
-            portaavionesData.y, //yInicial
+            Number(portaavionesData.x), //xInicial
+            Number(portaavionesData.y), //yInicial
             portaavionesData.velocidad,
             portaavionesData.velocidadMaxima,
-            portaavionesData.angulo,
+            Number(portaavionesData.angulo),
             portaavionesData.aceleracion,
-            portaavionesData.objeto,
             portaavionesData.combustible,
-            
         );
         this.seleccionado = portaavionesData.seleccionado;
     }
@@ -59,6 +57,7 @@ class Portaaviones extends Barco {
             botonAvion.on('pointerdown', () => {
                     
                     this.escena.seleccionarEntidad(`avion_${i}`);
+
                     if(this.escena.entidades[`avion_${i}`].piloto)
                         this.escena.cambiarObjetivoCamara(`avion_${i}`);
 
@@ -83,16 +82,18 @@ class Portaaviones extends Barco {
                             avion.calcularRangoVision();
                             avion.calcularAlcanceVuelo();
                             avion.init(this.escena);
-                            avion.objeto.setVisible(true);                                                        
+                            avion.objeto.setVisible(true);     
+                            console.log(`Despegando avion_${i} desde (${this.objeto.x}, ${this.objeto.y}) a (${avion.objeto.x}, ${avion.objeto.y})`);                                                   
                             this.escena.botonDespegar.setVisible(false);
                             this.escena.botonOperador.setVisible(false);
                             this.escena.botonObservador.setVisible(false);
                             this.escena.cambiarObjetivoCamara(`avion_${i}`);
                         });
+                    //this.escena.camaraMinimapa.ignore(this.escena.botonObservador);
+                    //this.escena.camaraMinimapa.ignore(this.escena.botonOperador);
+                    //this.escena.camaraMinimapa.ignore(this.escena.botonDespegar);
                     }
-                    this.escena.camaraMinimapa.ignore(this.escena.botonObservador);
-                    this.escena.camaraMinimapa.ignore(this.escena.botonOperador);
-                    this.escena.camaraMinimapa.ignore(this.escena.botonDespegar);
+                    
                 });
             panel.agregarBotonAlPanel(botonAvion);
         }

@@ -4,8 +4,9 @@ class Menu extends Phaser.Scene {
     constructor() {
         super({ key: 'Menu' });
 
-        // Exponemos la función "unirseJuego" para que pueda ser llamada desde "index.html"
-        window.unirseJuego = this.unirseJuego.bind(this);
+        // Exponemos la función "unirseSala" para que pueda ser llamada desde "index.html"
+        window.unirseSala = this.unirseSala.bind(this);
+        window.recuperarPartida = this.recuperarPartida.bind(this);
     }
 
     create() {
@@ -15,6 +16,7 @@ class Menu extends Phaser.Scene {
 
             // Mostrar pantalla de juego con mensaje de espera si aún falta un jugador
             document.getElementById("pantalla-login").style.display = "none";
+            document.getElementById("pantalla-recuperar").style.display = "none";
             document.getElementById("contenedor-juego").style.display = "block";
             document.getElementById("indicador-turno").innerText = "Esperando jugadores...";
         });
@@ -32,6 +34,7 @@ class Menu extends Phaser.Scene {
         // Evento cuando el juego inicia
         socket.on("juegoIniciado", (data) => {
             document.getElementById("pantalla-login").style.display = "none"; // Ocultar login
+            document.getElementById("pantalla-recuperar").style.display = "none";
             document.getElementById("contenedor-juego").style.display = "block"; // Mostrar juego
             document.getElementById("indicador-turno").innerText = "";
 
@@ -41,14 +44,22 @@ class Menu extends Phaser.Scene {
 
     }
 
-    // Función para unirse al juego
-    unirseJuego() {
+    // Función para unirse a la sala
+    unirseSala() {
         const nombreUsuario = document.getElementById("nombreUsuario").value;
         const sala = document.getElementById("sala").value;
         const rol = document.getElementById("rol").value;
 
-        if (!nombreUsuario || !sala || !rol) {
-            alert("Debes ingresar un nombre, seleccionar una sala y un rol.");
+        if (!nombreUsuario) {
+            alert("Debe ingresar un nombre de usuario para continuar.");
+            return;
+        } 
+        if (!sala) {
+            alert("Debe seleccionar una sala para continuar.");
+            return;
+        } 
+        if (!rol) {
+            alert("Debe seleccionar un rol para continuar.");
             return;
         }
 
@@ -65,14 +76,29 @@ class Menu extends Phaser.Scene {
     recuperarPartida() {
         const sala = document.getElementById('sala-recuperar').value;
         const rol = document.getElementById('rol-recuperar').value;
-        socket.emit('recuperarPartida', { sala, rol }, (respuesta) => {
+        
+        if (!sala) {
+            alert("Debe seleccionar una sala para continuar.");
+            return;
+        } 
+        if (!rol) {
+            alert("Debe seleccionar un rol para continuar.");
+            return;
+        }
+
+        this.sala = sala;
+        this.rol = rol;
+
+        console.log("📡 Enviando solicitud para recuperar partida:", { sala, rol });
+        socket.emit("recuperarPartida", { sala, rol });
+        /*socket.emit('recuperarPartida', { sala, rol }, (respuesta) => {
             if (respuesta.success) {
                 document.getElementById('pantalla-recuperar').classList.remove('activa');
                 document.getElementById('contenedor-juego').style.display = 'block';
             } else {
                 alert('No se encontró una partida guardada en esta sala.');
             }
-        });
+        });*/
     }
 }
 
