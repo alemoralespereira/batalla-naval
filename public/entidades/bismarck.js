@@ -148,15 +148,15 @@ class Bismarck extends Barco {
                         if(this.armaSeleccionada.nombre === "Antiaereo pesado 1") {
                             origenX = this.popa.x;
                             origenY = this.popa.y;
-                            this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
+                            this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
                         } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
                             origenX = this.proa.x;
                             origenY = this.proa.y;
-                            this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
+                            this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
                         } else {
                             origenX = this.objeto.x;
                             origenY = this.objeto.y;
-                            this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
+                            this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
                         }
 
                         textosMuniciones[this.armaSeleccionada.nombre].setText(`Cantidad municiones:  ${this.armaSeleccionada.contadorMuniciones} / ${this.armaSeleccionada.cantidadMuniciones}`);
@@ -197,7 +197,7 @@ class Bismarck extends Barco {
         for (let i = 0; i < this.escena.entidades.bismarck.armas.length; i++) {
             const arma = this.escena.entidades.bismarck.armas[i];
             const x = -100;
-            const y = 460 + i * 30;
+            const y = 360 + i * 30;
             const botonArma = panel.agregarBoton(x, y, arma.nombre);
             this.escena.camaraMinimapa.ignore(botonArma);
             botonesArmas[arma.nombre] = botonArma;
@@ -247,10 +247,8 @@ class Bismarck extends Barco {
     }
 
     disparar(origenX, origenY, destX, destY, nombreArma) {
-        console.log(nombreArma);
-        console.log(this.armas);
         const arma = this.armas.find((arma) => arma.nombre === nombreArma);
-        arma.dispararArma(origenX, origenY, destX, destY);
+        arma.dispararArma(origenX, origenY, destX, destY, "bismarck");
     }
 
     update() {
@@ -358,6 +356,7 @@ class Bismarck extends Barco {
     }
 
     recibirDaño(daño) {
+        this.escena.scene.get('EscenaAtaque').impactoBismarck = true;
         this.salud -= daño;
         console.log(`El Bismarck recibió ${daño} de daño. Salud restante: ${this.salud}`);
 

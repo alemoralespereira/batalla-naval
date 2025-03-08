@@ -34,7 +34,7 @@ class Avion extends Entity {
 
         console.log(`Avión ${this.numeroAvion} disparando torpedo.`);
         this.escena.sound.play('disparoAvion'); // Reproducir sonido de disparo
-        this.arma.dispararArma(this.objeto.x, this.objeto.y, destinoX, destinoY,this);
+        this.arma.dispararArma(this.objeto.x, this.objeto.y, destinoX, destinoY, `avion_${this.numeroAvion}`);
 
         this.torpedo = false; // Torpedo agotado hasta recargar
     }
@@ -96,6 +96,7 @@ class Avion extends Entity {
     }
 
     recibirDaño(daño) {
+        this.escena.scene.get('EscenaAtaque').impactoAvion = true;
         this.salud -= daño;
         console.log("Daño recibido: ", daño, " Salud actual: ", this.salud);
 

@@ -56,6 +56,9 @@ class EscenaPrincipal extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, this.mapa.width, this.mapa.height);
         this.cameras.main.setZoom(0.8);
 
+        this.scene.launch('EscenaAtaque');
+        this.scene.get("EscenaAtaque").scene.sleep();
+
         //*********************************************************************************/
         // MINI MAPA 
         this.camaraMinimapa = this.cameras.add(700, 500, 200, 200) // (x, y, width, height)

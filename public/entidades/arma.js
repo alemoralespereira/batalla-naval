@@ -1,5 +1,3 @@
-import Bismarck from './bismarck.js';
-
 class Arma {
     constructor({ nombre, rango, velocidad, daño, cadenciaDisparo, cantidadMuniciones, escena }) {
         this.nombre = nombre;
@@ -34,13 +32,13 @@ class Arma {
         }
     }
 
-    dispararArma(origenX, origenY, destX, destY) {
+    dispararArma(origenX, origenY, destX, destY, entidadAtacante) {
         if(!this.escena){
             console.error("Error: La escena no está definida en el arma.");
             return;
-            }
-        
-        this.escena.scene.launch('EscenaAtaque'); 
+        }
+
+        this.escena.scene.get('EscenaAtaque').iniciarEscena({ escena: this.escena, entidadAtacante });
         
         console.log(`Disparando arma desde (${origenX}, ${origenY}) hacia (${destX}, ${destY})`);
 
