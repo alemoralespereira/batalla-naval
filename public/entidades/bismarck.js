@@ -16,7 +16,7 @@ class Bismarck extends Barco {
             bismarckData.objeto,
             bismarckData.combustible,
         );
-        this.salud = 15;
+        this.salud = bismarckData.salud;
         this.armas = []
         this.armaSeleccionada = null;
         this.cursorMira = null;
@@ -48,7 +48,7 @@ class Bismarck extends Barco {
         this.updateHitboxes();
 
         this.puntosDeColision = escena.add.group();
-        this.puntosDeColision.addMultiple([this.objeto, this.proa, this.popa, this.helices]);
+        this.puntosDeColision.addMultiple([this.objeto, this.proa, this.popa]);
 
         this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 500, 500).setOrigin(0.5, 0.5);
         this.objeto.rangoVision = this.rangoVision;
@@ -316,6 +316,7 @@ class Bismarck extends Barco {
         }
         this.calcularCombustible();
 
+        
         if(this.combustible > 0) {
             // Movimiento con las teclas W, A, S, D
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown || controles.abajo.isDown) {
@@ -352,9 +353,7 @@ class Bismarck extends Barco {
                 this.objeto.setAngularVelocity(0);
             }
         } else {
-            this.objeto.setAngularVelocity(0);
-            this.objeto.setVelocityX(0);
-            this.objeto.setVelocityY(0);
+            this.escena.victoriaEquipoAzul();
         }
     }
 
@@ -371,12 +370,13 @@ class Bismarck extends Barco {
             console.log("Bismarck destruido!");
             this.escena.sound.play('explosion'); // Sonido de explosión
             this.objeto.destroy(); // Eliminar el barco si se queda sin salud
+            this.objeto = null;
+
+            delete this.escena.entidades["bismarck"];
+
+            this.escena.victoriaEquipoAzul();
         }
     }
-
-
-
-
 }
 
 export default Bismarck;

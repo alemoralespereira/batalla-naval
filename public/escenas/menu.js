@@ -60,6 +60,20 @@ class Menu extends Phaser.Scene {
         // Emitir evento para unirse a la sala con el rol seleccionado
         socket.emit("unirseSala", { nombreUsuario, sala, rol });
     }
+
+    // Funcion para recuperar una partida
+    recuperarPartida() {
+        const sala = document.getElementById('sala-recuperar').value;
+        const rol = document.getElementById('rol-recuperar').value;
+        socket.emit('recuperarPartida', { sala, rol }, (respuesta) => {
+            if (respuesta.success) {
+                document.getElementById('pantalla-recuperar').classList.remove('activa');
+                document.getElementById('contenedor-juego').style.display = 'block';
+            } else {
+                alert('No se encontró una partida guardada en esta sala.');
+            }
+        });
+    }
 }
 
 export default Menu;

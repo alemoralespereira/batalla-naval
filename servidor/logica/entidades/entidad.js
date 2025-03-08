@@ -1,5 +1,5 @@
 class Entidad {
-    constructor({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible, rangoVision }) {
+    constructor({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible }) {
         this.x = x;
         this.y = y;
         this.velocidad = velocidad;
@@ -7,7 +7,6 @@ class Entidad {
         this.angulo = angulo;
         this.aceleracion = aceleracion;
         this.combustible = combustible;
-        this.rangoVision = rangoVision;
     }
 
     getX() {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batalla Naval</title>
+    <title>BISMARCK WARZONE</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script defer type="module" src="main.js"></script>
@@ -27,16 +27,33 @@
         button {
             font-size: 16px;
             padding: 10px;
-            margin-top: 10px;
+            margin: 5px;
             cursor: pointer;
+            display: block; 
+            width: 200px; 
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .pantalla {
+            display: none;
+        }
+        .pantalla.activa {
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <!-- Pantalla de inicio -->
-    <div id="pantalla-login">
-        <h1>Batalla Naval</h1>
+    <!-- Pantalla de menú principal -->
+    <div id="pantalla-menu" class="pantalla activa">
+        <h1>BISMARCK WARZONE</h1>
+        <button onclick="mostrarLogin()">Nueva Partida</button>
+        <button onclick="mostrarRecuperarPartida()">Recuperar Partida Guardada</button>
+    </div>
+
+    <!-- Pantalla de inicio/login -->
+    <div id="pantalla-login" class="pantalla">
+        <h1>BISMARCK WARZONE - Nueva Partida</h1>
         <label>Nombre de usuario:</label>
         <input type="text" id="nombreUsuario" placeholder="Ingresa tu nombre">
         <br><br>
@@ -57,12 +74,70 @@
         <br><br>
 
         <button onclick="unirseJuego()">Unirse</button>
+        <button onclick="volverMenu()">Volver al Menú</button>
+    </div>
+
+    <!-- Pantalla de recuperar partida -->
+    <div id="pantalla-recuperar" class="pantalla">
+        <h1>BISMARCK WARZONE - Recuperar Partida</h1>
+        <label>Selecciona una sala guardada:</label>
+        <select id="sala-recuperar">
+            <option value="sala1">Sala 1</option>
+            <option value="sala2">Sala 2</option>
+            <option value="sala3">Sala 3</option>
+        </select>
+        <br><br>
+
+        <label>Selecciona tu rol:</label>
+        <select id="rol-recuperar">
+            <option value="bismarck">Equipo Rojo</option>
+            <option value="portaaviones">Equipo Azul</option>
+        </select>
+        <br><br>
+
+        <button onclick="recuperarPartida()">Recuperar Partida</button>
+        <button onclick="volverMenu()">Volver al Menú</button>
     </div>
 
     <!-- Contenedor del juego -->
     <div id="contenedor-juego">
         <h2 id="indicador-turno">Esperando jugadores...</h2>
     </div>
+
+    <script>
+        function mostrarLogin() {
+            document.getElementById('pantalla-menu').classList.remove('activa');
+            document.getElementById('pantalla-login').classList.add('activa');
+        }
+
+        function mostrarRecuperarPartida() {
+            document.getElementById('pantalla-menu').classList.remove('activa');
+            document.getElementById('pantalla-recuperar').classList.add('activa');
+        }
+
+        function volverMenu() {
+            document.getElementById('pantalla-login').classList.remove('activa');
+            document.getElementById('pantalla-recuperar').classList.remove('activa');
+            document.getElementById('pantalla-menu').classList.add('activa');
+        }
+
+        function unirseJuego() {
+            const nombre = document.getElementById('nombreUsuario').value;
+            const sala = document.getElementById('sala').value;
+            const rol = document.getElementById('rol').value;
+            console.log('Unirse al juego con:', { nombre, sala, rol });
+            document.getElementById('pantalla-login').classList.remove('activa');
+            document.getElementById('contenedor-juego').style.display = 'block';
+        }
+
+        function recuperarJuego() {
+            const sala = document.getElementById('sala-recuperar').value;
+            const rol = document.getElementById('rol-recuperar').value;
+            console.log('Recuperando partida de sala:', sala, 'con rol:', rol);
+            document.getElementById('pantalla-recuperar').classList.remove('activa');
+            document.getElementById('contenedor-juego').style.display = 'block';
+        }
+    </script>
 
 </body>
 </html>

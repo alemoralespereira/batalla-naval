@@ -18,11 +18,11 @@ class Avion extends Entity {
         this.piloto = avionData.piloto;
         this.observador = avionData.observador;
         this.operador = avionData.operador;
-        this.seleccionado = false;
-        this.numeroAvion = numeroAvion;
-        this.torpedo = true;
-        this.multiplicadorCombustible = 1;
-        this.despego = false;
+        this.seleccionado = avionData.seleccionado;
+        this.numeroAvion = avionData.numeroAvion;
+        this.torpedo = avionData.torpedo;
+        this.multiplicadorCombustible = avionData.multiplicadorCombustible;
+        this.despego = avionData.despego;
         this.salud = avionData.salud;
         this.arma = null;
     }
@@ -115,8 +115,9 @@ class Avion extends Entity {
 
             delete this.escena.entidades[nombreEntidad];
 
-            // Condicion de victoria si se eliminan los 10 aviones
-            // ...
+            if (this.escena.equipoAzul.length === 1) {
+                this.escena.victoriaBismarck();
+            }
         }
     }
    
