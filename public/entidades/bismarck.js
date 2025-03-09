@@ -31,6 +31,8 @@ class Bismarck extends Entidad {
         this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setOrigin(0.5, 0.5);
         this.objeto.body.setCircle(40, 210, 85);
         this.objeto.setVisible(true);
+        this.objeto.setCollideWorldBounds(true);
+        //this.objeto.setBounce(1);
 
         this.proa = escena.physics.add.sprite(this.objeto.x, this.objeto.y, null).setOrigin(0.5, 0.5);
         this.proa.body.setCircle(40, -25, -25);
@@ -53,14 +55,7 @@ class Bismarck extends Entidad {
         this.objeto.rangoVision = this.rangoVision;
         //this.graphics = escena.add.graphics();
         //this.dibujarRangoVision();
-        this.indicadorCombustible = escena.add.text(-100, 760, `COMBUSTIBLE BISMARCK:  ${Math.max(this.combustible, 0)}`,{
-            fontSize: '20px',
-            fill: '#ffffff'
-        });
-
-        this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
-        this.indicadorCombustible.setVisible(false);
-        this.indicadorCombustible.setScrollFactor(0);
+        
         super.init(escena);
 
         this.armas = [
@@ -127,6 +122,14 @@ class Bismarck extends Entidad {
             .setScale(0.2, 0.2)
             .setVisible(false)
             .setInteractive();
+
+        this.indicadorCombustible = this.escena.add.text(-100, 760, `COMBUSTIBLE BISMARCK:  ${Math.max(this.combustible, 0)}`,{
+            fontSize: '20px',
+            fill: '#ffffff'
+        });
+        this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
+        this.indicadorCombustible.setVisible(false);
+        this.indicadorCombustible.setScrollFactor(0);
 
         this.indicadorSalud = this.escena.add.text(this.objeto.x, this.objeto.y - 30, `Vida: ${this.salud}`, {
             fontSize: "16px",
@@ -283,6 +286,10 @@ class Bismarck extends Entidad {
                 this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${Math.max(this.combustible, 0)}`);
             }
 
+            /*if(this.vida > 0) {
+                this.indicadorSalud.setVisible(true);
+            }*/
+
             this.armas.forEach((arma) => {
                 if (arma.rangoAtaque) {
                     arma.rangoAtaque.destroy();
@@ -313,7 +320,7 @@ class Bismarck extends Entidad {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
-        this.calcularCombustible();
+//        this.calcularCombustible();
 
         
         if(this.combustible > 0) {
@@ -352,7 +359,8 @@ class Bismarck extends Entidad {
                 this.objeto.setAngularVelocity(0);
             }
         } else {
-            this.escena.victoriaEquipoAzul();
+            const mensaje = "Bismarck sin combutible";
+            this.escena.victoriaEquipoAzul(mensaje);
         }
     }
 

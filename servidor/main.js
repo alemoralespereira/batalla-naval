@@ -279,6 +279,19 @@ io.on("connection", (socket) => {
         });
     });
 
+    socket.on("hundirAvion", (data) => {
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+
+        socket.to(data.sala).emit("hundirAvionCliente", {
+            sala: data.sala,
+            nombreEntidad: data.nombreEntidad,
+        });
+    })
+
     socket.on("recuperarPartida", ({ sala, rol }) => {
         query.obtenerDatosDeSala(sala, (error, resultados) => {
             if(error) {
@@ -387,7 +400,7 @@ io.on("connection", (socket) => {
                                     y: resultado.posY
                                 }
                             } else {
-                                entidades[`avion_${resultado.numeroAvion}`] = new Avion({
+                                entidades[resultado.idEntidad] = new Avion({
                                     x: resultado.posX,
                                     y: resultado.posY,
                                     velocidad: resultado.velocidad,

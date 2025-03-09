@@ -25,7 +25,9 @@ class EscenaPrincipal extends Phaser.Scene {
 
         for (let i = 1; i < 11; i++) {
             const nombreAvion = `avion_${i}`;
-            this.entidades[nombreAvion] = new Avion(data.estadoJuego.entidades[nombreAvion], i);
+            if(data.estadoJuego.entidades[nombreAvion].salud != 0) {
+                this.entidades[nombreAvion] = new Avion(data.estadoJuego.entidades[nombreAvion], i);
+            }
         }
     }
 
@@ -43,6 +45,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.load.audio('barco', 'assets/sonidos/barco.mp3');
         this.load.audio('explosion', 'assets/sonidos/explosion.mp3');
         this.load.image('splash', '/assets/splash.png');
+        this.load.image('torpedo', '/assets/torpedo.png');
     }
 
     create() {
@@ -81,9 +84,11 @@ class EscenaPrincipal extends Phaser.Scene {
         this.puntosAviones = {};
         for(let i=1; i<11; i++){
             const nombreAvion = `avion_${i}`;
-            this.puntosAviones[nombreAvion] = this.add.circle(0,0,50,0x0000ff);
-            this.puntosEntidades.add(this.puntosAviones[nombreAvion]);
-            this.cameras.main.ignore(this.puntosAviones[nombreAvion]);
+            if(this.entidades[nombreAvion]) {
+                this.puntosAviones[nombreAvion] = this.add.circle(0,0,50,0x0000ff);
+                this.puntosEntidades.add(this.puntosAviones[nombreAvion]);
+                this.cameras.main.ignore(this.puntosAviones[nombreAvion]);
+            }
         }
 
         //********************************************************/
@@ -107,13 +112,15 @@ class EscenaPrincipal extends Phaser.Scene {
 
         // Aviones
         for (let i = 1; i < 11; i++) {
-            const avion = this.entidades[`avion_${i}`];
-            avion.init(this); // Inicializar el avión
-            avion.objeto.setCollideWorldBounds(true);
-            this.equipoAzul.push(avion);
-            if(!avion.piloto)
-                avion.objeto.setVisible(false);        
-            this.camaraMinimapa.ignore(avion.objeto);   
+            if(this.entidades[`avion_${i}`]){
+                const avion = this.entidades[`avion_${i}`];
+                avion.init(this); // Inicializar el avión
+                avion.objeto.setCollideWorldBounds(true);
+                this.equipoAzul.push(avion);
+                if(!avion.piloto)
+                    avion.objeto.setVisible(false);        
+                this.camaraMinimapa.ignore(avion.objeto);   
+            }
         }
 
         //********************************************************/
@@ -170,7 +177,7 @@ class EscenaPrincipal extends Phaser.Scene {
             this.mensaje = this.add.text(
                 this.cameras.main.centerX,
                 200, 
-                `¡¡¡${data.mensaje}!!!`,
+                `${data.mensaje}`,
                 {
                     fontSize: '32px',
                     fontStyle: 'bold',
@@ -210,6 +217,10 @@ class EscenaPrincipal extends Phaser.Scene {
             });
         });
 
+        socket.on("hundirAvionCliente", (data) => {
+            const entidad = this.entidades[data.nombreEntidad];
+            entidad.hundirAvion();
+        });
          //********************************************************/
         // MANEJO DE OVERLAPS
 
@@ -253,7 +264,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.physics.add.overlap(
             this.puerto,
             this.entidades.bismarck.objeto,
-            () => this.victoriaBismarck(),
+            ()=>this.victoriaBismarck("Bismarck ha llegado al puerto"),
             null,
             this
         );
@@ -269,7 +280,7 @@ class EscenaPrincipal extends Phaser.Scene {
 
         //Colision entre bismarck y portaaviones
         this.physics.add.collider(
-            this.entidades.bismarck.objeto, 
+            this.entidades.bismarck.puntosDeColision, 
             this.entidades.portaaviones.objeto
         );
         
@@ -301,26 +312,31 @@ class EscenaPrincipal extends Phaser.Scene {
 
             for (let i = 1; i < 11; i++) {
                 const nombreAvion = `avion_${i}`;
-                this.estadoJuego.entidades[nombreAvion] = {
-                    x: this.entidades[nombreAvion].objeto.x,
-                    y: this.entidades[nombreAvion].objeto.y,
-                    angulo: this.entidades[nombreAvion].objeto.angle,
-                    velocidad: this.entidades[nombreAvion].velocidad,
-                    velocidadMaxima: this.entidades[nombreAvion].velocidadMaxima,
-                    aceleracion: this.entidades[nombreAvion].aceleracion,
-                    combustible: this.entidades[nombreAvion].combustible,
-                    piloto: this.entidades[nombreAvion].piloto,
-                    observador: this.entidades[nombreAvion].observador,
-                    operador: this.entidades[nombreAvion].operador,
-                    salud: this.entidades[nombreAvion].salud,
-                    seleccionado: this.entidades[nombreAvion].seleccionado,
-                    numeroAvion: this.entidades[nombreAvion].numeroAvion,
-                    torpedo: this.entidades[nombreAvion].torpedo,
-                    multiplicadorCombustible: this.entidades[nombreAvion].multiplicadorCombustible,
-                    despego: this.entidades[nombreAvion].despego
-
-
-                };
+                if(this.entidades[nombreAvion]){
+                    this.estadoJuego.entidades[nombreAvion] = {
+                        x: this.entidades[nombreAvion].objeto.x,
+                        y: this.entidades[nombreAvion].objeto.y,
+                        angulo: this.entidades[nombreAvion].objeto.angle,
+                        velocidad: this.entidades[nombreAvion].velocidad,
+                        velocidadMaxima: this.entidades[nombreAvion].velocidadMaxima,
+                        aceleracion: this.entidades[nombreAvion].aceleracion,
+                        combustible: this.entidades[nombreAvion].combustible,
+                        piloto: this.entidades[nombreAvion].piloto,
+                        observador: this.entidades[nombreAvion].observador,
+                        operador: this.entidades[nombreAvion].operador,
+                        salud: this.entidades[nombreAvion].salud,
+                        seleccionado: this.entidades[nombreAvion].seleccionado,
+                        numeroAvion: this.entidades[nombreAvion].numeroAvion,
+                        torpedo: this.entidades[nombreAvion].torpedo,
+                        multiplicadorCombustible: this.entidades[nombreAvion].multiplicadorCombustible,
+                        despego: this.entidades[nombreAvion].despego
+                    };
+                } else {
+                    this.estadoJuego.entidades[nombreAvion] = {
+                        salud: 0
+                    };
+                }
+                
             }
 
             this.estadoJuego.puerto = {
@@ -352,38 +368,22 @@ class EscenaPrincipal extends Phaser.Scene {
 
     inmovilizarBismarck() {
         this.entidades.bismarck.objeto.setVelocity(0, 0);
-
-        /*const mensaje = this.add.text(
-            this.cameras.main.centerX,
-            200, 
-            `¡¡¡BISMARCK INMOVILIZADO!!!`,
-            {
-                fontSize: '32px',
-                fontStyle: 'bold',
-                color: 'rgba(246, 248, 246, 0.87)',
-                backgroundColor: 'rgba(16, 181, 21, 0.5)',
-                padding: {
-                    x: 15,
-                    y: 15
-                }
-            }).setOrigin(0.5)
-            .setScrollFactor(0);*/
         this.victoriaEquipoAzul();
     }
 
-    victoriaBismarck() {
+    victoriaBismarck(mensaje) {
         this.entidades.bismarck.objeto.setVisible(false);                
         socket.emit("victoria", { 
                 sala: this.sala, 
-                mensaje: "¡¡¡VICTORIA DEL EQUIPO ROJO!!!"
+                mensaje: mensaje + "\n¡¡¡VICTORIA DEL EQUIPO ROJO!!!"
             });
         this.scene.pause("EscenaPrincipal");
     }
 
-    victoriaEquipoAzul() {
+    victoriaEquipoAzul(mensaje) {
         socket.emit("victoria", {
             sala: this.sala,
-            mensaje: "¡¡¡VICTORIA DEL EQUIPO AZUL!!!"
+            mensaje: mensaje + "\n¡¡¡VICTORIA DEL EQUIPO AZUL!!!"
         });
         this.scene.pause("EscenaPrincipal");
     }
@@ -428,13 +428,6 @@ class EscenaPrincipal extends Phaser.Scene {
 
         //RANGOS DE VISION DE LAS ENTIDADES
         if (this.rol === "bismarck" && this.entidades.bismarck) {
-            /*this.equipoAzul.forEach((entidad) => {
-                if (this.estaEnRangoDeVision(this.entidades.bismarck, entidad)) {
-                    entidad.objeto.setVisible(true);
-                } else {
-                    entidad.objeto.setVisible(false);
-                }
-            });*/
             let i = 0;
             while (i < this.equipoAzul.length) {
                 const entidad = this.equipoAzul[i];
@@ -494,6 +487,11 @@ class EscenaPrincipal extends Phaser.Scene {
                 }
                 i++;
             }
+        }
+        
+        if (this.equipoAzul.length === 1) {
+            mensaje = "El equipo azul no tiene aviones disponibles."
+            this.victoriaBismarck(mensaje);
         }
     }
 
