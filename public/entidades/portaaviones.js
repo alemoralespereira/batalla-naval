@@ -19,6 +19,9 @@ class Portaaviones extends Entidad {
     init(escena) {
         this.escena = escena; 
         this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
+        this.objeto.setCollideWorldBounds(true);
+        //this.objeto.setBounce(1); 
+
         this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 500, 500).setOrigin(0.5, 0.5);
         this.objeto.rangoVision = this.rangoVision;
        // this.graphics = escena.add.graphics();
@@ -53,90 +56,38 @@ class Portaaviones extends Entidad {
             botonAvion.numero = i;
             this.escena.botonesAviones.push(botonAvion);
             this.escena.camaraMinimapa.ignore(botonAvion);
-            botonAvion.on('pointerdown', () => {
-                    
+            if(!this.escena.entidades[`avion_${i}`]){
+                botonAvion.setBackgroundColor('rgba(195, 19, 19, 0.9)');
+                botonAvion.disableInteractive();
+            } else {
+                botonAvion.on('pointerdown', () => {               
                     this.escena.seleccionarEntidad(`avion_${i}`);
 
                     if(this.escena.entidades[`avion_${i}`].piloto)
                         this.escena.cambiarObjetivoCamara(`avion_${i}`);
 
                     if(!this.escena.entidades[`avion_${i}`].piloto) {
-                        // if (!this.escena.botonObservador) {
-                        //     this.escena.botonObservador = panel.agregarBoton(40, 460, 'Observador');
-                        //     this.escena.entidades[`avion_${i}`].observador = false;
-                        //     this.escena.botonObservador.setBackgroundColor('#808080');
-                        // }
-
-                        // this.escena.botonObservador.on('pointerdown', () => {
-                        //     const avion = this.escena.entidades[`avion_${i}`];
-
-                        //     if (avion.observador) {
-                        //         this.escena.entidades[`avion_${i}`].observador = false;
-                        //         this.escena.botonObservador.setBackgroundColor('#808080');
-                        //     } else {
-                        //         this.escena.entidades[`avion_${i}`].observador = true;
-                        //         this.escena.botonObservador.setBackgroundColor('#00ff00');
-                        //     }
-                        // });
-                        
-                        // if (!this.escena.botonOperador) {
-                        //     this.escena.botonOperador = panel.agregarBoton(160, 460, 'Operador');
-                        //     this.escena.entidades[`avion_${i}`].operador = false;
-                        //     this.escena.botonOperador.setBackgroundColor('#808080');
-                        // }
-
-                        // this.escena.botonOperador.on('pointerdown', () => {
-                        //     const avion = this.escena.entidades[`avion_${i}`];
-
-                        //     if (avion.operador) {
-                        //         this.escena.entidades[`avion_${i}`].operador = false;
-                        //         this.escena.botonOperador.setBackgroundColor('#808080');
-                        //     } else {
-                        //         this.escena.entidades[`avion_${i}`].operador = true;
-                        //         this.escena.botonOperador.setBackgroundColor('#00ff00');
-                        //     }
-                        // });
-                        
-                        // if (!this.escena.botonDespegar) {
-                        //     this.escena.botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00');
-                        // }
-
-                        // this.escena.botonDespegar.on('pointerdown', () => {
-                        //     botonAvion.setBackgroundColor('#00ff00');
-                        //     const avion = this.escena.entidades[`avion_${i}`];
-                        //     avion.piloto = true;
-                        //     avion.calcularRangoVision();
-                        //     avion.calcularAlcanceVuelo();
-                        //     avion.init(this.escena);
-                        //     avion.objeto.setVisible(true);     
-                        //     console.log(`Despegando avion_${i} desde (${this.objeto.x}, ${this.objeto.y}) a (${avion.objeto.x}, ${avion.objeto.y})`);                                                   
-                        //     this.escena.botonDespegar.setVisible(false);
-                        //     this.escena.botonOperador.setVisible(false);
-                        //     this.escena.botonObservador.setVisible(false);
-                        //     this.escena.cambiarObjetivoCamara(`avion_${i}`);
-                        // });
-                    //this.escena.camaraMinimapa.ignore(this.escena.botonObservador);
-                    //this.escena.camaraMinimapa.ignore(this.escena.botonOperador);
-                    //this.escena.camaraMinimapa.ignore(this.escena.botonDespegar);
-                   
                         if (this.escena.botonObservador) {
+                            this.escena.camaraMinimapa.ignore(this.escena.botonObservador);
                             this.escena.botonObservador.setVisible(true);
                             this.escena.botonObservador.setBackgroundColor('#808080');
                             this.escena.entidades[`avion_${i}`].observador = false;
                         }
                         
                         if (this.escena.botonOperador) {
+                            this.escena.camaraMinimapa.ignore(this.escena.botonOperador);
                             this.escena.botonOperador.setVisible(true);
                             this.escena.botonOperador.setBackgroundColor('#808080');
                             this.escena.entidades[`avion_${i}`].operador = false;
                         }
                         
                         if (this.escena.botonDespegar) {
+                            this.escena.camaraMinimapa.ignore(this.escena.botonDespegar);
                             this.escena.botonDespegar.setVisible(true);
                         }
                     }
-                    
                 });
+            }
             panel.agregarBotonAlPanel(botonAvion);
         }
 
@@ -222,7 +173,7 @@ class Portaaviones extends Entidad {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
-        this.calcularCombustible();
+    //    this.calcularCombustible();
 
         if(this.combustible > 0) {
 

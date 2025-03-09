@@ -263,7 +263,8 @@ io.on("connection", (socket) => {
             origenX: data.origenX,
             origenY: data.origenY,
             destX: data.destX,
-            destY: data.destY
+            destY: data.destY,
+            angulo: data.angulo
         });
     });
 
@@ -278,6 +279,19 @@ io.on("connection", (socket) => {
             mensaje: data.mensaje
         });
     });
+
+    socket.on("hundirAvion", (data) => {
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+
+        socket.to(data.sala).emit("hundirAvionCliente", {
+            sala: data.sala,
+            nombreEntidad: data.nombreEntidad,
+        });
+    })
 
     socket.on("recuperarPartida", ({ sala, rol }) => {
         query.obtenerDatosDeSala(sala, (error, resultados) => {
@@ -341,9 +355,7 @@ io.on("connection", (socket) => {
             if (salas[sala].jugadores.length === 2) {
                 // Inicializar el estado del juego con el ultimo estado guardado
             
-                //const puerto = posicionRandomPuerto();
-                //const posicionBismarck = posicionRandomBismarck(puerto);
-                //const posicionPortaaviones = posicionRandomPortaaviones(posicionBismarck, puerto);
+              
                 query.obtenerDatosEntidades(sala, (error, resultados) => {
                     if(error) {
                         console.error('Error al recuperar datos entidades:', error);
@@ -351,9 +363,9 @@ io.on("connection", (socket) => {
                     }
                     //try - catch
                 
-                
-                    const puerto = posicionRandomPuerto();
+            
                     const entidades = {};
+                    let puerto = null;
                     
                     resultados.forEach(resultado => {
                         //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
@@ -383,8 +395,13 @@ io.on("connection", (socket) => {
                                     combustible: resultado.combustible,
                                     seleccionado: false
                                 });
+                            } else if (resultado.idEntidad === "puerto"){
+                                puerto = {
+                                    x: resultado.posX,
+                                    y: resultado.posY
+                                }
                             } else {
-                                entidades[`avion_${resultado.numeroAvion}`] = new Avion({
+                                entidades[resultado.idEntidad] = new Avion({
                                     x: resultado.posX,
                                     y: resultado.posY,
                                     velocidad: resultado.velocidad,
@@ -464,6 +481,13 @@ io.on("connection", (socket) => {
                         }
                     });
                 }
+                query.actualizarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
+                    if(error) {
+                        console.error('Error al insertar entidad:', error);
+                        return;
+                    }
+                    console.log("Resultados Actualizar:", resultados);
+                });
             } else {
                 jugadores.forEach(jugador => {
                     query.insertarDatosSala(data.sala, jugador.nombreUsuario, jugador.rol, fecha, (error, resultados) => {
@@ -483,7 +507,13 @@ io.on("connection", (socket) => {
                         }
                     });
                 }
-                
+                query.insertarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
+                    if(error) {
+                        console.error('Error al insertar entidad:', error);
+                        return;
+                    }
+                    console.log("Resultados Insertar:", resultados);
+                });
             }
         })
         

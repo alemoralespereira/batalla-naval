@@ -75,8 +75,6 @@ class Avion extends Entidad {
             console.log(`Sprite creado para avion_${this.numeroAvion} en x=${this.objeto.x}, y=${this.objeto.y}`);
             this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 250, 250).setOrigin(0.5, 0.5);
             this.objeto.rangoVision = this.rangoVision;
-        
-
             
             // this.graphics = escena.add.graphics();
             // this.dibujarRangoVision();
@@ -88,9 +86,7 @@ class Avion extends Entidad {
             this.indicadorCombustible.setVisible(false);
             this.indicadorCombustible.setScrollFactor(0); 
         }      
-        //this.objeto.numeroAvion = this.numeroAvion;
-        //this.objeto.piloto = this.piloto;
-        //this.objeto.despego = this.despego;
+
         super.init(escena);
 
     }
@@ -102,7 +98,7 @@ class Avion extends Entidad {
 
         console.log(`Avión ${this.numeroAvion} disparando torpedo.`);
         this.escena.sound.play('disparoAvion'); // Reproducir sonido de disparo
-        this.arma.dispararArma(this.objeto.x, this.objeto.y, destinoX, destinoY,this);
+        this.arma.dispararArma(this.objeto.x, this.objeto.y, this.objeto.angle, destinoX, destinoY, "avion");
 
         this.torpedo = false; // Torpedo agotado hasta recargar
     }
@@ -132,10 +128,6 @@ class Avion extends Entidad {
             }
 
             delete this.escena.entidades[nombreEntidad];
-
-            if (this.escena.equipoAzul.length === 1) {
-                this.escena.victoriaBismarck();
-            }
         }
     }
    
@@ -166,6 +158,27 @@ class Avion extends Entidad {
 
         // Se disminuye el combustible total para facilitar los calculos de alcance máximo según los tripulantes
         this.combustible = this.combustible * this.multiplicadorCombustible;
+    }
+
+    hundirAvion() {
+        this.salud = 0;
+            
+        this.splash = this.escena.add.image(this.objeto.x, this.objeto.y, "splash");
+        this.escena.time.delayedCall(200, () => {
+            this.splash.destroy();
+        });
+        
+        const nombreEntidad = `avion_${this.numeroAvion}`;
+        this.objeto.destroy();
+        this.objeto = null;
+        this.escena.equipoAzul = this.escena.equipoAzul.filter((a) => a.numeroAvion !== this.numeroAvion);
+        
+        if (this.escena.rol === "portaaviones") {
+            this.escena.botonesAviones[this.numeroAvion - 1].setBackgroundColor('rgba(195, 19, 19, 0.9)');
+            this.escena.botonesAviones[this.numeroAvion - 1].disableInteractive();
+        }
+
+        delete this.escena.entidades[nombreEntidad];
     }
 
     update() {
@@ -204,13 +217,7 @@ class Avion extends Entidad {
         );
         if(distanciaAvionAPortaaviones > 250) {   
             this.despego = true;
-            //this.objeto.despego = true;
         }     
-
-        //this.piloto = this.objeto.piloto;
-        //this.despego = this.objeto.despego;
-        //this.objeto.piloto = this.piloto;
-        //this.objeto.despego = this.despego;
        
         if(this.piloto && this.escena.rol === "portaaviones"){
         //    console.log("Avion:" , this.numeroAvion);
@@ -229,27 +236,16 @@ class Avion extends Entidad {
         }
 
         if(this.combustible <= 0) {
-            this.salud = 0;
-            
-            this.splash = this.escena.add.image(this.objeto.x, this.objeto.y, "splash");
-            this.escena.time.delayedCall(200, () => {
-                this.splash.destroy();
-            });
-            
+            console.log("Entro a this.combustible < 0");
+            this.hundirAvion();
             const nombreEntidad = `avion_${this.numeroAvion}`;
-            this.objeto.destroy();
-            this.objeto = null;
-            this.escena.equipoAzul = this.escena.equipoAzul.filter((a) => a.numeroAvion !== this.numeroAvion);
-            
-            if (this.escena.rol === "portaaviones") {
-                this.escena.botonesAviones[this.numeroAvion - 1].setBackgroundColor('rgba(195, 19, 19, 0.9)');
-                this.escena.botonesAviones[this.numeroAvion - 1].disableInteractive();
-            }
 
-            delete this.escena.entidades[nombreEntidad];
+            const datosHundirAvion = {
+                sala: this.escena.sala,
+                nombreEntidad : nombreEntidad,
+            }
+            socket.emit("hundirAvion", datosHundirAvion);
         }
-           
-      //  console.log(`Avion_${this.numeroAvion} posición: (${this.objeto.x}, ${this.objeto.y})`);
     }
 
     mover(controles) {
@@ -257,7 +253,6 @@ class Avion extends Entidad {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
-        this.calcularCombustible();
 
         if (this.combustible > 0 && this.piloto) {
             // Movimiento con las teclas W, A, S, D

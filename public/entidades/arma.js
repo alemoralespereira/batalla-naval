@@ -33,7 +33,7 @@ class Arma {
         }
     }
 
-    dispararArma(origenX, origenY, destX, destY, entidadAtacante) {
+    dispararArma(origenX, origenY, origenAngulo, destX, destY, entidadAtacante) {
         if(!this.escena){
             console.error("Error: La escena no está definida en el arma.");
             return;
@@ -44,8 +44,21 @@ class Arma {
         console.log(`Disparando arma desde (${origenX}, ${origenY}) hacia (${destX}, ${destY})`);
 
         this.contadorMuniciones -= 1;
+        let proyectil = null;
 
-        const proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectil");
+        if(this.nombre === 'Torpedo avion') {
+            proyectil = this.escena.physics.add.sprite(origenX, origenY, "torpedo")
+            proyectil.angle = origenAngulo;
+        }
+        if(this.nombre === 'Antiaereo pesado 1' || this.nombre === 'Antiaereo pesado 2') {
+            proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectilPesado")
+            proyectil.angle = origenAngulo;
+        }
+        if(this.nombre === 'Antiaereo ligero') {
+            proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectilLigero")
+            proyectil.angle = origenAngulo;
+        }
+        //const proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectil");
         this.escena.proyectiles.add(proyectil);
         proyectil.daño = this.daño;
         proyectil.nombre = this.nombre;
