@@ -323,6 +323,11 @@ class EscenaPrincipal extends Phaser.Scene {
                 };
             }
 
+            this.estadoJuego.puerto = {
+                x: this.puerto.x,
+                y: this.puerto.y
+            };
+
             const datosGuardar = {
                 //idUsuario: socket.id,
                 //nombreUsuario: this.nombreUsuario,
