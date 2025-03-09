@@ -42,20 +42,16 @@ class Entidad {
     }
 
     setX(x) {
-        this.x = x;
-
-        return this;
+        this.x = Number(x);
+        return this; 
     }
-
+    
     setY(y) {
-        this.y = y;
-
+        this.y = Number(y);
         return this;
     }
-
     setAngulo(angulo) {
-        this.angulo = angulo;
-
+        this.angulo = Number(angulo);
         return this;
     }
 }

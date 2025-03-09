@@ -13,7 +13,8 @@ class EscenaPrincipal extends Phaser.Scene {
         this.sala = data.sala;
         this.rol = data.rol;
         this.estadoJuego = data.estadoJuego;
-        this.nombreUsuario = data.nombreUsuario;
+        //this.nombreUsuario = data.nombreUsuario;
+        console.log("Datos crudos recibidos:", JSON.stringify(data.estadoJuego.entidades.avion_1, null, 2));
 
         //********************************************************/
         // CREAR ENTIDADES
@@ -41,6 +42,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.load.audio('disparoBismarck', 'assets/sonidos/disparoBismarck.mp3');
         this.load.audio('barco', 'assets/sonidos/barco.mp3');
         this.load.audio('explosion', 'assets/sonidos/explosion.mp3');
+        this.load.image('splash', '/assets/splash.png');
     }
 
     create() {
@@ -49,7 +51,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
         this.puerto = this.add.image(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
         this.puerto = this.physics.add.sprite(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
-
+        console.log("Mapa añadido a la escena");
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -112,7 +114,8 @@ class EscenaPrincipal extends Phaser.Scene {
             avion.init(this); // Inicializar el avión
             avion.objeto.setCollideWorldBounds(true);
             this.equipoAzul.push(avion);
-            avion.objeto.setVisible(false);        
+            if(!avion.piloto)
+                avion.objeto.setVisible(false);        
             this.camaraMinimapa.ignore(avion.objeto);   
         }
 
@@ -336,6 +339,15 @@ class EscenaPrincipal extends Phaser.Scene {
         });
     }
 
+    getCoordenadasMouse() {
+        this.input.activePointer.updateWorldPoint(this.cameras.main);
+
+        return {
+          x: this.input.activePointer.worldX,
+          y: this.input.activePointer.worldY,
+        }
+      }
+
     inmovilizarBismarck() {
         this.entidades.bismarck.objeto.setVelocity(0, 0);
 
@@ -491,13 +503,16 @@ class EscenaPrincipal extends Phaser.Scene {
         this.entidades[`avion_${avion.numeroAvion}`].despego = false;
         this.entidades[`avion_${avion.numeroAvion}`].torpedo = true;
         this.entidades[`avion_${avion.numeroAvion}`].seleccionado = false;
+        this.entidades[`avion_${avion.numeroAvion}`].velocidad = 0;
         this.entidades[`avion_${avion.numeroAvion}`].combustible = this.estadoJuego.entidades[`avion_${avion.numeroAvion}`].combustible;
         this.entidades[`avion_${avion.numeroAvion}`].multiplicadorCombustible = 1;
         this.entidades[`avion_${avion.numeroAvion}`].indicadorCombustible.setVisible(false);
         avion.objeto.setVisible(false); 
-        let botonAmodificar = this.botonesAviones[`${avion.numeroAvion}`-1];
-        botonAmodificar.setBackgroundColor('#808080');
 
+        if (this.rol === "portaaviones") {
+            let botonAmodificar = this.botonesAviones[`${avion.numeroAvion}`-1];
+            botonAmodificar.setBackgroundColor('#808080');
+        }
     }
 
     //Autoriza la superposicion, si el avion esta volando (tiene piloto) y ya despego(La ubicacion del avion esta fuera del portaaviones)
@@ -508,38 +523,31 @@ class EscenaPrincipal extends Phaser.Scene {
 
     //Funcion para determinar si entidad2 esta dentro del rango de vision de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
-
-        if (!this.entidad1 || !this.entidad2) {
+        if (!entidad1 || !entidad2) {
             //console.warn("Intento de calcular rango de vision en entidades destruidas.");
-            return; 
+            return false;
         }
 
-        const limites = entidad2.objeto.getBounds();
-
-        const topLeft = { x: limites.x, y: limites.y };
-        const topRight = { x: limites.x + limites.width, y: limites.y };
-        const bottomLeft = { x: limites.x, y: limites.y + limites.height };
-        const bottomRight = { x: limites.x + limites.width, y: limites.y + limites.height };
-
         const limitesRangoVision = entidad1.objeto.rangoVision.getBounds();
-        
-        return (
-            Phaser.Geom.Rectangle.Contains(limitesRangoVision, topLeft.x, topLeft.y) ||
-            Phaser.Geom.Rectangle.Contains(limitesRangoVision, topRight.x, topRight.y) ||
-            Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomLeft.x, bottomLeft.y) ||
-            Phaser.Geom.Rectangle.Contains(limitesRangoVision, bottomRight.x, bottomRight.y)
-        );
+        const rectanguloRangoVision = new Phaser.Geom.Rectangle(limitesRangoVision.x, limitesRangoVision.y, limitesRangoVision.width, limitesRangoVision.height);
+
+        const limites = entidad2.objeto.getBounds();
+        const rectanguloLimites = new Phaser.Geom.Rectangle(limites.x, limites.y, limites.width, limites.height);
+
+        return Phaser.Geom.Rectangle.Overlaps(rectanguloRangoVision, rectanguloLimites);
     }
 
     //Función para cambiar la cámara a la entidad seleccionada.
     cambiarObjetivoCamara(nombreEntidad) {
         if (this.entidades[nombreEntidad] && this.entidades[nombreEntidad].objeto) {
+            console.log(this.entidades[nombreEntidad].objeto);
             this.cameras.main.startFollow(this.entidades[nombreEntidad].objeto);
             console.log(`Cámara siguiendo a ${nombreEntidad}`);
         } else {
             console.error(`Entidad ${nombreEntidad} no encontrada.`);
         }
     }
+       
 
     // Función para seleccionar entidad y cambiar de cámara.
     seleccionarEntidad(nombreEntidad) {

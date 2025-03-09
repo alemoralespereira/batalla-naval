@@ -1,19 +1,18 @@
 import Panel from '../ui/panel.js';
-import Barco from './barco.js';
+import Entidad from './entidad.js';
 import Arma from './arma.js';
 import Avion from './avion.js';
 import socket from '../socket.js';
 
-class Bismarck extends Barco {
+class Bismarck extends Entidad {
     constructor(bismarckData) {
         super(
-            bismarckData.x, //xInicial
-            bismarckData.y, //yInicial
+            Number(bismarckData.x), //xInicial
+            Number(bismarckData.y), //yInicial
             bismarckData.velocidad,
             bismarckData.velocidadMaxima,
-            bismarckData.angulo,
+            Number(bismarckData.angulo),
             bismarckData.aceleracion,
-            bismarckData.objeto,
             bismarckData.combustible,
         );
         this.salud = bismarckData.salud;
@@ -54,18 +53,10 @@ class Bismarck extends Barco {
         this.objeto.rangoVision = this.rangoVision;
         //this.graphics = escena.add.graphics();
         //this.dibujarRangoVision();
-        this.indicadorCombustible = escena.add.text(-100, 760, `COMBUSTIBLE BISMARCK:  ${this.combustible}`,{
+        this.indicadorCombustible = escena.add.text(-100, 760, `COMBUSTIBLE BISMARCK:  ${Math.max(this.combustible, 0)}`,{
             fontSize: '20px',
             fill: '#ffffff'
         });
-
-        this.indicadorSalud = this.escena.add.text(this.objeto.x, this.objeto.y - 30, `Vida: ${this.salud}`, {
-            fontSize: "16px",
-            fill: "#ff0000",
-            fontWeight: "bold",
-            backgroundColor: "#ffffff"
-        }).setOrigin(0.5);
-
 
         this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
         this.indicadorCombustible.setVisible(false);
@@ -136,41 +127,48 @@ class Bismarck extends Barco {
             .setScale(0.2, 0.2)
             .setVisible(false)
             .setInteractive();
+
+        this.indicadorSalud = this.escena.add.text(this.objeto.x, this.objeto.y - 30, `Vida: ${this.salud}`, {
+            fontSize: "16px",
+            fill: "#ff0000",
+            fontWeight: "bold",
+            backgroundColor: "#ffffff"
+        }).setOrigin(0.5);
         
         this.cursorMira.on('pointerdown', () => {
             if (this.cursorMira.visible) {
-                    if(!this.armaSeleccionada.disparoActivado && this.armaSeleccionada.contadorMuniciones > 0) {
-                        this.armaSeleccionada.disparoActivado = true;
-                        this.escena.sound.play('disparoBismarck');
-                        let origenX;
-                        let origenY;
+                if(!this.armaSeleccionada.disparoActivado && this.armaSeleccionada.contadorMuniciones > 0) {
+                    this.armaSeleccionada.disparoActivado = true;
+                    this.escena.sound.play('disparoBismarck');
+                    let origenX;
+                    let origenY;
 
-                        if(this.armaSeleccionada.nombre === "Antiaereo pesado 1") {
-                            origenX = this.popa.x;
-                            origenY = this.popa.y;
-                            this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
-                        } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
-                            origenX = this.proa.x;
-                            origenY = this.proa.y;
-                            this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
-                        } else {
-                            origenX = this.objeto.x;
-                            origenY = this.objeto.y;
-                            this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
-                        }
-
-                        textosMuniciones[this.armaSeleccionada.nombre].setText(`Cantidad municiones:  ${this.armaSeleccionada.contadorMuniciones} / ${this.armaSeleccionada.cantidadMuniciones}`);
-
-                        socket.emit("disparar", { 
-                            nombreEntidad: "bismarck", 
-                            sala: this.escena.sala,
-                            nombreArma: this.armaSeleccionada.nombre,
-                            origenX, 
-                            origenY, 
-                            destX: this.cursorMira.x,
-                            destY: this.cursorMira.y 
-                        });
+                    if(this.armaSeleccionada.nombre === "Antiaereo pesado 1") {
+                        origenX = this.popa.x;
+                        origenY = this.popa.y;
+                        this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
+                    } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
+                        origenX = this.proa.x;
+                        origenY = this.proa.y;
+                        this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
+                    } else {
+                        origenX = this.objeto.x;
+                        origenY = this.objeto.y;
+                        this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y, "bismarck");
                     }
+
+                    textosMuniciones[this.armaSeleccionada.nombre].setText(`Cantidad municiones:  ${this.armaSeleccionada.contadorMuniciones} / ${this.armaSeleccionada.cantidadMuniciones}`);
+
+                    socket.emit("disparar", { 
+                        nombreEntidad: "bismarck", 
+                        sala: this.escena.sala,
+                        nombreArma: this.armaSeleccionada.nombre,
+                        origenX, 
+                        origenY, 
+                        destX: this.cursorMira.x,
+                        destY: this.cursorMira.y 
+                    });
+                }
             }
         });
 
@@ -256,7 +254,7 @@ class Bismarck extends Barco {
         super.update();
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
 
-        if (this.objeto) {
+        if (this.objeto && this.indicadorSalud) {
             this.indicadorSalud.setPosition(this.objeto.x, this.objeto.y - 30); // Mantener indicador de vida en la posición del barco
         }
 
@@ -273,13 +271,14 @@ class Bismarck extends Barco {
         //this.dibujarRangoVision();
         this.updateHitboxes();
         if(this.escena.rol === "bismarck") {
-           this.cursorMira.setPosition(this.escena.input.activePointer.worldX, this.escena.input.activePointer.worldY);
+            const coordenadasMouse = this.escena.getCoordenadasMouse();
+           this.cursorMira.setPosition(coordenadasMouse.x, coordenadasMouse.y);
 
             //if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
             if(this.velocidad > 0) {
                 // console.log("Adentro del if velocidad: ", this.velocidad);    
                 this.indicadorCombustible.setVisible(true);
-                this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${this.combustible}`);
+                this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${Math.max(this.combustible, 0)}`);
             }
 
             this.armas.forEach((arma) => {

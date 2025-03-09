@@ -1,48 +1,31 @@
-import Entity from './entity.js';
+import Entidad from './entidad.js';
 import socket from '../socket.js';
 import Arma from "./arma.js";
 
-class Avion extends Entity {
+class Avion extends Entidad {
     constructor(avionData, numeroAvion) {
         super(
-            avionData.x, //xInicial
-            avionData.y, //yInicial
+            Number(avionData.x), //xInicial
+            Number(avionData.y), //yInicial
             avionData.velocidad,
             avionData.velocidadMaxima,
-            avionData.angulo,
+            Number(avionData.angulo),
             avionData.aceleracion,
-            avionData.objeto,
             avionData.combustible,
         );
         this.sonidoMotor = null;
-        this.piloto = avionData.piloto;
-        this.observador = avionData.observador;
-        this.operador = avionData.operador;
-        this.seleccionado = avionData.seleccionado;
+        this.piloto = Boolean(avionData.piloto);
+        this.observador = Boolean(avionData.observador);
+        this.operador = Boolean(avionData.operador);
+        this.seleccionado = Boolean(avionData.seleccionado);
         this.numeroAvion = avionData.numeroAvion;
-        this.torpedo = avionData.torpedo;
+        this.torpedo = Boolean(avionData.torpedo);
         this.multiplicadorCombustible = avionData.multiplicadorCombustible;
-        this.despego = avionData.despego;
+        this.despego = Boolean(avionData.despego);
         this.salud = avionData.salud;
         this.arma = null;
     }
-
-    disparar(){
-        const anguloRad = Phaser.Math.DegToRad(this.objeto.angle);
-        const destinoX = this.objeto.x + Math.cos(anguloRad) * this.arma.rango;
-        const destinoY = this.objeto.y + Math.sin(anguloRad) * this.arma.rango;
-
-        console.log(`Avión ${this.numeroAvion} disparando torpedo.`);
-        this.escena.sound.play('disparoAvion'); // Reproducir sonido de disparo
-        this.arma.dispararArma(this.objeto.x, this.objeto.y, destinoX, destinoY, `avion_${this.numeroAvion}`);
-
-        this.torpedo = false; // Torpedo agotado hasta recargar
-    }
-
-    recargar(){
-        console.log(`Avión ${this.numeroAvion} recargando torpedo.`);
-        this.torpedo = true;
-    }
+    
 
     init(escena) {
         this.escena = escena;
@@ -59,24 +42,41 @@ class Avion extends Entity {
             nombre: "Torpedo avion",
             rango: 500,
             velocidad: 300,
-            daño: 5,
+            daño: 1,
             cadenciaDisparo:0,
             cantidadMuniciones:1,
             escena: this.escena
-            });
+        });
 
-        this.torpedo = true;  // Cada avión obtiene un torpedo al despegar
-
+        //this.torpedo = true;  // Cada avión obtiene un torpedo al despegar
+        console.log(`Inicializando avion_${this.numeroAvion} con x=${this.xInicial}, y=${this.yInicial}`);
         if (this.objeto) {
             // Si el sprite ya existe, actualiza su posición
             this.objeto.x = this.escena.entidades.portaaviones.objeto.x;
             this.objeto.y = this.escena.entidades.portaaviones.objeto.y;
             this.objeto.angle = this.escena.entidades.portaaviones.objeto.angle;
+
         } else {
             this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "avion").setScale(0.2).setOrigin(0.5, 0.5);
+            //this.objeto.setVisible(true);
+            if(this.velocidad > 0) {
+                // Calcular nueva velocidad
+                const angle = this.anguloInicial;
+                const velocityX = Math.cos(angle) * this.velocidad;
+                const velocityY = Math.sin(angle) * this.velocidad;
+
+                // Actualizar las posiciones
+                this.objeto.setVelocityX(velocityX);
+                this.objeto.setVelocityY(velocityY);
+                this.objeto.angle = this.anguloInicial;
+            }
+            
+
+            console.log(`Sprite creado para avion_${this.numeroAvion} en x=${this.objeto.x}, y=${this.objeto.y}`);
             this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 250, 250).setOrigin(0.5, 0.5);
             this.objeto.rangoVision = this.rangoVision;
-            
+        
+
             
             // this.graphics = escena.add.graphics();
             // this.dibujarRangoVision();
@@ -94,6 +94,23 @@ class Avion extends Entity {
         super.init(escena);
 
     }
+
+    disparar(){
+        const anguloRad = Phaser.Math.DegToRad(this.objeto.angle);
+        const destinoX = this.objeto.x + Math.cos(anguloRad) * this.arma.rango;
+        const destinoY = this.objeto.y + Math.sin(anguloRad) * this.arma.rango;
+
+        console.log(`Avión ${this.numeroAvion} disparando torpedo.`);
+        this.escena.sound.play('disparoAvion'); // Reproducir sonido de disparo
+        this.arma.dispararArma(this.objeto.x, this.objeto.y, destinoX, destinoY,this);
+
+        this.torpedo = false; // Torpedo agotado hasta recargar
+    }
+
+   /* recargar(){
+        console.log(`Avión ${this.numeroAvion} recargando torpedo.`);
+        this.torpedo = true;
+    }*/
 
     recibirDaño(daño) {
         this.escena.scene.get('EscenaAtaque').impactoAvion = true;
@@ -155,6 +172,7 @@ class Avion extends Entity {
         super.update();
 
         if (this.escena.controles.disparo.isDown && this.escena.nombreEntidadSeleccionada === `avion_${this.numeroAvion}`) {
+            console.log(this.torpedo);
             // No puede disparar sin munición
             if (this.torpedo) {
                 this.disparar();
@@ -166,10 +184,10 @@ class Avion extends Entity {
         }
 
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
-       // this.dibujarRangoVision();
+        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones") {
-            //Si esta seleccionado o si se esta moviendo pero tiene piloto.
-            if(this.seleccionado || ((this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) && this.piloto)) {    
+            //Si se esta moviendo pero tiene piloto.
+            if(((this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) && this.piloto)) {    
                 this.indicadorCombustible.setVisible(true);
                 // El jugador ve que todos los aviones tienen el mismo combustible maximo pero cuanto más tripulantes más rápido se consume
                 const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
@@ -178,7 +196,13 @@ class Avion extends Entity {
         }
         
         //Si la diferencia entre la posicion del avion y la posicion del portaaviones sobre el eje de las X, es mayor a 150, es porque despegó.
-        if((this.objeto.x - this.escena.entidades.portaaviones.objeto.x) > 250) {          
+        const distanciaAvionAPortaaviones = Phaser.Math.Distance.Between(
+            this.objeto.x,
+            this.objeto.y,
+            this.escena.entidades.portaaviones.objeto.x,
+            this.escena.entidades.portaaviones.objeto.y
+        );
+        if(distanciaAvionAPortaaviones > 250) {   
             this.despego = true;
             //this.objeto.despego = true;
         }     
@@ -188,7 +212,7 @@ class Avion extends Entity {
         //this.objeto.piloto = this.piloto;
         //this.objeto.despego = this.despego;
        
-        if(this.piloto){
+        if(this.piloto && this.escena.rol === "portaaviones"){
         //    console.log("Avion:" , this.numeroAvion);
             const datosMovimiento = {
                 //idUsuario: socket.id, // ID del socket
@@ -203,6 +227,29 @@ class Avion extends Entity {
             // Enviar al servidor
             socket.emit("moverEntidad", datosMovimiento);
         }
+
+        if(this.combustible <= 0) {
+            this.salud = 0;
+            
+            this.splash = this.escena.add.image(this.objeto.x, this.objeto.y, "splash");
+            this.escena.time.delayedCall(200, () => {
+                this.splash.destroy();
+            });
+            
+            const nombreEntidad = `avion_${this.numeroAvion}`;
+            this.objeto.destroy();
+            this.objeto = null;
+            this.escena.equipoAzul = this.escena.equipoAzul.filter((a) => a.numeroAvion !== this.numeroAvion);
+            
+            if (this.escena.rol === "portaaviones") {
+                this.escena.botonesAviones[this.numeroAvion - 1].setBackgroundColor('rgba(195, 19, 19, 0.9)');
+                this.escena.botonesAviones[this.numeroAvion - 1].disableInteractive();
+            }
+
+            delete this.escena.entidades[nombreEntidad];
+        }
+           
+      //  console.log(`Avion_${this.numeroAvion} posición: (${this.objeto.x}, ${this.objeto.y})`);
     }
 
     mover(controles) {
@@ -229,7 +276,10 @@ class Avion extends Entity {
                 if (controles.arriba.isDown) {
                     this.velocidad = Math.min(this.velocidad + this.aceleracion, this.velocidadMaxima);
                 }
-
+            } else {
+                this.objeto.setAngularVelocity(0);
+            }
+            if(this.velocidad > 0) {
                 // Calcular nueva velocidad
                 const angle = Phaser.Math.DegToRad(this.objeto.angle);
                 const velocityX = Math.cos(angle) * this.velocidad;
@@ -238,19 +288,20 @@ class Avion extends Entity {
                 // Actualizar las posiciones
                 this.objeto.setVelocityX(velocityX);
                 this.objeto.setVelocityY(velocityY);
-
-                // Actualizar las posiciones internas
-                // this.x = this.objeto.x;
-                // this.y = this.objeto.y;
-                // this.angulo = this.objeto.angle;
-            } else {
-                this.objeto.setAngularVelocity(0);
             }
         } else {
             this.objeto.setAngularVelocity(0);
             this.objeto.setVelocityX(0);
             this.objeto.setVelocityY(0);
-        }
+            }
+
+       
+
+                // Actualizar las posiciones internas
+                // this.x = this.objeto.x;
+                // this.y = this.objeto.y;
+                // this.angulo = this.objeto.angle;
+            
     }
 }
 

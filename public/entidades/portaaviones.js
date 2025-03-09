@@ -1,20 +1,17 @@
 import Panel from '../ui/panel.js';
-import Barco from './barco.js';
-import socket from '../socket.js';
+import Entidad from './entidad.js';
+import Avion from './avion.js';
 
-
-class Portaaviones extends Barco {
+class Portaaviones extends Entidad {
     constructor(portaavionesData) {
         super(
-            portaavionesData.x, //xInicial
-            portaavionesData.y, //yInicial
+            Number(portaavionesData.x), //xInicial
+            Number(portaavionesData.y), //yInicial
             portaavionesData.velocidad,
             portaavionesData.velocidadMaxima,
-            portaavionesData.angulo,
+            Number(portaavionesData.angulo),
             portaavionesData.aceleracion,
-            portaavionesData.objeto,
             portaavionesData.combustible,
-            
         );
         this.seleccionado = portaavionesData.seleccionado;
     }
@@ -26,7 +23,7 @@ class Portaaviones extends Barco {
         this.objeto.rangoVision = this.rangoVision;
        // this.graphics = escena.add.graphics();
        // this.dibujarRangoVision();
-       this.indicadorCombustible = escena.add.text(-100, 430, `COMBUSTIBLE PORTAAVIONES:  ${this.combustible}`,{
+       this.indicadorCombustible = escena.add.text(-100, 430, `COMBUSTIBLE PORTAAVIONES:  ${Math.max(this.combustible, 0)}`,{
             fontSize: '20px',
             fill: '#ffffff'
         });
@@ -59,43 +56,140 @@ class Portaaviones extends Barco {
             botonAvion.on('pointerdown', () => {
                     
                     this.escena.seleccionarEntidad(`avion_${i}`);
+
                     if(this.escena.entidades[`avion_${i}`].piloto)
                         this.escena.cambiarObjetivoCamara(`avion_${i}`);
 
                     if(!this.escena.entidades[`avion_${i}`].piloto) {
-                        this.escena.botonObservador = panel.agregarBoton(40, 460, 'Observador')
-                        .on('pointerdown', () => {
-                            this.escena.entidades[`avion_${i}`].observador = true;
-                            this.escena.botonObservador.setBackgroundColor('#00ff00');
-                        });
+                        // if (!this.escena.botonObservador) {
+                        //     this.escena.botonObservador = panel.agregarBoton(40, 460, 'Observador');
+                        //     this.escena.entidades[`avion_${i}`].observador = false;
+                        //     this.escena.botonObservador.setBackgroundColor('#808080');
+                        // }
+
+                        // this.escena.botonObservador.on('pointerdown', () => {
+                        //     const avion = this.escena.entidades[`avion_${i}`];
+
+                        //     if (avion.observador) {
+                        //         this.escena.entidades[`avion_${i}`].observador = false;
+                        //         this.escena.botonObservador.setBackgroundColor('#808080');
+                        //     } else {
+                        //         this.escena.entidades[`avion_${i}`].observador = true;
+                        //         this.escena.botonObservador.setBackgroundColor('#00ff00');
+                        //     }
+                        // });
                         
-                        this.escena.botonOperador = panel.agregarBoton(160, 460, 'Operador')
-                        .on('pointerdown', () => {
-                            this.escena.entidades[`avion_${i}`].operador = true;
-                            this.escena.botonOperador.setBackgroundColor('#00ff00');
-                        });
+                        // if (!this.escena.botonOperador) {
+                        //     this.escena.botonOperador = panel.agregarBoton(160, 460, 'Operador');
+                        //     this.escena.entidades[`avion_${i}`].operador = false;
+                        //     this.escena.botonOperador.setBackgroundColor('#808080');
+                        // }
+
+                        // this.escena.botonOperador.on('pointerdown', () => {
+                        //     const avion = this.escena.entidades[`avion_${i}`];
+
+                        //     if (avion.operador) {
+                        //         this.escena.entidades[`avion_${i}`].operador = false;
+                        //         this.escena.botonOperador.setBackgroundColor('#808080');
+                        //     } else {
+                        //         this.escena.entidades[`avion_${i}`].operador = true;
+                        //         this.escena.botonOperador.setBackgroundColor('#00ff00');
+                        //     }
+                        // });
                         
-                        this.escena.botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00')
-                        .on('pointerdown', () => {
-                            botonAvion.setBackgroundColor('#00ff00');
-                            const avion = this.escena.entidades[`avion_${i}`];
-                            avion.piloto = true;
-                            avion.calcularRangoVision();
-                            avion.calcularAlcanceVuelo();
-                            avion.init(this.escena);
-                            avion.objeto.setVisible(true);                                                        
-                            this.escena.botonDespegar.setVisible(false);
-                            this.escena.botonOperador.setVisible(false);
-                            this.escena.botonObservador.setVisible(false);
-                            this.escena.cambiarObjetivoCamara(`avion_${i}`);
-                        });
+                        // if (!this.escena.botonDespegar) {
+                        //     this.escena.botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00');
+                        // }
+
+                        // this.escena.botonDespegar.on('pointerdown', () => {
+                        //     botonAvion.setBackgroundColor('#00ff00');
+                        //     const avion = this.escena.entidades[`avion_${i}`];
+                        //     avion.piloto = true;
+                        //     avion.calcularRangoVision();
+                        //     avion.calcularAlcanceVuelo();
+                        //     avion.init(this.escena);
+                        //     avion.objeto.setVisible(true);     
+                        //     console.log(`Despegando avion_${i} desde (${this.objeto.x}, ${this.objeto.y}) a (${avion.objeto.x}, ${avion.objeto.y})`);                                                   
+                        //     this.escena.botonDespegar.setVisible(false);
+                        //     this.escena.botonOperador.setVisible(false);
+                        //     this.escena.botonObservador.setVisible(false);
+                        //     this.escena.cambiarObjetivoCamara(`avion_${i}`);
+                        // });
+                    //this.escena.camaraMinimapa.ignore(this.escena.botonObservador);
+                    //this.escena.camaraMinimapa.ignore(this.escena.botonOperador);
+                    //this.escena.camaraMinimapa.ignore(this.escena.botonDespegar);
+                   
+                        if (this.escena.botonObservador) {
+                            this.escena.botonObservador.setVisible(true);
+                            this.escena.botonObservador.setBackgroundColor('#808080');
+                            this.escena.entidades[`avion_${i}`].observador = false;
+                        }
+                        
+                        if (this.escena.botonOperador) {
+                            this.escena.botonOperador.setVisible(true);
+                            this.escena.botonOperador.setBackgroundColor('#808080');
+                            this.escena.entidades[`avion_${i}`].operador = false;
+                        }
+                        
+                        if (this.escena.botonDespegar) {
+                            this.escena.botonDespegar.setVisible(true);
+                        }
                     }
-                    this.escena.camaraMinimapa.ignore(this.escena.botonObservador);
-                    this.escena.camaraMinimapa.ignore(this.escena.botonOperador);
-                    this.escena.camaraMinimapa.ignore(this.escena.botonDespegar);
+                    
                 });
             panel.agregarBotonAlPanel(botonAvion);
         }
+
+        this.escena.botonObservador = panel.agregarBoton(40, 460, 'Observador').setVisible(false);
+        this.escena.botonObservador.on('pointerdown', () => {
+            const entidadSeleccionada = this.escena.entidades[this.escena.nombreEntidadSeleccionada];
+
+            if (entidadSeleccionada instanceof Avion) {   
+                if (entidadSeleccionada.observador) {
+                    entidadSeleccionada.observador = false;
+                    this.escena.botonObservador.setBackgroundColor('#808080');
+                } else {
+                    entidadSeleccionada.observador = true;
+                    this.escena.botonObservador.setBackgroundColor('#00ff00');
+                }
+            }
+        });
+        
+        this.escena.botonOperador = panel.agregarBoton(160, 460, 'Operador').setVisible(false);
+        this.escena.botonOperador.on('pointerdown', () => {
+            const entidadSeleccionada = this.escena.entidades[this.escena.nombreEntidadSeleccionada];
+
+            if (entidadSeleccionada instanceof Avion) {   
+                if (entidadSeleccionada.operador) {
+                    entidadSeleccionada.operador = false;
+                    this.escena.botonOperador.setBackgroundColor('#808080');
+                } else {
+                    entidadSeleccionada.operador = true;
+                    this.escena.botonOperador.setBackgroundColor('#00ff00');
+                }
+            }
+        });
+
+        this.escena.botonDespegar = panel.agregarBoton(260, 460, 'Despegar', '#00ff00').setVisible(false);
+        this.escena.botonDespegar.on('pointerdown', () => {
+            const entidadSeleccionada = this.escena.entidades[this.escena.nombreEntidadSeleccionada];
+            
+            if (entidadSeleccionada instanceof Avion) {   
+                const botonAvion = this.escena.botonesAviones[entidadSeleccionada.numeroAvion - 1];
+                botonAvion.setBackgroundColor('#00ff00');
+                const avion = entidadSeleccionada;
+                avion.piloto = true;
+                avion.calcularRangoVision();
+                avion.calcularAlcanceVuelo();
+                avion.init(this.escena);
+                avion.objeto.setVisible(true);     
+                console.log(`Despegando ${this.escena.nombreEntidadSeleccionada} desde (${this.objeto.x}, ${this.objeto.y}) a (${avion.objeto.x}, ${avion.objeto.y})`);                                                   
+                this.escena.botonDespegar.setVisible(false);
+                this.escena.botonOperador.setVisible(false);
+                this.escena.botonObservador.setVisible(false);
+                this.escena.cambiarObjetivoCamara(this.escena.nombreEntidadSeleccionada);
+            }
+        });
 
         //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
         this.escena.entidades.bismarck.objeto.setVisible(false);
@@ -118,7 +212,7 @@ class Portaaviones extends Barco {
        if(this.escena.rol === "portaaviones") {
             if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
                 this.indicadorCombustible.setVisible(true);
-                this.indicadorCombustible.setText(`COMBUSTIBLE PORTAAVIONES: ${this.combustible}`);
+                this.indicadorCombustible.setText(`COMBUSTIBLE PORTAAVIONES: ${Math.max(this.combustible, 0)}`);
             }   
         }       
     }
