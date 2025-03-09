@@ -145,19 +145,24 @@ class Bismarck extends Entidad {
                     this.escena.sound.play('disparoBismarck');
                     let origenX;
                     let origenY;
+                    let angulo = null;
 
                     if(this.armaSeleccionada.nombre === "Antiaereo pesado 1") {
                         origenX = this.popa.x;
                         origenY = this.popa.y;
-                        this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y);
+                        angulo = Phaser.Math.RadToDeg(this.calcularAngulo(this.popa.x, this.popa.y, this.cursorMira.x, this.cursorMira.y));
+                        this.armaSeleccionada.dispararArma(this.popa.x, this.popa.y, angulo, this.cursorMira.x, this.cursorMira.y);
                     } else if (this.armaSeleccionada.nombre === "Antiaereo pesado 2") {
                         origenX = this.proa.x;
                         origenY = this.proa.y;
-                        this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y);
+                        angulo = Phaser.Math.RadToDeg(this.calcularAngulo(this.proa.x, this.proa.y, this.cursorMira.x, this.cursorMira.y));
+                        console.log(angulo);
+                        this.armaSeleccionada.dispararArma(this.proa.x, this.proa.y, angulo, this.cursorMira.x, this.cursorMira.y);
                     } else {
                         origenX = this.objeto.x;
                         origenY = this.objeto.y;
-                        this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y);
+                        angulo = Phaser.Math.RadToDeg(this.calcularAngulo(this.objeto.x, this.objeto.y, this.cursorMira.x, this.cursorMira.y));
+                        this.armaSeleccionada.dispararArma(this.objeto.x, this.objeto.y, angulo, this.cursorMira.x, this.cursorMira.y);
                     }
 
                     textosMuniciones[this.armaSeleccionada.nombre].setText(`Cantidad municiones:  ${this.armaSeleccionada.contadorMuniciones} / ${this.armaSeleccionada.cantidadMuniciones}`);
@@ -169,7 +174,8 @@ class Bismarck extends Entidad {
                         origenX, 
                         origenY, 
                         destX: this.cursorMira.x,
-                        destY: this.cursorMira.y 
+                        destY: this.cursorMira.y,
+                        angulo: this.angulo
                     });
                 }
             }
@@ -247,11 +253,16 @@ class Bismarck extends Entidad {
         this.graphics.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
-    disparar(origenX, origenY, destX, destY, nombreArma) {
+    calcularAngulo(origenX, origenY, destX, destY) {
+        return Math.atan2(destY- origenY, destX - origenX);
+    }
+
+    disparar(origenX, origenY, angulo, destX, destY, nombreArma) {
         console.log(nombreArma);
         console.log(this.armas);
         const arma = this.armas.find((arma) => arma.nombre === nombreArma);
-        arma.dispararArma(origenX, origenY, destX, destY);
+        
+        arma.dispararArma(origenX, origenY, angulo, destX, destY);
     }
 
     update() {

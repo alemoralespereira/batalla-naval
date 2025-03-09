@@ -263,7 +263,8 @@ io.on("connection", (socket) => {
             origenX: data.origenX,
             origenY: data.origenY,
             destX: data.destX,
-            destY: data.destY
+            destY: data.destY,
+            angulo: data.angulo
         });
     });
 

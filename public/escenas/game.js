@@ -46,6 +46,8 @@ class EscenaPrincipal extends Phaser.Scene {
         this.load.audio('explosion', 'assets/sonidos/explosion.mp3');
         this.load.image('splash', '/assets/splash.png');
         this.load.image('torpedo', '/assets/torpedo.png');
+        this.load.image('proyectilLigero', '/assets/proyLigero.png');
+        this.load.image('proyectilPesado', '/assets/proyPesado.png');
     }
 
     create() {
@@ -170,7 +172,7 @@ class EscenaPrincipal extends Phaser.Scene {
                 return;
             }
 
-            entidad.disparar(data.origenX, data.origenY, data.destX, data.destY, data.nombreArma);
+            entidad.disparar(data.origenX, data.origenY, data.angulo, data.destX, data.destY, data.nombreArma);
         });
 
         socket.on("finJuego", (data) => {

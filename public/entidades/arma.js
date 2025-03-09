@@ -47,7 +47,15 @@ class Arma {
         let proyectil = null;
 
         if(this.nombre === 'Torpedo avion') {
-            proyectil = this.escena.physics.add.sprite(origenX, origenY, "torpedo");
+            proyectil = this.escena.physics.add.sprite(origenX, origenY, "torpedo")
+            proyectil.angle = origenAngulo;
+        }
+        if(this.nombre === 'Antiaereo pesado 1' || this.nombre === 'Antiaereo pesado 2') {
+            proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectilPesado")
+            proyectil.angle = origenAngulo;
+        }
+        if(this.nombre === 'Antiaereo ligero') {
+            proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectilLigero")
             proyectil.angle = origenAngulo;
         }
         //const proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectil");
