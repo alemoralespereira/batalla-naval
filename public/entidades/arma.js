@@ -23,8 +23,9 @@ class Arma {
         ).setStrokeStyle(2, 0x00ff00).setOrigin(0.5, 0.5); // .setOrigin(this.origenX, this.origenY);
 
         const circulo = new Phaser.Geom.Circle(x, y, this.rango);
-        
-        if (circulo.contains(this.escena.input.activePointer.worldX, this.escena.input.activePointer.worldY)) {
+        const coordenadasMouse = this.escena.getCoordenadasMouse();
+
+        if (circulo.contains(coordenadasMouse.x, coordenadasMouse.y)) {
             cursorMira.setVisible(true);
             const colorLinea = this.disparoActivado ? 0xff0000 : 0xffffff;
             this.lineaAtaque = this.escena.add.line(0, 0, x, y, destX, destY,  colorLinea).setOrigin(0);

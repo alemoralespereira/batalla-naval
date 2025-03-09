@@ -188,7 +188,7 @@ io.on("connection", (socket) => {
                     operador: false,
                     salud: 1,
                     numeroAvion: i,
-                    torpedo: false,
+                    torpedo: true,
                     multiplicadorCombustible: 1,
                     despego: false,
                     seleccionado: false

@@ -1,8 +1,8 @@
-import Entity from './entity.js';
+import Entidad from './entidad.js';
 import socket from '../socket.js';
 import Arma from "./arma.js";
 
-class Avion extends Entity {
+class Avion extends Entidad {
     constructor(avionData, numeroAvion) {
         super(
             Number(avionData.x), //xInicial
@@ -42,11 +42,11 @@ class Avion extends Entity {
             nombre: "Torpedo avion",
             rango: 500,
             velocidad: 300,
-            daño: 5,
+            daño: 1,
             cadenciaDisparo:0,
             cantidadMuniciones:1,
             escena: this.escena
-            });
+        });
 
         //this.torpedo = true;  // Cada avión obtiene un torpedo al despegar
         console.log(`Inicializando avion_${this.numeroAvion} con x=${this.xInicial}, y=${this.yInicial}`);
@@ -61,14 +61,14 @@ class Avion extends Entity {
             //this.objeto.setVisible(true);
             if(this.velocidad > 0) {
                 // Calcular nueva velocidad
-            const angle = this.anguloInicial;
-            const velocityX = Math.cos(angle) * this.velocidad;
-            const velocityY = Math.sin(angle) * this.velocidad;
+                const angle = this.anguloInicial;
+                const velocityX = Math.cos(angle) * this.velocidad;
+                const velocityY = Math.sin(angle) * this.velocidad;
 
-            // Actualizar las posiciones
-            this.objeto.setVelocityX(velocityX);
-            this.objeto.setVelocityY(velocityY);
-            this.objeto.angle = this.anguloInicial;
+                // Actualizar las posiciones
+                this.objeto.setVelocityX(velocityX);
+                this.objeto.setVelocityY(velocityY);
+                this.objeto.angle = this.anguloInicial;
             }
             
 
@@ -78,8 +78,8 @@ class Avion extends Entity {
         
 
             
-            this.graphics = escena.add.graphics();
-            this.dibujarRangoVision();
+            // this.graphics = escena.add.graphics();
+            // this.dibujarRangoVision();
             this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
                 fontSize: '20px',
                 fill: '#ffffff'
@@ -171,6 +171,7 @@ class Avion extends Entity {
         super.update();
 
         if (this.escena.controles.disparo.isDown && this.escena.nombreEntidadSeleccionada === `avion_${this.numeroAvion}`) {
+            console.log(this.torpedo);
             // No puede disparar sin munición
             if (this.torpedo) {
                 this.disparar();
@@ -182,10 +183,10 @@ class Avion extends Entity {
         }
 
         this.rangoVision.setPosition(this.objeto.x, this.objeto.y);
-        this.dibujarRangoVision();
+        // this.dibujarRangoVision();
        if(this.escena.rol === "portaaviones") {
-            //Si esta seleccionado o si se esta moviendo pero tiene piloto.
-            if(this.seleccionado || ((this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) && this.piloto)) {    
+            //Si se esta moviendo pero tiene piloto.
+            if(((this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) && this.piloto)) {    
                 this.indicadorCombustible.setVisible(true);
                 // El jugador ve que todos los aviones tienen el mismo combustible maximo pero cuanto más tripulantes más rápido se consume
                 const combustible = Math.floor(Math.max(this.combustible, 0) / this.multiplicadorCombustible);
@@ -194,7 +195,13 @@ class Avion extends Entity {
         }
         
         //Si la diferencia entre la posicion del avion y la posicion del portaaviones sobre el eje de las X, es mayor a 150, es porque despegó.
-        if((this.objeto.x - this.escena.entidades.portaaviones.objeto.x) > 250) {          
+        const distanciaAvionAPortaaviones = Phaser.Math.Distance.Between(
+            this.objeto.x,
+            this.objeto.y,
+            this.escena.entidades.portaaviones.objeto.x,
+            this.escena.entidades.portaaviones.objeto.y
+        );
+        if(distanciaAvionAPortaaviones > 250) {   
             this.despego = true;
             //this.objeto.despego = true;
         }     

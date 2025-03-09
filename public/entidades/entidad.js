@@ -1,4 +1,4 @@
-class Entity {
+class Entidad {
     constructor(x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible) {
         this.xInicial = x;
         this.yInicial = y;
@@ -41,4 +41,4 @@ class Entity {
     }
 }
 
-export default Entity;
+export default Entidad;
