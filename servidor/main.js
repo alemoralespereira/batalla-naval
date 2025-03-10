@@ -24,29 +24,43 @@ app.use(express.static(path.join(__dirname, "../public")));
 let salas = {};
 
 const db = new mainDB();
+let query;
+
 // Loguear las variables de la base de datos
-console.log('DB variables:', {
+/*console.log('DB variables:', {
     host: config.DB_HOST,
     port: config.DB_PORT,
     database: config.DB_NAME,
     user: config.DB_USER,
     password: config.DB_PASSWORD
-});
+});*/
 
 try {
+    // Loguear las variables de configuración antes de conectar
+    console.log('Variables DB antes de conectar:', {
+        host: config.DB_HOST || 'mysql-aba0.railway.internal',
+        port: config.DB_PORT || 3306,
+        database: config.DB_NAME || 'railway',
+        user: config.DB_USER || 'root',
+        password: config.DB_PASSWORD || 'aIrDMWaeYaHFpVaQwxrkhWgGqSoITrcn'
+    });
+
     db.connect();
     const conexion = db.getConnection();
     conexion.connect((err) => {
         if (err) {
             console.error('❌ ERROR CONECCION BASE DE DATOS:', err.message);
         } else {
-            console.log('✅ BASE DE DATOS CONECTADA');
+            console.log('✅ BASE DE DATOS CONECTADA', );
+            query = new consultas(conexion);
         }
     });
-    const query = new consultas(conexion);
+    
 } catch (error) {
     console.error('❌ Failed to initialize database:', error.message);
 }
+
+
 
 function posicionRandomPuerto() {
     const esquinas = [
