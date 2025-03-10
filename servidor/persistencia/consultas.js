@@ -4,7 +4,7 @@ class consultas {
     }
 
     existeSala(idSala, callback) {
-        const query = 'SELECT 1 FROM proyecto.salas WHERE idSala = ?';
+        const query = 'SELECT 1 FROM proyectoDB.salas WHERE idSala = ?';
         this.connection.query(query, [idSala], (error, resultados) => {
             if(error) {
                 return;
@@ -14,7 +14,7 @@ class consultas {
     }
 
     obtenerDatosDeSala(idSala, callback) {
-        const query = 'SELECT * FROM proyecto.salas WHERE idSala = ?';
+        const query = 'SELECT * FROM proyectoDB.salas WHERE idSala = ?';
         this.connection.query(query, [idSala], (error, resultados) => {
             if (error) {
                 return;
@@ -24,7 +24,7 @@ class consultas {
     }
     
     obtenerDatosEntidades(idSala, callback) {
-        const query = 'SELECT * FROM proyecto.entidades WHERE idSala = ?';
+        const query = 'SELECT * FROM proyectoDB.entidades WHERE idSala = ?';
         this.connection.query(query, [idSala], (error, resultados) => {
             if (error) {
                 return;
@@ -34,7 +34,7 @@ class consultas {
     }
 
     insertarDatosSala(idSala,  nombreUsuario, rol, fecha, callback) {
-        const query = 'INSERT INTO proyecto.salas (idSala, nombreJugador, rol, fechaActualizacion) VALUES (?,?,?,?)';
+        const query = 'INSERT INTO proyectoDB.salas (idSala, nombreJugador, rol, fechaActualizacion) VALUES (?,?,?,?)';
         this.connection.query(query, [idSala, nombreUsuario, rol, fecha], (error, resultados) => {
             if (error) {
                 callback(error, null);
@@ -45,7 +45,7 @@ class consultas {
     }
 
     actualizarDatosSala(idSala, nombreUsuario, rol, fecha, callback) {
-        const query = 'UPDATE proyecto.salas SET idSala = ?, nombreJugador = ?, rol = ?, fechaActualizacion = ? WHERE idSala = ? and rol = ?';
+        const query = 'UPDATE proyectoDB.salas SET idSala = ?, nombreJugador = ?, rol = ?, fechaActualizacion = ? WHERE idSala = ? and rol = ?';
         this.connection.query(query, [idSala, nombreUsuario, rol, fecha, idSala, rol], (error, resultados) => {
             if (error) {
                 callback(error, null);
@@ -56,7 +56,7 @@ class consultas {
     }
 
     insertarDatosEntidades(idSala, idEntidad, posX, posY, angulo, velocidad, velocidadMaxima, aceleracion, combustible, piloto, observador, operador, salud, numeroAvion, torpedo, multiplicadorCombustible, despego, callback) {
-        const query = 'INSERT INTO proyecto.entidades (idSala, idEntidad, posX, posY, angulo, velocidad, velocidadMaxima, aceleracion, combustible, piloto, observador, operador, salud, numeroAvion, torpedo, multiplicadorCombustible, despego) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        const query = 'INSERT INTO proyectoDB.entidades (idSala, idEntidad, posX, posY, angulo, velocidad, velocidadMaxima, aceleracion, combustible, piloto, observador, operador, salud, numeroAvion, torpedo, multiplicadorCombustible, despego) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
         this.connection.query(query, [idSala, idEntidad, posX, posY, angulo, velocidad, velocidadMaxima, aceleracion, combustible, piloto, observador, operador, salud, numeroAvion, torpedo, multiplicadorCombustible, despego], (error, resultados) => {
             if (error) {
                 callback(error, null);
@@ -67,7 +67,7 @@ class consultas {
     }
 
     actualizarDatosEntidades(idSala, idEntidad, posX, posY, angulo, velocidad, velocidadMaxima, aceleracion, combustible, piloto, observador, operador, salud, numeroAvion, torpedo, multiplicadorCombustible, despego, callback) {
-        const query = 'UPDATE proyecto.entidades SET idSala = ?,    idEntidad = ?,    posX = ?,     posY = ?,     angulo = ?,     velocidad = ?,     velocidadMaxima = ?,    aceleracion = ?,     combustible = ?,     piloto = ?,     observador = ?,    operador = ?,     salud = ?,     numeroAvion = ?,     torpedo = ?,    multiplicadorCombustible = ?,     despego = ? WHERE   idSala = ?    AND idEntidad = ?';
+        const query = 'UPDATE proyectoDB.entidades SET idSala = ?,    idEntidad = ?,    posX = ?,     posY = ?,     angulo = ?,     velocidad = ?,     velocidadMaxima = ?,    aceleracion = ?,     combustible = ?,     piloto = ?,     observador = ?,    operador = ?,     salud = ?,     numeroAvion = ?,     torpedo = ?,    multiplicadorCombustible = ?,     despego = ? WHERE   idSala = ?    AND idEntidad = ?';
         this.connection.query(query, [idSala, idEntidad, posX, posY, angulo, velocidad, velocidadMaxima, aceleracion, combustible, piloto, observador, operador, salud, numeroAvion, torpedo, multiplicadorCombustible, despego, idSala, idEntidad], (error, resultados) => {
             if (error) {
                 callback(error, null);

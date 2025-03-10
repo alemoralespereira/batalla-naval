@@ -1,13 +1,13 @@
-export const PUERTO = process.env.PORT
+const PUERTO = process.env.PORT;
 
-//BASE DE DATOS
-export const DB_HOST = process.env.HOSTDB
-export const DB_PORT = process.env.PORTDB
-export const DB_NAME = process.env.DB
-export const DB_USER = process.env.USERDB
-export const DB_PASSWORD = process.env.PASSWORDDB
+// BASE DE DATOS
+const DB_HOST = process.env.HOSTDB;
+const DB_PORT = process.env.PORTDB;
+const DB_NAME = process.env.DB;
+const DB_USER = process.env.USERDB;
+const DB_PASSWORD = process.env.PASSWORDDB;
 
-export default {
+module.exports = {
     PUERTO,
     DB_HOST,
     DB_PORT,

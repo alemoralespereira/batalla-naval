@@ -1,5 +1,5 @@
-import mysql from 'mysql2';
-import config from '../config.js';
+const mysql = require('mysql2');
+const config = require('../config.js');
 
 class mainDB {
 
@@ -10,11 +10,11 @@ class mainDB {
             user: 'root',
             password: 'root',
             database: 'proyecto'*/
-            host: config.DB_HOST,
-            port: config.DB_PORT,
-            database: config.DB_NAME,
-            user: config.DB_USER,
-            password: config.DB_PASSWORD
+            host: config.DB_HOST || 'hopper.proxy.rlwy.net',
+            port: config.DB_PORT || 11871,
+            database: config.DB_NAME ||'railway',
+            user: config.DB_USER || 'root',
+            password: config.DB_PASSWORD || 'HTzAxCAXuJrTmsEuEUexkdjiiIchRTSG'
         })
     }
     
@@ -39,4 +39,4 @@ class mainDB {
 
 }
 
-export default mainDB;
+module.exports = mainDB;

@@ -11,10 +11,9 @@ const app = express();
 const servidor = http.createServer(app);
 const io = socketIo(servidor);
 
-
-import config from './config.js';
-import mainDB from './persistencia/mainDB';
-import consultas from './persistencia/consultas';
+const config = require('./config.js');
+const mainDB = require('./persistencia/mainDB');
+const consultas = require('./persistencia/consultas');
 
 const PUERTO = config.PUERTO || 8080;
 
