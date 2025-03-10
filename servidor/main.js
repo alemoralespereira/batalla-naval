@@ -12,7 +12,7 @@ const servidor = http.createServer(app);
 const io = socketIo(servidor);
 
 
-import config from '../config.js';
+import config from './config.js';
 import mainDB from './persistencia/mainDB';
 import consultas from './persistencia/consultas';
 
