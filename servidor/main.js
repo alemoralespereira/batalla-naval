@@ -32,9 +32,21 @@ console.log('DB variables:', {
     user: config.DB_USER,
     password: config.DB_PASSWORD
 });
-db.connect();
-const conexion = db.getConnection();
-const query = new consultas(conexion);
+
+try {
+    db.connect();
+    const conexion = db.getConnection();
+    conexion.connect((err) => {
+        if (err) {
+            console.error('❌ ERROR CONECCION BASE DE DATOS:', err.message);
+        } else {
+            console.log('✅ BASE DE DATOS CONECTADA');
+        }
+    });
+    const query = new consultas(conexion);
+} catch (error) {
+    console.error('❌ Failed to initialize database:', error.message);
+}
 
 function posicionRandomPuerto() {
     const esquinas = [
@@ -95,21 +107,20 @@ function posicionRandomPortaaviones(posicionBismarck, posicionPuerto){
     return posicionPortaaviones;
 }   
 
+// Iniciar servidor en el puerto
+servidor.listen(PUERTO, () => {
+    console.log(`✅ Servidor corriendo en el puerto ${PUERTO}`);
+    // Loguear de nuevo las variables al iniciar el servidor (opcional)
+    console.log('ℹ️ Server started with DB config:', {
+        host: config.DB_HOST,
+        port: config.DB_PORT,
+        database: config.DB_NAME,
+        user: config.DB_USER
+    });
+});
 
 io.on("connection", (socket) => {
     console.log("🟢 Nuevo jugador conectado:", socket.id);
-
-    // Iniciar servidor en el puerto
-    servidor.listen(PUERTO, () => {
-        console.log(`✅ Servidor corriendo en el puerto ${PUERTO}`);
-        // Loguear de nuevo las variables al iniciar el servidor (opcional)
-        console.log('ℹ️ Server started with DB config:', {
-            host: config.DB_HOST,
-            port: config.DB_PORT,
-            database: config.DB_NAME,
-            user: config.DB_USER
-        });
-    });
 
     socket.on("unirseSala", ({ nombreUsuario, sala, rol }) => {
 
