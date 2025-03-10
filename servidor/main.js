@@ -99,6 +99,18 @@ function posicionRandomPortaaviones(posicionBismarck, posicionPuerto){
 io.on("connection", (socket) => {
     console.log("🟢 Nuevo jugador conectado:", socket.id);
 
+    // Iniciar servidor en el puerto
+    servidor.listen(PUERTO, () => {
+        console.log(`✅ Servidor corriendo en el puerto ${PUERTO}`);
+        // Loguear de nuevo las variables al iniciar el servidor (opcional)
+        console.log('ℹ️ Server started with DB config:', {
+            host: config.DB_HOST,
+            port: config.DB_PORT,
+            database: config.DB_NAME,
+            user: config.DB_USER
+        });
+    });
+
     socket.on("unirseSala", ({ nombreUsuario, sala, rol }) => {
 
         console.log("ENTRO A UNIRSE PARTIDA");
