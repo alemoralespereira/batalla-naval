@@ -1,3 +1,5 @@
+import Avion from './avion.js';
+
 class Arma {
     constructor({ nombre, rango, velocidad, daño, cadenciaDisparo, cantidadMuniciones, escena }) {
         this.nombre = nombre;
@@ -26,35 +28,42 @@ class Arma {
         if (circulo.contains(coordenadasMouse.x, coordenadasMouse.y)) {
             cursorMira.setVisible(true);
             const colorLinea = this.disparoActivado ? 0xff0000 : 0xffffff;
-            this.lineaAtaque = this.escena.add.line(0, 0, x, y, destX, destY,  colorLinea).setOrigin(0);
-            
+            this.lineaAtaque = this.escena.add.line(0, 0, x, y, destX, destY, colorLinea).setOrigin(0);
+
         } else {
             cursorMira.setVisible(false);
         }
     }
 
-    dispararArma(origenX, origenY, origenAngulo, destX, destY, entidadAtacante) {
-        if(!this.escena){
+    dispararArma(origenX, origenY, origenAngulo, destX, destY) {
+        if (!this.escena) {
             console.error("Error: La escena no está definida en el arma.");
             return;
         }
 
-        this.escena.scene.get('EscenaAtaque').iniciarEscena({ escena: this.escena, entidadAtacante });
-        
+        const anguloDisparo = origenAngulo - this.escena.entidades.bismarck.objeto.angle;
+
+        if (this.escena.rol === "portaaviones" && this.escena.entidades.bismarck.objeto.visible) {
+            this.escena.scene.get('EscenaAtaque').iniciarEscena({ escena: this.escena, nombreArma: this.nombre, anguloDisparo });
+        } else if (this.escena.equipoAzul.some((avion) => avion instanceof Avion && avion.objeto.visible)) {
+            this.escena.scene.get('EscenaAtaque').iniciarEscena({ escena: this.escena, nombreArma: this.nombre, anguloDisparo });
+        }
+
+
         console.log(`Disparando arma desde (${origenX}, ${origenY}) hacia (${destX}, ${destY})`);
 
         this.contadorMuniciones -= 1;
         let proyectil = null;
 
-        if(this.nombre === 'Torpedo avion') {
+        if (this.nombre === 'Torpedo avion') {
             proyectil = this.escena.physics.add.sprite(origenX, origenY, "torpedo")
             proyectil.angle = origenAngulo;
         }
-        if(this.nombre === 'Antiaereo pesado 1' || this.nombre === 'Antiaereo pesado 2') {
+        if (this.nombre === 'Antiaereo pesado 1' || this.nombre === 'Antiaereo pesado 2') {
             proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectilPesado")
             proyectil.angle = origenAngulo;
         }
-        if(this.nombre === 'Antiaereo ligero') {
+        if (this.nombre === 'Antiaereo ligero') {
             proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectilLigero")
             proyectil.angle = origenAngulo;
         }
@@ -62,12 +71,12 @@ class Arma {
         this.escena.proyectiles.add(proyectil);
         proyectil.daño = this.daño;
         proyectil.nombre = this.nombre;
-        
+
         console.log(`Proyectil creado en (${proyectil.x}, ${proyectil.y}) con daño ${proyectil.daño}`);
         this.escena.physics.moveTo(proyectil, destX, destY, this.velocidad);
-        
+
         //Se multiplica la cadenciaDisparo en segundos por 1000 para convertirlo en milisegundos.
-        this.escena.time.delayedCall(this.cadenciaDisparo*1000, () => {
+        this.escena.time.delayedCall(this.cadenciaDisparo * 1000, () => {
             this.disparoActivado = false;
         });
 

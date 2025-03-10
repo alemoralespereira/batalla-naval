@@ -98,7 +98,7 @@ class Avion extends Entidad {
 
         console.log(`Avión ${this.numeroAvion} disparando torpedo.`);
         this.escena.sound.play('disparoAvion'); // Reproducir sonido de disparo
-        this.arma.dispararArma(this.objeto.x, this.objeto.y, this.objeto.angle, destinoX, destinoY, "avion");
+        this.arma.dispararArma(this.objeto.x, this.objeto.y, this.objeto.angle, destinoX, destinoY);
 
         this.torpedo = false; // Torpedo agotado hasta recargar
     }
@@ -185,7 +185,6 @@ class Avion extends Entidad {
         super.update();
 
         if (this.escena.controles.disparo.isDown && this.escena.nombreEntidadSeleccionada === `avion_${this.numeroAvion}`) {
-            console.log(this.torpedo);
             // No puede disparar sin munición
             if (this.torpedo) {
                 this.disparar();
@@ -215,7 +214,7 @@ class Avion extends Entidad {
             this.escena.entidades.portaaviones.objeto.x,
             this.escena.entidades.portaaviones.objeto.y
         );
-        if(distanciaAvionAPortaaviones > 250) {   
+        if(this.piloto && distanciaAvionAPortaaviones > 250) {   
             this.despego = true;
         }     
        
