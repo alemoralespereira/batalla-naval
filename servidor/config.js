@@ -1,11 +1,11 @@
 const PUERTO = process.env.PORT;
 
 // BASE DE DATOS
-const DB_HOST = process.env.HOSTDB;
-const DB_PORT = process.env.PORTDB;
-const DB_NAME = process.env.DB;
-const DB_USER = process.env.USERDB;
-const DB_PASSWORD = process.env.PASSWORDDB;
+const DB_HOST = 'mysql-aba0.railway.internal'//process.env.HOSTDB;
+const DB_PORT = 3306//process.env.PORTDB;
+const DB_NAME = 'railway'//process.env.DB;
+const DB_USER = 'root'//process.env.USERDB;
+const DB_PASSWORD = 'aIrDMWaeYaHFpVaQwxrkhWgGqSoITrcn'//process.env.PASSWORDDB;   
 
 module.exports = {
     PUERTO,

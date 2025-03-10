@@ -26,17 +26,7 @@ let salas = {};
 const db = new mainDB();
 let query;
 
-// Loguear las variables de la base de datos
-/*console.log('DB variables:', {
-    host: config.DB_HOST,
-    port: config.DB_PORT,
-    database: config.DB_NAME,
-    user: config.DB_USER,
-    password: config.DB_PASSWORD
-});*/
-
 try {
-    // Loguear las variables de configuración antes de conectar
     console.log('Variables DB antes de conectar:', {
         host: config.DB_HOST || 'mysql-aba0.railway.internal',
         port: config.DB_PORT || 3306,
