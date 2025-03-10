@@ -16,12 +16,6 @@ class mainDB {
             user: config.DB_USER,// || 'root',
             password: config.DB_PASSWORD// || 'HTzAxCAXuJrTmsEuEUexkdjiiIchRTSG'
         })
-        // Loguear las variables
-        console.log('DB_HOST:', config.DB_HOST);
-        console.log('DB_PORT:', config.DB_PORT);
-        console.log('DB_NAME:', config.DB_NAME);
-        console.log('DB_USER:', config.DB_USER);
-        console.log('DB_PASSWORD:', config.DB_PASSWORD);
     }
     
     connect() {
