@@ -11,18 +11,18 @@ const app = express();
 const servidor = http.createServer(app);
 const io = socketIo(servidor);
 
-const PUERTO = process.env.PORT || 8080;
 
-const mainDB = require('./persistencia/mainDB');
-const consultas = require('./persistencia/consultas');
+import config from '../config.js';
+import mainDB from './persistencia/mainDB';
+import consultas from './persistencia/consultas';
+
+const PUERTO = config.PUERTO || 8080;
 
 // Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "../public")));
 
 // Almacenar información de las salas y jugadores
 let salas = {};
-let recuperandoPartida = false;
-
 
 const db = new mainDB();
 db.connect();
@@ -474,6 +474,7 @@ io.on("connection", (socket) => {
                 })
                 for (let key in entidades) {
                     const entidad = entidades[key];
+                    console.log("Actualizando datos para entidad:", entidad);
                     query.actualizarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, entidad.combustible, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
                         if(error) {
                             console.error('Error al insertar entidad:', error);

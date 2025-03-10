@@ -1,4 +1,5 @@
-const mysql = require('mysql2');
+import mysql from 'mysql2';
+import config from '../config.js';
 
 class mainDB {
 
@@ -9,11 +10,11 @@ class mainDB {
             user: 'root',
             password: 'root',
             database: 'proyecto'*/
-            host: process.env.HOSTDB || 'turntable.proxy.rlwy.net',
-            port: process.env.PORTDB || 28872,
-            database: process.env.DB || 'proyecto',
-            user: process.env.USERDB || 'root',
-            password: process.env.PASSWORDDB || 'KZncjNkqiZketEzbCSKKuQbVkOUZtRNR',
+            host: config.DB_HOST,
+            port: config.DB_PORT,
+            database: config.DB_NAME,
+            user: config.DB_USER,
+            password: config.DB_PASSWORD
         })
     }
     
@@ -38,4 +39,4 @@ class mainDB {
 
 }
 
-module.exports = mainDB;
+export default mainDB;
