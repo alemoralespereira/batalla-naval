@@ -1,14 +1,19 @@
 const mysql = require('mysql2');
-
+//mysql://root:KZncjNkqiZketEzbCSKKuQbVkOUZtRNR@turntable.proxy.rlwy.net:28872/railway
 class mainDB {
 
     constructor() {
         this.connection = mysql.createConnection({
-            host: 'localhost',
+           /* host: 'localhost',
             port: 3306,
             user: 'root',
             password: 'root',
-            database: 'proyecto'
+            database: 'proyecto'*/
+            host: process.env.HOSTDB || 'turntable.proxy.rlwy.net',
+            port: process.env.PORTDB || 28872,
+            database: process.env.DB || 'proyecto',
+            user: process.env.USERDB || 'root',
+            password: process.env.PASSWORDDB || 'KZncjNkqiZketEzbCSKKuQbVkOUZtRNR',
         })
     }
     
