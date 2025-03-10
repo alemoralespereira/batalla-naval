@@ -10,11 +10,11 @@ class mainDB {
             user: 'root',
             password: 'root',
             database: 'proyecto'*/
-            host: config.DB_HOST,// || 'hopper.proxy.rlwy.net',
-            port: config.DB_PORT,// || 11871,
-            database: config.DB_NAME,// ||'railway',
-            user: config.DB_USER,// || 'root',
-            password: config.DB_PASSWORD// || 'HTzAxCAXuJrTmsEuEUexkdjiiIchRTSG'
+            host: config.DB_HOST || 'mysql-aba0.railway.internal',
+            port: config.DB_PORT || 3306,
+            database: config.DB_NAME ||'railway',
+            user: config.DB_USER || 'root',
+            password: config.DB_PASSWORD || 'aIrDMWaeYaHFpVaQwxrkhWgGqSoITrcn'
         })
     }
     
