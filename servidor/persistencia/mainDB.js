@@ -1,5 +1,5 @@
 const mysql = require('mysql2');
-//mysql://root:KZncjNkqiZketEzbCSKKuQbVkOUZtRNR@turntable.proxy.rlwy.net:28872/railway
+
 class mainDB {
 
     constructor() {
