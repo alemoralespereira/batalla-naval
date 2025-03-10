@@ -24,6 +24,14 @@ app.use(express.static(path.join(__dirname, "../public")));
 let salas = {};
 
 const db = new mainDB();
+// Loguear las variables de la base de datos
+console.log('DB variables:', {
+    host: config.DB_HOST,
+    port: config.DB_PORT,
+    database: config.DB_NAME,
+    user: config.DB_USER,
+    password: config.DB_PASSWORD
+});
 db.connect();
 const conexion = db.getConnection();
 const query = new consultas(conexion);
