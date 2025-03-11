@@ -1,8 +1,8 @@
-const Barco = require('./barco');
+const Entidad = require('./entidad');
 
-class Bismarck extends Barco {
-    constructor({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible, salud }) {
-        super({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible});
+class Bismarck extends Entidad {
+    constructor({idEntidad, x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible, salud }) {
+        super({ idEntidad, x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible});
 
         this.salud = salud;
     }

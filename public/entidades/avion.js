@@ -5,6 +5,7 @@ import Arma from "./arma.js";
 class Avion extends Entidad {
     constructor(avionData, numeroAvion) {
         super(
+            avionData.idEntidad,
             Number(avionData.x), //xInicial
             Number(avionData.y), //yInicial
             avionData.velocidad,
@@ -49,7 +50,7 @@ class Avion extends Entidad {
         });
 
         //this.torpedo = true;  // Cada avión obtiene un torpedo al despegar
-        console.log(`Inicializando avion_${this.numeroAvion} con x=${this.xInicial}, y=${this.yInicial}`);
+       // console.log(`Inicializando avion_${this.numeroAvion} con x=${this.xInicial}, y=${this.yInicial}`);
         if (this.objeto) {
             // Si el sprite ya existe, actualiza su posición
             this.objeto.x = this.escena.entidades.portaaviones.objeto.x;
@@ -72,7 +73,7 @@ class Avion extends Entidad {
             }
             
 
-            console.log(`Sprite creado para avion_${this.numeroAvion} en x=${this.objeto.x}, y=${this.objeto.y}`);
+            //console.log(`Sprite creado para avion_${this.numeroAvion} en x=${this.objeto.x}, y=${this.objeto.y}`);
             this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 250, 250).setOrigin(0.5, 0.5);
             this.objeto.rangoVision = this.rangoVision;
             
@@ -102,11 +103,6 @@ class Avion extends Entidad {
 
         this.torpedo = false; // Torpedo agotado hasta recargar
     }
-
-   /* recargar(){
-        console.log(`Avión ${this.numeroAvion} recargando torpedo.`);
-        this.torpedo = true;
-    }*/
 
     recibirDaño(daño) {
         this.escena.scene.get('EscenaAtaque').impactoAvion = true;
@@ -218,10 +214,8 @@ class Avion extends Entidad {
             this.despego = true;
         }     
        
-        if(this.piloto && this.escena.rol === "portaaviones"){
-        //    console.log("Avion:" , this.numeroAvion);
+        if(this.piloto && this.escena.rol === "portaaviones") {
             const datosMovimiento = {
-                //idUsuario: socket.id, // ID del socket
                 nombreUsuario: this.escena.nombreUsuario,
                 rol: this.escena.rol,
                 sala: this.escena.sala,
@@ -230,7 +224,7 @@ class Avion extends Entidad {
                 y: this.objeto.y,
                 angulo: this.objeto.angle
             };
-            // Enviar al servidor
+
             socket.emit("moverEntidad", datosMovimiento);
         }
 
@@ -243,9 +237,26 @@ class Avion extends Entidad {
                 sala: this.escena.sala,
                 nombreEntidad : nombreEntidad,
             }
+
             socket.emit("hundirAvion", datosHundirAvion);
         }
     }
+
+   /* getDatos() {
+        const datosBase = super.getDatos();
+        return {
+            datosBase,
+            piloto: this.piloto,
+            observador: this.observador,
+            operador: this.operador,
+            seleccionado: this.seleccionado,
+            numeroAvion: this.numeroAvion,
+            torpedo: this.torpedo,
+            multiplicadorCombustible: this.multiplicadorCombustible,
+            despego: this.despego,
+            salud: this.salud
+        }
+    }*/
 
     mover(controles) {
         if (!this.objeto) {
@@ -288,14 +299,6 @@ class Avion extends Entidad {
             this.objeto.setVelocityX(0);
             this.objeto.setVelocityY(0);
             }
-
-       
-
-                // Actualizar las posiciones internas
-                // this.x = this.objeto.x;
-                // this.y = this.objeto.y;
-                // this.angulo = this.objeto.angle;
-            
     }
 }
 

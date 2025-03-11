@@ -14,7 +14,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.rol = data.rol;
         this.estadoJuego = data.estadoJuego;
         //this.nombreUsuario = data.nombreUsuario;
-        console.log("Datos crudos recibidos:", JSON.stringify(data.estadoJuego.entidades.avion_1, null, 2));
+        //console.log("Datos crudos recibidos:", JSON.stringify(data.estadoJuego.entidades.avion_1, null, 2));
 
         //********************************************************/
         // CREAR ENTIDADES
@@ -54,9 +54,9 @@ class EscenaPrincipal extends Phaser.Scene {
         //*********************************************************************************/
         // MAPA PRINCIPAL, CAMARA Y LIMITES DEL MUNDO
         this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
-        this.puerto = this.add.image(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
+        //this.puerto = this.add.image(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
         this.puerto = this.physics.add.sprite(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
-        console.log("Mapa añadido a la escena");
+        console.log(this.puerto);
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -146,7 +146,6 @@ class EscenaPrincipal extends Phaser.Scene {
             derecha: "D",
             abajo: "S",
             disparo: Phaser.Input.Keyboard.KeyCodes.SPACE,
-            //pausa: Phaser.Input.Keyboard.KeyCodes.ESC,
             guardar: Phaser.Input.Keyboard.KeyCodes.G
         });
 
@@ -226,6 +225,7 @@ class EscenaPrincipal extends Phaser.Scene {
             const entidad = this.entidades[data.nombreEntidad];
             entidad.hundirAvion();
         });
+
          //********************************************************/
         // MANEJO DE OVERLAPS
 
@@ -350,9 +350,6 @@ class EscenaPrincipal extends Phaser.Scene {
             };
 
             const datosGuardar = {
-                //idUsuario: socket.id,
-                //nombreUsuario: this.nombreUsuario,
-                //rol: this.rol,
                 sala: this.sala,
                 jugadores: this.sala.jugadores,
                 estadoJuego: this.estadoJuego
@@ -371,9 +368,14 @@ class EscenaPrincipal extends Phaser.Scene {
         }
       }
 
-    inmovilizarBismarck() {
+    inmovilizarBismarck(bismarck, proyectil) {
+        this.explosion = this.add.image(bismarck.x, bismarck.y, "hit");
+        proyectil.destroy();
+        this.time.delayedCall(250, () => {
+            this.explosion.destroy();
+        });
         this.entidades.bismarck.objeto.setVelocity(0, 0);
-        this.victoriaEquipoAzul();
+        this.victoriaEquipoAzul("Helices dañadas, Bismarck Inmovilizado");
     }
 
     victoriaBismarck(mensaje) {

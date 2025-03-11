@@ -1,14 +1,15 @@
 const mysql = require('mysql2');
+const config = require('../config.js');
 
 class mainDB {
 
     constructor() {
         this.connection = mysql.createConnection({
-            host: 'localhost',
-            port: 3306,
-            user: 'root',
-            password: 'root',
-            database: 'proyecto'
+            host: config.DB_HOST,// || 'mysql-aba0.railway.internal',
+            port: config.DB_PORT,// || 3306,
+            database: config.DB_NAME,// ||'railway',
+            user: config.DB_USER,// || 'root',
+            password: config.DB_PASSWORD// || 'aIrDMWaeYaHFpVaQwxrkhWgGqSoITrcn'
         })
     }
     
