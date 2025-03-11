@@ -1,5 +1,6 @@
 class Entidad {
-    constructor({ x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible }) {
+    constructor({idEntidad, x, y, velocidad, velocidadMaxima, angulo, aceleracion, combustible }) {
+        this.idEntidad = idEntidad;
         this.x = x;
         this.y = y;
         this.velocidad = velocidad;
@@ -50,8 +51,29 @@ class Entidad {
         this.y = Number(y);
         return this;
     }
+
+    setVelocidad(velocidad) {
+        this.velocidad = Number(velocidad);
+        return this;
+    }
+
+    setVelocidadMaxima(velocidadMaxima) {
+        this.velocidadMaxima = Number(velocidadMaxima);
+        return this;
+    }
+
     setAngulo(angulo) {
         this.angulo = Number(angulo);
+        return this;
+    }
+
+    setAceleracion(aceleracion) {
+        this.aceleracion = Number(aceleracion);
+        return this;
+    }
+
+    setCombustible(combustible) {
+        this.combustible = combustible
         return this;
     }
 }

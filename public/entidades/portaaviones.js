@@ -5,6 +5,7 @@ import Avion from './avion.js';
 class Portaaviones extends Entidad {
     constructor(portaavionesData) {
         super(
+            portaavionesData.idEntidad,
             Number(portaavionesData.x), //xInicial
             Number(portaavionesData.y), //yInicial
             portaavionesData.velocidad,

@@ -15,7 +15,7 @@ const config = require('./config.js');
 const mainDB = require('./persistencia/mainDB');
 const consultas = require('./persistencia/consultas');
 
-const PUERTO = config.PUERTO;// || 8080;
+const PUERTO = config.PUERTO || 8080;
 
 // Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "../public")));
@@ -27,12 +27,12 @@ const db = new mainDB();
 let query;
 
 try {
-    console.log('Variables DB antes de conectar:', {
-        host: config.DB_HOST || 'mysql-aba0.railway.internal',
-        port: config.DB_PORT || 3306,
-        database: config.DB_NAME || 'railway',
-        user: config.DB_USER || 'root',
-        password: config.DB_PASSWORD || 'aIrDMWaeYaHFpVaQwxrkhWgGqSoITrcn'
+    console.log('Variables DB:', {
+        host: config.DB_HOST,
+        port: config.DB_PORT,
+        database: config.DB_NAME,
+        user: config.DB_USER,
+        password: config.DB_PASSWORD,
     });
 
     db.connect();
@@ -49,8 +49,6 @@ try {
 } catch (error) {
     console.error('❌ Failed to initialize database:', error.message);
 }
-
-
 
 function posicionRandomPuerto() {
     const esquinas = [
@@ -170,6 +168,7 @@ io.on("connection", (socket) => {
             const entidades = {};
 
             entidades.bismarck = new Bismarck({
+                idEntidad: "bismarck",
                 x: posicionBismarck.x,
                 y: posicionBismarck.y,
                 velocidad: 0,
@@ -182,6 +181,7 @@ io.on("connection", (socket) => {
             });
 
             entidades.portaaviones = new Portaaviones({
+                idEntidad: "portaaviones",
                 x: posicionPortaaviones.x,
                 y: posicionPortaaviones.y,
                 velocidad: 0,
@@ -195,6 +195,7 @@ io.on("connection", (socket) => {
 
             for (let i = 1; i < 11; i++) {
                 entidades[`avion_${i}`] = new Avion({
+                    idEntidad: `avion_${i}`,
                     x: posicionPortaaviones.x,
                     y: posicionPortaaviones.y,
                     velocidad: 0,
@@ -313,6 +314,94 @@ io.on("connection", (socket) => {
         });
     })
 
+    socket.on("actualizarCombustible", (data) => {
+        // Verificar si la sala existe
+        if (!salas[data.sala]) {
+            console.error(`❌ Sala ${data.sala} no encontrada.`);
+            return;
+        }
+        //console.log(data);
+        const entidad = salas[data.sala].estadoJuego.entidades[data.idEntidad];
+
+        if (entidad) {
+            entidad.setCombustible(data.combustible);
+        } else {
+            console.error(`❌ Entidad ${data.idEntidad} no encontrada en sala ${data.sala}`);
+        }
+        
+    })
+
+        /*socket.on("actualizarDatosEntidad", (data) => {
+            // Verificar si la sala existe
+            if (!salas[data.sala]) {
+                console.error(`❌ Sala ${data.sala} no encontrada.`);
+                return;
+            }
+        
+            // Obtener el idEntidad desde data.entidad
+            const entidadData = data.entidad;
+            if (!entidadData) {
+                console.error(`❌ No se encontró información de la entidad en los datos recibidos para la sala ${data.sala}`);
+                return;
+            }
+        
+            const idEntidad = entidadData.datosBase?.idEntidad || entidadData.idEntidad;
+            if (!idEntidad) {
+                console.error(`❌ No se encontró idEntidad en los datos de la entidad para la sala ${data.sala}`);
+                return;
+            }
+        
+            // Acceder al objeto de entidades de la sala
+            const entidades = salas[data.sala].estadoJuego.entidades;
+        
+            // Obtener la entidad específica usando el idEntidad
+            const entidad = entidades[idEntidad];
+        
+            if (entidad) {
+                // Actualizar atributos básicos de la entidad
+                if (entidadData.xInicial !== undefined) entidad.setX(entidadData.xInicial);
+                if (entidadData.yInicial !== undefined) entidad.setY(entidadData.yInicial);
+                if (entidadData.velocidad !== undefined) entidad.setVelocidad(entidadData.velocidad);
+                if (entidadData.velocidadMaxima !== undefined) entidad.setVelocidadMaxima(entidadData.velocidadMaxima);
+                if (entidadData.anguloInicial !== undefined) entidad.setAngulo(entidadData.anguloInicial);
+                if (entidadData.aceleracion !== undefined) entidad.setAceleracion(entidadData.aceleracion);
+                if (entidadData.combustible !== undefined) entidad.setCombustible(entidadData.combustible);
+                console.log("Entidad", entidad, "combustible", entidadData.combustible);
+        
+                // Actualizar atributos específicos de las clases hijas
+                if (entidadData.salud !== undefined && typeof entidad.setSalud === 'function') {
+                    entidad.setSalud(entidadData.salud);
+                }
+                if (entidadData.piloto !== undefined && typeof entidad.setPiloto === 'function') {
+                    entidad.setPiloto(entidadData.piloto);
+                }
+                if (entidadData.observador !== undefined && typeof entidad.setObservador === 'function') {
+                    entidad.setObservador(entidadData.observador);
+                }
+                if (entidadData.operador !== undefined && typeof entidad.setOperador === 'function') {
+                    entidad.setOperador(entidadData.operador);
+                }
+                if (entidadData.numeroAvion !== undefined && typeof entidad.setNumeroAvion === 'function') {
+                    entidad.setNumeroAvion(entidadData.numeroAvion);
+                }
+                if (entidadData.torpedo !== undefined && typeof entidad.setTorpedo === 'function') {
+                    entidad.setTorpedo(entidadData.torpedo);
+                }
+                if (entidadData.multiplicadorCombustible !== undefined && typeof entidad.setMultiplicadorCombustible === 'function') {
+                    entidad.setMultiplicadorCombustible(entidadData.multiplicadorCombustible);
+                }
+                if (entidadData.despego !== undefined && typeof entidad.setDespego === 'function') {
+                    entidad.setDespego(entidadData.despego);
+                }
+                if (entidadData.seleccionado !== undefined && typeof entidad.setSeleccionado === 'function') {
+                    entidad.setSeleccionado(entidadData.seleccionado);
+                }
+            } else {
+                console.error(`❌ Entidad ${idEntidad} no encontrada en sala ${data.sala}`);
+            }
+        });*/
+
+
     socket.on("recuperarPartida", ({ sala, rol }) => {
         query.obtenerDatosDeSala(sala, (error, resultados) => {
             if(error) {
@@ -392,6 +481,7 @@ io.on("connection", (socket) => {
                         console.log("Entidad", resultado);
                         if(resultado.idEntidad === "bismarck") {
                             entidades.bismarck = new Bismarck({
+                                idEntidad: resultado.idEntidad,
                                 x: resultado.posX,
                                 y: resultado.posY,
                                 velocidad: resultado.velocidad,
@@ -404,6 +494,7 @@ io.on("connection", (socket) => {
                             });
                         } else if(resultado.idEntidad === "portaaviones") {
                                 entidades.portaaviones = new Portaaviones({
+                                    idEntidad: resultado.idEntidad,
                                     x: resultado.posX,
                                     y: resultado.posY,
                                     velocidad: resultado.velocidad,
@@ -422,6 +513,7 @@ io.on("connection", (socket) => {
                                 }
                             } else {
                                 entidades[resultado.idEntidad] = new Avion({
+                                    idEntidad: resultado.idEntidad,
                                     x: resultado.posX,
                                     y: resultado.posY,
                                     velocidad: resultado.velocidad,
@@ -481,7 +573,6 @@ io.on("connection", (socket) => {
                 console.log('Error:', error);
                 return;
             }
-            //console.log("Resu", resultados.length);    
      
             if(resultados.length > 0) {
                 jugadores.forEach(jugador => {
@@ -494,14 +585,52 @@ io.on("connection", (socket) => {
                 })
                 for (let key in entidades) {
                     const entidad = entidades[key];
-                    console.log("Actualizando datos para entidad:", entidad);
-                    query.actualizarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, entidad.combustible, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
+                    //console.log("Actualizando datos para entidad:", entidad);
+                    let combustibleActualizado = entidad.combustible;
+                    const ent = salas[data.sala].estadoJuego.entidades[key];
+                    //console.log("Entidad: ", ent);
+                    
+                    if (ent) {
+                      combustibleActualizado = ent.getCombustible();
+                      //console.log("Combustible: ", combustibleActualizado)
+                   }
+
+                    query.actualizarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, 
+                                                //entidad.combustible
+                                                combustibleActualizado, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
                         if(error) {
                             console.error('Error al insertar entidad:', error);
                             return;
                         }
                     });
                 }
+               /*for(let key in salas[data.sala].estadoJuego.entidades) {
+                    const entidadServidor = salas[data.sala].estadoJuego.entidades[key];
+                    query.actualizarDatosEntidades(
+                        data.sala,
+                        entidadServidor.idEntidad, 
+                        entidadServidor.x, 
+                        entidadServidor.y, 
+                        entidadServidor.angulo, 
+                        entidadServidor.velocidad, 
+                        entidadServidor.velocidadMaxima, 
+                        entidadServidor.aceleracion, 
+                        entidadServidor.combustible, 
+                        entidadServidor.piloto, 
+                        entidadServidor.observador, 
+                        entidadServidor.operador, 
+                        entidadServidor.salud, 
+                        entidadServidor.numeroAvion, 
+                        entidadServidor.torpedo, 
+                        entidadServidor.multiplicadorCombustible, 
+                        entidadServidor.despego, (error, resultados) => {
+                        
+                            if(error) {
+                            console.error('Error al insertar entidad:', error);
+                            return;
+                        }
+                    });
+               }*/
                 query.actualizarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
                     if(error) {
                         console.error('Error al insertar entidad:', error);

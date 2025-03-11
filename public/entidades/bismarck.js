@@ -7,6 +7,7 @@ import socket from '../socket.js';
 class Bismarck extends Entidad {
     constructor(bismarckData) {
         super(
+            bismarckData.idEntidad,
             Number(bismarckData.x), //xInicial
             Number(bismarckData.y), //yInicial
             bismarckData.velocidad,
@@ -43,7 +44,7 @@ class Bismarck extends Entidad {
         this.popa.setVisible(false);
 
         this.helices = escena.physics.add.sprite(this.objeto.x, this.objeto.y, null).setOrigin(0.5, 0.5);
-        this.helices.body.setSize(10,10);
+        this.helices.body.setSize(5,5);
         this.helices.setVisible(false);
 
         this.updateHitboxes();
@@ -90,13 +91,20 @@ class Bismarck extends Entidad {
                 cantidadMuniciones: 10,
             })
         ];
+
+        this.indicadorSalud = this.escena.add.text(this.objeto.x, this.objeto.y - 30, `Vida: ${this.salud}`, {
+            fontSize: "16px",
+            fill: "#ff0000",
+            fontWeight: "bold",
+            backgroundColor: "#ffffff"
+        }).setOrigin(0.5);
     }
 
     updateHitboxes() {
         const angleRad = this.objeto.rotation;
         const offsetProa = 90; // Distancia desde el centro hacia la proa
         const offsetPopa = -85; // Distancia desde el centro hacia la popa
-        const offsetHelices = -150; // Distancia desde el centro hacia las hélices
+        const offsetHelices = -160; // Distancia desde el centro hacia las hélices
 
         // Posición de la proa
         this.proa.x = this.objeto.x + Math.cos(angleRad) * offsetProa;
@@ -130,13 +138,6 @@ class Bismarck extends Entidad {
         this.escena.camaraMinimapa.ignore(this.indicadorCombustible);
         this.indicadorCombustible.setVisible(false);
         this.indicadorCombustible.setScrollFactor(0);
-
-        this.indicadorSalud = this.escena.add.text(this.objeto.x, this.objeto.y - 30, `Vida: ${this.salud}`, {
-            fontSize: "16px",
-            fill: "#ff0000",
-            fontWeight: "bold",
-            backgroundColor: "#ffffff"
-        }).setOrigin(0.5);
         
         this.cursorMira.on('pointerdown', () => {
             if (this.cursorMira.visible) {
@@ -325,6 +326,14 @@ class Bismarck extends Entidad {
         }
         
     }
+
+    /*getDatos() {
+        const datosBase = super.getDatos();
+        return {
+            datosBase,
+            salud: this.salud
+        }
+    }*/
 
     mover(controles) {
         if (!this.objeto) {
