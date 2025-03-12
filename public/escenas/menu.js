@@ -22,8 +22,8 @@ class Menu extends Phaser.Scene {
             document.getElementById("indicador-turno").innerText = "Esperando jugadores...";
         });
 
-        // Evento cuando el servidor indica que el rol ya está asignado
-        socket.on("errorUnirse", (data) => {
+        // Evento cuando el servidor indica un error.
+        socket.on("error", (data) => {
             alert(data.mensaje);
         });
 

@@ -47,18 +47,18 @@ class ServidorJuego {
             this.salas[sala] = new Sala([], new EstadoJuego(), "iniciando")
         } // Si existe sala pero ya hay dos jugadores jugando, salgo.
         else if (this.salas[sala].cantidadJugadores() === 2) {
-            socket.emit("errorUnirse", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
+            socket.emit("error", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
             return;
         } // Si existe sala, hay 1 jugador esperando pero esta recuperando partida, salgo.
         else if (this.salas[sala].getEstadoPartida() === "recuperando") {
-            socket.emit("errorUnirse", { mensaje: `Un jugador esta recuperando la partida de la ${sala}. Por favor elige otra sala o ingrese en la opcion de recuperar partida.` });
+            socket.emit("error", { mensaje: `Un jugador esta recuperando la partida de la ${sala}. Por favor elige otra sala o ingrese en la opcion de recuperar partida.` });
             return;
         }
 
         // Verificar si el rol ya está ocupado
         const rolOcupado = this.salas[sala].getJugadores().some(jugador => jugador.getRol() === rol);
         if (rolOcupado) {
-            socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
+            socket.emit("error", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
             return; // No permite que el jugador se una si el rol ya está ocupado
         }
 
@@ -234,9 +234,9 @@ class ServidorJuego {
             mensaje: data.mensaje
         });
 
-         // Eliminar la sala del objeto salas
-         delete this.salas[data.sala];
-         console.log(`🗑️ Sala ${data.sala} eliminada tras finalizar el juego.`);
+        // Eliminar la sala del objeto salas
+        delete this.salas[data.sala];
+        console.log(`🗑️ Sala ${data.sala} eliminada tras finalizar el juego.`);
     }
 
     hundirAvion(socket, data) {
@@ -337,146 +337,153 @@ class ServidorJuego {
     }
 
     recuperarPartida(socket, { sala, rol }) {
-        this.query.obtenerDatosDeSala(sala, (error, resultados) => {
+        this.query.existeSala(sala, (error, resultados) => {
             if (error) {
-                console.error('Error al recuperar datos sala:', error);
-                return;
-            }
-            let nombreUsuario = null;
-            resultados.forEach(resultado => {
-                if (resultado.idSala === sala && resultado.rol === rol) {
-                    console.log("Nombre Usuario BD:", resultado.nombreJugador);
-                    nombreUsuario = resultado.nombreJugador;
-                }
-            })
-
-            //Si no existe la sala, la inicializo con estado "recuperando". 
-            if (!this.salas[sala]) {
-                this.salas[sala] = new Sala([], new EstadoJuego(), "recuperando")
-            } // Si existe sala pero ya hay dos jugadores jugando, salgo.
-            else if (this.salas[sala].cantidadJugadores() === 2) {
-                socket.emit("errorUnirse", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
-                return;
-            } // Si existe sala, hay 1 jugador esperando pero esta iniciando partida, salgo.
-            else if (this.salas[sala].getEstadoPartida() === "iniciando") {
-                socket.emit("errorUnirse", { mensaje: `Un jugador esta iniciando nueva partida en ${sala}. Por favor intente mas tarde o ingrese en la opcion de iniciar partida.` });
+                console.log('Error:', error);
                 return;
             }
 
-            // Verificar si el rol ya está ocupado
-            const rolOcupado = this.salas[sala].getJugadores().some(jugador => jugador.rol === rol);
-            if (rolOcupado) {
-                socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
-                return; // No permite que el jugador se una si el rol ya está ocupado
-            }
-
-            // Agregar jugador a la sala
-            this.salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
-            socket.join(sala);
-
-            console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
-            console.log("Detalles del jugador:", {
-                socketId: socket.id,
-                nombreUsuario,
-                rol,
-                sala,
-            });
-
-            // Notificar a todos en la sala
-            this.io.to(sala).emit("jugadorConectado", {
-                mensaje: `${nombreUsuario} se unió como ${rol}`,
-                jugadores: this.salas[sala].getJugadores().map(j => ({ nombreUsuario: j.nombreUsuario, rol: j.rol }))
-            });
-
-            // Si solo hay un jugador, enviar evento de espera
-            if (this.salas[sala].cantidadJugadores() === 1) {
-                this.io.to(sala).emit("esperandoJugadores");
-            }
-
-            // Recuperar juego cuando hay dos jugadores
-            if (this.salas[sala].cantidadJugadores() === 2) {
-                // Inicializar el estado del juego con el ultimo estado guardado
-
-
-                this.query.obtenerDatosEntidades(sala, (error, resultados) => {
+            if (resultados.length > 0) {
+                this.query.obtenerDatosDeSala(sala, (error, resultados) => {
                     if (error) {
-                        console.error('Error al recuperar datos entidades:', error);
+                        //alert('Error al recuperar datos sala:', error);
+                        console.error('Error al recuperar datos sala:', error);
                         return;
                     }
-                    //try - catch
-
-
-                    const estadoJuego = this.salas[sala].getEstadoJuego();
-
+                    let nombreUsuario = null;
                     resultados.forEach(resultado => {
-                        //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
-                        console.log("Entidad", resultado);
-                        if (resultado.idEntidad === "bismarck") {
-                            estadoJuego.agregarEntidad("bismarck", new Bismarck({
-                                idEntidad: resultado.idEntidad,
-                                x: resultado.posX,
-                                y: resultado.posY,
-                                velocidad: resultado.velocidad,
-                                velocidadMaxima: resultado.velocidadMaxima,
-                                angulo: resultado.angulo,
-                                aceleracion: resultado.aceleracion,
-                                salud: resultado.salud,
-                                objeto: null,
-                                combustible: resultado.combustible
-                            }));
-                        } else if (resultado.idEntidad === "portaaviones") {
-                            estadoJuego.agregarEntidad("portaaviones", new Portaaviones({
-                                idEntidad: resultado.idEntidad,
-                                x: resultado.posX,
-                                y: resultado.posY,
-                                velocidad: resultado.velocidad,
-                                velocidadMaxima: resultado.velocidadMaxima,
-                                angulo: resultado.angulo,
-                                aceleracion: resultado.aceleracion,
-                                salud: resultado.salud,
-                                objeto: null,
-                                combustible: resultado.combustible,
-                                seleccionado: false
-                            }));
-                        } else if (resultado.idEntidad === "puerto") {
-                            estadoJuego.setPuerto(new Puerto(resultado.posX, resultado.posY));
-                        } else {
-                            estadoJuego.agregarEntidad(`avion_${i}`, new Avion({
-                                idEntidad: resultado.idEntidad,
-                                x: resultado.posX,
-                                y: resultado.posY,
-                                velocidad: resultado.velocidad,
-                                velocidadMaxima: resultado.velocidadMaxima,
-                                angulo: resultado.angulo,
-                                aceleracion: resultado.aceleracion,
-                                objeto: null,
-                                combustible: resultado.combustible,
-                                piloto: resultado.piloto,
-                                observador: resultado.observador,
-                                operador: resultado.operador,
-                                salud: resultado.salud,
-                                numeroAvion: resultado.numeroAvion,
-                                torpedo: resultado.torpedo,
-                                multiplicadorCombustible: resultado.multiplicadorCombustible,
-                                despego: resultado.despego,
-                                seleccionado: false
-                            }));
+                        if (resultado.idSala === sala && resultado.rol === rol) {
+                            console.log("Nombre Usuario BD:", resultado.nombreJugador);
+                            nombreUsuario = resultado.nombreJugador;
                         }
                     })
 
-                    this.io.to(sala).emit("juegoIniciado", {
-                        mensaje: "El juego se ha restaurado",
-                        jugadores: this.salas[sala].getJugadores(),
-                        estadoJuego,
+                    //Si no existe la sala, la inicializo con estado "recuperando". 
+                    if (!this.salas[sala]) {
+                        this.salas[sala] = new Sala([], new EstadoJuego(), "recuperando")
+                    } // Si existe sala pero ya hay dos jugadores jugando, salgo.
+                    else if (this.salas[sala].cantidadJugadores() === 2) {
+                        socket.emit("error", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
+                        return;
+                    } // Si existe sala, hay 1 jugador esperando pero esta iniciando partida, salgo.
+                    else if (this.salas[sala].estadoPartida === "iniciando") {
+                        socket.emit("error", { mensaje: `Un jugador esta iniciando nueva partida en ${sala}. Por favor intente mas tarde o ingrese en la opcion de iniciar partida.` });
+                        return;
+                    }
+
+                    // Verificar si el rol ya está ocupado
+                    const rolOcupado = this.salas[sala].jugadores.some(jugador => jugador.rol === rol);
+                    if (rolOcupado) {
+                        socket.emit("error", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
+                        return; // No permite que el jugador se una si el rol ya está ocupado
+                    }
+
+                    // Agregar jugador a la sala
+                    this.salas[sala].agregarJugador(new Jugador(socket.id, nombreUsuario, rol));
+                    socket.join(sala);
+
+                    console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
+                    console.log("Detalles del jugador:", {
+                        socketId: socket.id,
+                        nombreUsuario,
+                        rol,
+                        sala,
                     });
 
-                    console.log(`🎮 Juego recuperado en ${sala}`);
-                    console.log("Detalles del juego:", {
-                        sala,
-                        jugadores: this.salas[sala].getJugadores(),
-                        estadoJuego,
+                    // Notificar a todos en la sala
+                    this.io.to(sala).emit("jugadorConectado", {
+                        mensaje: `${nombreUsuario} se unió como ${rol}`,
+                        jugadores: this.salas[sala].getJugadores().map(j => ({ nombreUsuario: j.nombreUsuario, rol: j.rol }))
                     });
+
+                    // Si solo hay un jugador, enviar evento de espera
+                    if (this.salas[sala].cantidadJugadores() === 1) {
+                        this.io.to(sala).emit("esperandoJugadores");
+                    }
+
+                    // Recuperar juego cuando hay dos jugadores
+                    if (this.salas[sala].cantidadJugadores() === 2) {
+                        // Inicializar el estado del juego con el ultimo estado guardado
+                        this.query.obtenerDatosEntidades(sala, (error, resultados) => {
+                            if (error) {
+                                console.error('Error al recuperar datos entidades:', error);
+                                return;
+                            }
+                            //try - catch
+
+                            const estadoJuego = this.salas[sala].getEstadoJuego();
+
+                            resultados.forEach(resultado => {
+                                //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
+                                console.log("Entidad", resultado);
+                                if (resultado.idEntidad === "bismarck") {
+                                    estadoJuego.agregarEntidad("bismarck", new Bismarck({
+                                        idEntidad: resultado.idEntidad,
+                                        x: resultado.posX,
+                                        y: resultado.posY,
+                                        velocidad: resultado.velocidad,
+                                        velocidadMaxima: resultado.velocidadMaxima,
+                                        angulo: resultado.angulo,
+                                        aceleracion: resultado.aceleracion,
+                                        salud: resultado.salud,
+                                        combustible: resultado.combustible
+                                    }));
+                                } else if (resultado.idEntidad === "portaaviones") {
+                                    estadoJuego.agregarEntidad("portaaviones", new Portaaviones({
+                                        idEntidad: resultado.idEntidad,
+                                        x: resultado.posX,
+                                        y: resultado.posY,
+                                        velocidad: resultado.velocidad,
+                                        velocidadMaxima: resultado.velocidadMaxima,
+                                        angulo: resultado.angulo,
+                                        aceleracion: resultado.aceleracion,
+                                        salud: resultado.salud,
+                                        combustible: resultado.combustible,
+                                        seleccionado: false
+                                    }));
+                                } else if (resultado.idEntidad === "puerto") {
+                                    estadoJuego.setPuerto(new Puerto(resultado.posX, resultado.posY));
+                                } else {
+                                    estadoJuego.agregarEntidad(`avion_${i}`, new Avion({
+                                        idEntidad: resultado.idEntidad,
+                                        x: resultado.posX,
+                                        y: resultado.posY,
+                                        velocidad: resultado.velocidad,
+                                        velocidadMaxima: resultado.velocidadMaxima,
+                                        angulo: resultado.angulo,
+                                        aceleracion: resultado.aceleracion,
+                                        combustible: resultado.combustible,
+                                        piloto: resultado.piloto,
+                                        observador: resultado.observador,
+                                        operador: resultado.operador,
+                                        salud: resultado.salud,
+                                        numeroAvion: resultado.numeroAvion,
+                                        torpedo: resultado.torpedo,
+                                        multiplicadorCombustible: resultado.multiplicadorCombustible,
+                                        despego: resultado.despego,
+                                        seleccionado: false
+                                    }));
+                                }
+                            })
+
+                            this.io.to(sala).emit("juegoIniciado", {
+                                mensaje: "El juego se ha restaurado",
+                                jugadores: this.salas[sala].getJugadores(),
+                                estadoJuego,
+                            });
+
+                            console.log(`🎮 Juego recuperado en ${sala}`);
+                            console.log("Detalles del juego:", {
+                                sala,
+                                jugadores: this.salas[sala].getJugadores(),
+                                estadoJuego
+                            });
+                        });
+                    }
                 });
+            } else {
+                socket.emit("error", { mensaje: `${sala} no contiene datos guardados. Por favor elige otra sala o inicie una nueva partida.` });
+                return;
             }
         });
     }
