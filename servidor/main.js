@@ -32,7 +32,7 @@ async function conectarBaseDatos() {
         try {
             db.conectar();
             const conexion = db.getConexion();
-            conexion.connect((err) => {
+            conexion.connect((err) => { //funcion asincrona, devuelve resolve(query) en caso de exito, o reject(error) en caso contrario. 
                 if (err) {
                     console.error('❌ ERROR AL CONECTAR BASE DE DATOS:', err.message);
                     reject(err);
@@ -51,7 +51,7 @@ async function conectarBaseDatos() {
 
 async function iniciarServidor() {
     try {
-        const query = await conectarBaseDatos();
+        const query = await conectarBaseDatos(); //Pausar ejecucion hasta que Promise de conectarBaseDatos() se resuelva o se rechace. 
         const servidorJuego = new ServidorJuego(io, query);
         servidorJuego.establecerConexion();
 
