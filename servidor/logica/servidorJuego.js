@@ -128,7 +128,7 @@ class ServidorJuego {
                     x: posicionPortaaviones.x,
                     y: posicionPortaaviones.y,
                     velocidad: 0,
-                    velocidadMaxima: 150,
+                    velocidadMaxima: 120,
                     angulo: 0,
                     aceleracion: 2,
                     combustible: 10000,
