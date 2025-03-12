@@ -178,13 +178,10 @@ class EscenaPrincipal extends Phaser.Scene {
         });
 
         socket.on("finJuego", (data) => {
-
-            this.physics.pause();
-
             this.mensaje = this.add.text(
                 this.cameras.main.centerX,
                 200, 
-               `${data.mensaje}\nPresione Enter para volver al menu principal.`,
+                `${data.mensaje}`,
                 {
                     fontSize: '32px',
                     fontStyle: 'bold',
@@ -197,14 +194,9 @@ class EscenaPrincipal extends Phaser.Scene {
                 }).setOrigin(0.5)
                 .setScrollFactor(0);
                 
-                const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-                enter.on('down', () => {
-                    this.scene.stop('EscenaPrincipal');
-                    this.scene.stop('EscenaAtaque');
-                    this.scene.start('Menu');
-                    this.mensaje.destroy();
-                    this.input.keyboard.removeKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-                });         
+               this.scene.pause();
+
+               //AGREGAR TRANSICION A OTRA ESCENA O MENU PRINCIPAL
         });
 
         socket.on("partidaGuardada", (data) => {
@@ -392,7 +384,7 @@ class EscenaPrincipal extends Phaser.Scene {
                 sala: this.sala, 
                 mensaje: mensaje + "\n¡¡¡VICTORIA DEL EQUIPO ROJO!!!"
             });
-        //this.scene.pause("EscenaPrincipal");
+        this.scene.pause("EscenaPrincipal");
     }
 
     victoriaEquipoAzul(mensaje) {
@@ -400,7 +392,7 @@ class EscenaPrincipal extends Phaser.Scene {
             sala: this.sala,
             mensaje: mensaje + "\n¡¡¡VICTORIA DEL EQUIPO AZUL!!!"
         });
-        //this.scene.pause("EscenaPrincipal");
+        this.scene.pause("EscenaPrincipal");
     }
 
     impactoEntidad(entidad, proyectil) {
@@ -505,7 +497,7 @@ class EscenaPrincipal extends Phaser.Scene {
         }
         
         if (this.equipoAzul.length === 1) {
-            const mensaje = "El equipo azul no tiene aviones disponibles."
+            mensaje = "El equipo azul no tiene aviones disponibles."
             this.victoriaBismarck(mensaje);
         }
     }
