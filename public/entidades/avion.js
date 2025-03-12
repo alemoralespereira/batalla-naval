@@ -244,22 +244,6 @@ class Avion extends Entidad {
         }
     }
 
-   /* getDatos() {
-        const datosBase = super.getDatos();
-        return {
-            datosBase,
-            piloto: this.piloto,
-            observador: this.observador,
-            operador: this.operador,
-            seleccionado: this.seleccionado,
-            numeroAvion: this.numeroAvion,
-            torpedo: this.torpedo,
-            multiplicadorCombustible: this.multiplicadorCombustible,
-            despego: this.despego,
-            salud: this.salud
-        }
-    }*/
-
     mover(controles) {
         if (!this.objeto) {
             console.error(`Sprite no encontrado para la entidad`);
