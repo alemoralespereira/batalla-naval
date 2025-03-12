@@ -43,7 +43,7 @@ try {
     console.error('❌ Failed to initialize database:', error.message);
 }
 
-const servidorJuego = new ServidorJuego(io, query).establecerConexion();
+new ServidorJuego(io, query).establecerConexion();
 
 // Iniciar servidor en el puerto
 servidor.listen(PUERTO, () => {

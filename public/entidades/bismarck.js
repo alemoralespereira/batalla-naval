@@ -397,13 +397,13 @@ class Bismarck extends Entidad {
         if (this.salud <= 0) {
             this.salud = 0;
             console.log("Bismarck destruido!");
-            this.escena.sound.play('explosion'); // Sonido de explosión
-            this.objeto.destroy(); // Eliminar el barco si se queda sin salud
+            this.escena.sound.play('explosion');
+            this.objeto.destroy();
             this.objeto = null;
 
             delete this.escena.entidades["bismarck"];
 
-            this.escena.victoriaEquipoAzul();
+            this.escena.victoriaEquipoAzul("Bismarck ha sigo destruido");
         }
     }
 }

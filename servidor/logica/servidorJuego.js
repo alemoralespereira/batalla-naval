@@ -233,6 +233,10 @@ class ServidorJuego {
         this.io.to(data.sala).emit("finJuego", {
             mensaje: data.mensaje
         });
+
+         // Eliminar la sala del objeto salas
+         delete this.salas[data.sala];
+         console.log(`🗑️ Sala ${data.sala} eliminada tras finalizar el juego.`);
     }
 
     hundirAvion(socket, data) {
@@ -333,7 +337,7 @@ class ServidorJuego {
     }
 
     recuperarPartida(socket, { sala, rol }) {
-        query.obtenerDatosDeSala(sala, (error, resultados) => {
+        this.query.obtenerDatosDeSala(sala, (error, resultados) => {
             if (error) {
                 console.error('Error al recuperar datos sala:', error);
                 return;
@@ -394,7 +398,7 @@ class ServidorJuego {
                 // Inicializar el estado del juego con el ultimo estado guardado
 
 
-                query.obtenerDatosEntidades(sala, (error, resultados) => {
+                this.query.obtenerDatosEntidades(sala, (error, resultados) => {
                     if (error) {
                         console.error('Error al recuperar datos entidades:', error);
                         return;
@@ -489,7 +493,7 @@ class ServidorJuego {
 
         //console.log("📥 Datos recibidos del cliente:", data.sala, jugadores, data.estadoJuego);
 
-        query.existeSala(data.sala, (error, resultados) => {
+        this.query.existeSala(data.sala, (error, resultados) => {
             if (error) {
                 console.log('Error:', error);
                 return;
@@ -497,7 +501,7 @@ class ServidorJuego {
 
             if (resultados.length > 0) {
                 jugadores.forEach(jugador => {
-                    query.actualizarDatosSala(data.sala, jugador.nombreUsuario, jugador.rol, fecha, (error, resultados) => {
+                    this.query.actualizarDatosSala(data.sala, jugador.nombreUsuario, jugador.rol, fecha, (error, resultados) => {
                         if (error) {
                             console.log('Error al sobreescribir datos:', error);
                             return;
@@ -516,7 +520,7 @@ class ServidorJuego {
                         //console.log("Combustible: ", combustibleActualizado)
                     }
 
-                    query.actualizarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion,
+                    this.query.actualizarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion,
                         //entidad.combustible
                         combustibleActualizado, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
                             if (error) {
@@ -527,7 +531,7 @@ class ServidorJuego {
                 }
                 /*for(let key in this.salas[data.sala].estadoJuego.entidades) {
                      const entidadServidor = this.salas[data.sala].estadoJuego.entidades[key];
-                     query.actualizarDatosEntidades(
+                     this.query.actualizarDatosEntidades(
                          data.sala,
                          entidadServidor.idEntidad, 
                          entidadServidor.x, 
@@ -552,7 +556,7 @@ class ServidorJuego {
                          }
                      });
                 }*/
-                query.actualizarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
+                this.query.actualizarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
                     if (error) {
                         console.error('Error al insertar entidad:', error);
                         return;
@@ -561,7 +565,7 @@ class ServidorJuego {
                 });
             } else {
                 jugadores.forEach(jugador => {
-                    query.insertarDatosSala(data.sala, jugador.nombreUsuario, jugador.rol, fecha, (error, resultados) => {
+                    this.query.insertarDatosSala(data.sala, jugador.nombreUsuario, jugador.rol, fecha, (error, resultados) => {
                         if (error) {
                             console.error('Error al insertar datos:', error);
                             return;
@@ -571,14 +575,14 @@ class ServidorJuego {
                 });
                 for (let key in entidades) {
                     const entidad = entidades[key];
-                    query.insertarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, entidad.combustible, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
+                    this.query.insertarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, entidad.combustible, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
                         if (error) {
                             console.error('Error al insertar entidad:', error);
                             return;
                         }
                     });
                 }
-                query.insertarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
+                this.query.insertarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
                     if (error) {
                         console.error('Error al insertar entidad:', error);
                         return;

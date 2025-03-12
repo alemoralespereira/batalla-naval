@@ -3,21 +3,17 @@ import socket from '../socket.js';
 class Menu extends Phaser.Scene {
     constructor() {
         super({ key: 'Menu' });
-
-        // Exponemos la función "unirseSala" para que pueda ser llamada desde "index.html"
         window.unirseSala = this.unirseSala.bind(this);
         window.recuperarPartida = this.recuperarPartida.bind(this);
+        window.reiniciarJuego = this.reiniciarJuego.bind(this);
     }
-
-    create() {
+       create() {
         // Evento cuando un jugador se une a la sala
         socket.on("jugadorConectado", (data) => {
             console.log(`${this.nombreUsuario} se unió a la sala ${this.sala}`);
-
-            // Mostrar pantalla de juego con mensaje de espera si aún falta un jugador
-            document.getElementById("pantalla-login").style.display = "none";
-            document.getElementById("pantalla-recuperar").style.display = "none";
-            document.getElementById("contenedor-juego").style.display = "block";
+            document.getElementById("pantalla-login").classList.remove("activa");
+            document.getElementById("pantalla-recuperar").classList.remove("activa");
+            document.getElementById("contenedor-juego").style.display = "block"; // Este sigue usando display porque no tiene clase activa
             document.getElementById("indicador-turno").innerText = "Esperando jugadores...";
         });
 
@@ -26,25 +22,24 @@ class Menu extends Phaser.Scene {
             document.getElementById("indicador-turno").innerText = "Esperando jugadores...";
         });
 
-        // Evento cuando el servidor indica que el rol ya esta asignado
+        // Evento cuando el servidor indica que el rol ya está asignado
         socket.on("errorUnirse", (data) => {
-            alert(data.mensaje); // Muestra el error al usuario
+            alert(data.mensaje);
         });
 
         // Evento cuando el juego inicia
         socket.on("juegoIniciado", (data) => {
-            document.getElementById("pantalla-login").style.display = "none"; // Ocultar login
-            document.getElementById("pantalla-recuperar").style.display = "none";
-            document.getElementById("contenedor-juego").style.display = "block"; // Mostrar juego
+            document.getElementById("pantalla-login").classList.remove("activa");
+            document.getElementById("pantalla-recuperar").classList.remove("activa");
+            document.getElementById("contenedor-juego").style.display = "block";
             document.getElementById("indicador-turno").innerText = "";
-
-            // Inicializar el Juego
             this.scene.start('EscenaPrincipal', { estadoJuego: data.estadoJuego, rol: this.rol, sala: this.sala, nombreUsuario: this.nombreUsuario });
         });
 
+        // Establecer estado inicial
+        this.reiniciarJuego();
     }
 
-    // Función para unirse a la sala
     unirseSala() {
         const nombreUsuario = document.getElementById("nombreUsuario").value;
         const sala = document.getElementById("sala").value;
@@ -68,11 +63,9 @@ class Menu extends Phaser.Scene {
         this.rol = rol;
 
         console.log("📡 Enviando solicitud para unirse:", { nombreUsuario, sala, rol });
-        // Emitir evento para unirse a la sala con el rol seleccionado
         socket.emit("unirseSala", { nombreUsuario, sala, rol });
     }
 
-    // Funcion para recuperar una partida
     recuperarPartida() {
         const sala = document.getElementById('sala-recuperar').value;
         const rol = document.getElementById('rol-recuperar').value;
@@ -91,14 +84,22 @@ class Menu extends Phaser.Scene {
 
         console.log("📡 Enviando solicitud para recuperar partida:", { sala, rol });
         socket.emit("recuperarPartida", { sala, rol });
-        /*socket.emit('recuperarPartida', { sala, rol }, (respuesta) => {
-            if (respuesta.success) {
-                document.getElementById('pantalla-recuperar').classList.remove('activa');
-                document.getElementById('contenedor-juego').style.display = 'block';
-            } else {
-                alert('No se encontró una partida guardada en esta sala.');
-            }
-        });*/
+    }
+
+    reiniciarJuego() {
+        // Restablecer al estado inicial: mostrar solo el menú principal
+        document.getElementById("pantalla-menu").classList.add("activa");
+        document.getElementById("pantalla-login").classList.remove("activa");
+        document.getElementById("pantalla-recuperar").classList.remove("activa");
+        document.getElementById("contenedor-juego").style.display = "none";
+        document.getElementById("indicador-turno").innerText = "";
+
+        // Limpiar los campos de entrada
+        document.getElementById("nombreUsuario").value = "";
+        document.getElementById("sala").value = "";
+        document.getElementById("rol").value = "";
+        document.getElementById("sala-recuperar").value = "";
+        document.getElementById("rol-recuperar").value = "";
     }
 }
 
