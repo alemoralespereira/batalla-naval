@@ -409,6 +409,7 @@ io.on("connection", (socket) => {
     socket.on("recuperarPartida", ({ sala, rol }) => {
         query.obtenerDatosDeSala(sala, (error, resultados) => {
             if(error) {
+                alert('Error al recuperar datos sala:', error);
                 console.error('Error al recuperar datos sala:', error);
                 return;
             }
