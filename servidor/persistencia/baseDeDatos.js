@@ -4,11 +4,11 @@ const config = require('../config.js');
 class BaseDeDatos {
     constructor() {
         this.conexion = mysql.createConnection({
-            host: config.DB_HOST,// || 'mysql-aba0.railway.internal',
-            port: config.DB_PORT,// || 3306,
-            database: config.DB_NAME,// ||'railway',
-            user: config.DB_USER,// || 'root',
-            password: config.DB_PASSWORD// || 'aIrDMWaeYaHFpVaQwxrkhWgGqSoITrcn'
+            host: config.DB_HOST,
+            port: config.DB_PORT,
+            database: config.DB_NAME,
+            user: config.DB_USER,
+            password: config.DB_PASSWORD
         })
     }
 

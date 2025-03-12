@@ -10,7 +10,6 @@ class ServidorJuego {
     constructor(io, query) {
         this.io = io;
         this.query = query;
-        // Almacenar información de las salas y jugadores
         this.salas = {};
     }
 
@@ -30,13 +29,10 @@ class ServidorJuego {
 
             socket.on("actualizarCombustible", this.actualizarCombustible.bind(this, socket));
 
-            //socket.on("actualizarDatosEntidad", this.actualizarDatosEntidad.bind(this, socket))
-
             socket.on("recuperarPartida", this.recuperarPartida.bind(this, socket));
 
             socket.on("guardarPartida", this.guardarPartida.bind(this, socket));
 
-            // Desconexión del jugador
             socket.on("disconnect", this.desconectar.bind(this, socket));
         });
     }
@@ -276,7 +272,6 @@ class ServidorJuego {
             if (resultados.length > 0) {
                 this.query.obtenerDatosDeSala(sala, (error, resultados) => {
                     if (error) {
-                        //alert('Error al recuperar datos sala:', error);
                         console.error('Error al recuperar datos sala:', error);
                         return;
                     }
@@ -339,12 +334,10 @@ class ServidorJuego {
                                 console.error('Error al recuperar datos entidades:', error);
                                 return;
                             }
-                            //try - catch
 
                             const estadoJuego = this.salas[sala].getEstadoJuego().setEntidades({});
 
                             resultados.forEach(resultado => {
-                                //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
                                 console.log("Entidad", resultado);
                                 if (resultado.idEntidad === "bismarck") {
                                     estadoJuego.agregarEntidad("bismarck", new Bismarck({
@@ -428,8 +421,6 @@ class ServidorJuego {
         const jugadores = this.salas[data.sala].getJugadores();
         const entidades = data.estadoJuego.entidades;
 
-        //console.log("📥 Datos recibidos del cliente:", data.sala, jugadores, data.estadoJuego);
-
         this.query.existeSala(data.sala, (error, resultados) => {
             if (error) {
                 console.log('Error:', error);
@@ -447,18 +438,14 @@ class ServidorJuego {
                 })
                 for (let key in entidades) {
                     const entidad = entidades[key];
-                    //console.log("Actualizando datos para entidad:", entidad);
                     let combustibleActualizado = entidad.combustible;
                     const ent = this.salas[data.sala].getEstadoJuego().getEntidad(key);
-                    //console.log("Entidad: ", ent);
 
                     if (ent) {
                         combustibleActualizado = ent.getCombustible();
-                        //console.log("Combustible: ", combustibleActualizado)
                     }
 
                     this.query.actualizarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion,
-                        //entidad.combustible
                         combustibleActualizado, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
                             if (error) {
                                 console.error('Error al insertar entidad:', error);
@@ -485,7 +472,14 @@ class ServidorJuego {
                 });
                 for (let key in entidades) {
                     const entidad = entidades[key];
-                    this.query.insertarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, entidad.combustible, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
+                    let combustibleActualizado = entidad.combustible;
+                    const ent = this.salas[data.sala].getEstadoJuego().getEntidad(key);
+
+                    if (ent) {
+                        combustibleActualizado = ent.getCombustible();
+                    }
+
+                    this.query.insertarDatosEntidades(data.sala, key, entidad.x, entidad.y, entidad.angulo, entidad.velocidad, entidad.velocidadMaxima, entidad.aceleracion, combustibleActualizado, entidad.piloto, entidad.observador, entidad.operador, entidad.salud, entidad.numeroAvion, entidad.torpedo, entidad.multiplicadorCombustible, entidad.despego, (error, resultados) => {
                         if (error) {
                             console.error('Error al insertar entidad:', error);
                             return;
