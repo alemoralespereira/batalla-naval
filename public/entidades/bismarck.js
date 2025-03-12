@@ -27,13 +27,12 @@ class Bismarck extends Entidad {
     init(escena) {
         this.escena = escena;
 
-        this.sonidoMotor = this.escena.sound.add('barco', { loop: true, volume: 0.4 });
+        this.sonidoMotor = this.escena.sound.add('barco', { loop: true, volume: 0.2 });
 
         this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "bismarck").setOrigin(0.5, 0.5);
         this.objeto.body.setCircle(40, 210, 85);
         this.objeto.setVisible(true);
         this.objeto.setCollideWorldBounds(true);
-        //this.objeto.setBounce(1);
 
         this.proa = escena.physics.add.sprite(this.objeto.x, this.objeto.y, null).setOrigin(0.5, 0.5);
         this.proa.body.setCircle(40, -25, -25);
@@ -190,8 +189,6 @@ class Bismarck extends Entidad {
         this.escena.entidades.portaaviones.objeto.setVisible(false);
         this.escena.puntoPortaaviones.setVisible(false);
         this.escena.equipoAzul.forEach((avion) => {
-            //console.log('Avion:', avion);
-            //console.log('Objetivo del avion:', avion.objeto);
             avion.objeto.setVisible(false);
             if(avion instanceof Avion) {
                 const nombreAvion = `avion_${avion.numeroAvion}`;
@@ -202,7 +199,7 @@ class Bismarck extends Entidad {
         const panel = new Panel(this.escena);
         const botonesArmas = {};
 
-        // Botones para seleccionar armas biscmarck
+        // Botones para seleccionar armas bismarck
         for (let i = 0; i < this.escena.entidades.bismarck.armas.length; i++) {
             const arma = this.escena.entidades.bismarck.armas[i];
             const x = -100;
@@ -292,16 +289,10 @@ class Bismarck extends Entidad {
             const coordenadasMouse = this.escena.getCoordenadasMouse();
            this.cursorMira.setPosition(coordenadasMouse.x, coordenadasMouse.y);
 
-            //if(this.xInicial != this.objeto.x || this.yInicial != this.objeto.y) {    
-            if(this.velocidad > 0) {
-                // console.log("Adentro del if velocidad: ", this.velocidad);    
+            if(this.velocidad > 0) { 
                 this.indicadorCombustible.setVisible(true);
                 this.indicadorCombustible.setText(`COMBUSTIBLE BISMARCK: ${Math.max(this.combustible, 0)}`);
             }
-
-            /*if(this.vida > 0) {
-                this.indicadorSalud.setVisible(true);
-            }*/
 
             this.armas.forEach((arma) => {
                 if (arma.rangoAtaque) {
@@ -328,22 +319,12 @@ class Bismarck extends Entidad {
         
     }
 
-    /*getDatos() {
-        const datosBase = super.getDatos();
-        return {
-            datosBase,
-            salud: this.salud
-        }
-    }*/
-
     mover(controles) {
         if (!this.objeto) {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
-//        this.calcularCombustible();
-
-        
+   
         if(this.combustible > 0) {
             // Movimiento con las teclas W, A, S, D
             if (controles.izquierda.isDown || controles.derecha.isDown || controles.arriba.isDown || controles.abajo.isDown) {
@@ -371,11 +352,6 @@ class Bismarck extends Entidad {
                 // Actualizar las posiciones
                 this.objeto.setVelocityX(velocityX);
                 this.objeto.setVelocityY(velocityY);
-
-                // Actualizar las posiciones internas
-                // this.x = this.objeto.x;
-                // this.y = this.objeto.y;
-                // this.angulo = this.objeto.angle;
             } else {
                 this.objeto.setAngularVelocity(0);
             }

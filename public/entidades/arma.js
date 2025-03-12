@@ -20,7 +20,7 @@ class Arma {
             this.rango,
             0x00ff00,
             0.2
-        ).setStrokeStyle(2, 0x00ff00).setOrigin(0.5, 0.5); // .setOrigin(this.origenX, this.origenY);
+        ).setStrokeStyle(2, 0x00ff00).setOrigin(0.5, 0.5);
 
         const circulo = new Phaser.Geom.Circle(x, y, this.rango);
         const coordenadasMouse = this.escena.getCoordenadasMouse();
@@ -67,7 +67,7 @@ class Arma {
             proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectilLigero")
             proyectil.angle = origenAngulo;
         }
-        //const proyectil = this.escena.physics.add.sprite(origenX, origenY, "proyectil");
+        
         this.escena.proyectiles.add(proyectil);
         proyectil.daño = this.daño;
         proyectil.nombre = this.nombre;

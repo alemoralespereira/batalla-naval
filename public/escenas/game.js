@@ -13,9 +13,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.sala = data.sala;
         this.rol = data.rol;
         this.estadoJuego = data.estadoJuego;
-        //this.nombreUsuario = data.nombreUsuario;
-        //console.log("Datos crudos recibidos:", JSON.stringify(data.estadoJuego.entidades.avion_1, null, 2));
-
+       
         //********************************************************/
         // CREAR ENTIDADES
         this.entidades = {
@@ -56,7 +54,7 @@ class EscenaPrincipal extends Phaser.Scene {
         this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
 
         this.puerto = this.physics.add.sprite(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0.5, 0.5);
-        this.puerto.body.setSize(50,50);
+        this.puerto.body.setSize(100,100);
         this.puerto.setAngle(this.estadoJuego.puerto.angulo);
 
         this.physics.world.setBounds(0, 0, 3200, 3200);
@@ -70,7 +68,7 @@ class EscenaPrincipal extends Phaser.Scene {
 
         //*********************************************************************************/
         // MINI MAPA 
-        this.camaraMinimapa = this.cameras.add(700, 500, 200, 200) // (x, y, width, height)
+        this.camaraMinimapa = this.cameras.add(700, 500, 200, 200)
             .setZoom(0.0625)
             .setBackgroundColor('rgba(135, 206, 235, 0.5)')
             .setName('minimapa');
@@ -122,7 +120,7 @@ class EscenaPrincipal extends Phaser.Scene {
         for (let i = 1; i < 11; i++) {
             if(this.entidades[`avion_${i}`]){
                 const avion = this.entidades[`avion_${i}`];
-                avion.init(this); // Inicializar el avión
+                avion.init(this);
                 avion.objeto.setCollideWorldBounds(true);
                 this.equipoAzul.push(avion);
                 if(!avion.piloto)
@@ -153,7 +151,7 @@ class EscenaPrincipal extends Phaser.Scene {
         });
 
         //********************************************************/
-        // EVENTO PARA ESCUCHAR AL SERVIDOR
+        // EVENTOS PARA ESCUCHAR AL SERVIDOR
         socket.on("actualizarPosicionEntidad", (data) => {
             if (!this.entidades[data.nombreEntidad]) {
                 console.error(`Entidad ${data.nombreEntidad} no encontrada.`);
@@ -301,7 +299,6 @@ class EscenaPrincipal extends Phaser.Scene {
         
         // Evento para guardar partida.
         this.controles.guardar.on('down', () => {
-            // Actualizar this.estadoJuego con el estado actual de las entidades
             this.estadoJuego.entidades.bismarck = {
                 x: this.entidades.bismarck.objeto.x,
                 y: this.entidades.bismarck.objeto.y,
@@ -512,7 +509,6 @@ class EscenaPrincipal extends Phaser.Scene {
     }
 
     aterrizar(avion) {
-        //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto} despego: ${avion.despego}`);
         console.log(`Avion ${avion.numeroAvion} aterrizando en portaaviones`);
 
         this.entidades[`avion_${avion.numeroAvion}`].piloto = false;
@@ -533,14 +529,12 @@ class EscenaPrincipal extends Phaser.Scene {
 
     //Autoriza la superposicion, si el avion esta volando (tiene piloto) y ya despego(La ubicacion del avion esta fuera del portaaviones)
     autorizarAterrizaje(avion){
-        //console.log(`Avion: ${avion.numeroAvion} volando: ${avion.piloto} despego: ${avion.despego}`);
         return (avion.piloto === true && avion.despego === true);
     }   
 
     //Funcion para determinar si entidad2 esta dentro del rango de vision de entidad1
     estaEnRangoDeVision(entidad1, entidad2) {
         if (!entidad1 || !entidad2) {
-            //console.warn("Intento de calcular rango de vision en entidades destruidas.");
             return false;
         }
 
@@ -564,7 +558,6 @@ class EscenaPrincipal extends Phaser.Scene {
         }
     }
        
-
     // Función para seleccionar entidad y cambiar de cámara.
     seleccionarEntidad(nombreEntidad) {
         if (this.rol === "portaaviones" && this.entidades[nombreEntidad]) {
@@ -573,9 +566,8 @@ class EscenaPrincipal extends Phaser.Scene {
                     this.entidades[key].seleccionado = false;  // Desmarcar todos los aviones
                 }
             }
-            this.nombreEntidadSeleccionada = nombreEntidad;       // Guardar el nombre de la entidad seleccionada
+            this.nombreEntidadSeleccionada = nombreEntidad;
             this.entidades[nombreEntidad].seleccionado = true;
-            //this.cambiarObjetivoCamara(nombreEntidad);    // Cambiar la cámara para seguir la entidad seleccionada
             console.log(`Entidad seleccionada: ${nombreEntidad}`);
         } else {
             console.error(`Entidad ${nombreEntidad} no encontrada o rol incorrecto.`);
@@ -602,27 +594,15 @@ class EscenaPrincipal extends Phaser.Scene {
             entidad.mover(this.controles);
             // Datos que se enviarán al servidor
             const datosMovimiento = {
-                idUsuario: socket.id, // ID del socket (usuario)
-                nombreUsuario: this.nombreUsuario, // Nombre del usuario
-                rol: this.rol, // Rol del jugador (bismarck o portaaviones)
-                sala: this.sala, // Sala a la que pertenece el jugador
-                nombreEntidad, // Entidad que se está moviendo (bismarck, portaaviones, avion_X)
-                x: entidad.objeto.x, // Posición X de la entidad
-                y: entidad.objeto.y, // Posición Y de la entidad
-                angulo: entidad.objeto.angle // Ángulo de la entidad
+                sala: this.sala,
+                nombreEntidad,
+                x: entidad.objeto.x,
+                y: entidad.objeto.y,
+                angulo: entidad.objeto.angle
             };
-
-            // Log para depuración: Verificar los datos antes de enviarlos
-            //console.log("📤 Datos que se enviarán al servidor:", datosMovimiento);
-
             // Emitir el evento con todos los datos requeridos
             socket.emit("moverEntidad", datosMovimiento);
-
-            // Log para depuración: Confirmar que los datos se enviaron
-            //console.log("✅ Datos enviados correctamente al servidor.");
-        } else {
-            // console.error("No hay entidad seleccionada o no es válida.");
-        }     
+        } 
     }
 }
 

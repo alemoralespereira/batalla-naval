@@ -21,7 +21,6 @@ class Portaaviones extends Entidad {
         this.escena = escena; 
         this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "portaaviones").setScale(1.5).setOrigin(0.5, 0.5);
         this.objeto.setCollideWorldBounds(true);
-        //this.objeto.setBounce(1); 
 
         this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 500, 500).setOrigin(0.5, 0.5);
         this.objeto.rangoVision = this.rangoVision;
@@ -175,7 +174,6 @@ class Portaaviones extends Entidad {
             console.error(`Sprite no encontrado para la entidad`);
             return;
         }
-    //    this.calcularCombustible();
 
         if(this.combustible > 0) {
 
@@ -205,11 +203,6 @@ class Portaaviones extends Entidad {
                 // Actualizar las posiciones
                 this.objeto.setVelocityX(velocityX);
                 this.objeto.setVelocityY(velocityY);
-
-                // Actualizar las posiciones internas
-                // this.x = this.objeto.x;
-                // this.y = this.objeto.y;
-                // this.angulo = this.objeto.angle;
         
             } else {
                 this.objeto.setAngularVelocity(0);
@@ -220,8 +213,6 @@ class Portaaviones extends Entidad {
             this.objeto.setVelocityY(0);
         }
     }
-
-
 
 }
 

@@ -1,10 +1,3 @@
-// Minimo
-// Destruir sprite explosion
-
-// Plus
-// Determinar velocidad y distancia proyectil
-// Representar más de un avión
-
 class EscenaAtaque extends Phaser.Scene {
     constructor() {
         super({ key: 'EscenaAtaque' });

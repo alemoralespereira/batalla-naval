@@ -17,25 +17,7 @@ class Entidad {
     
     update() {
         this.calcularCombustible();
-
-       /* socket.emit("actualizarDatosEntidad", {
-            sala: this.escena.sala,
-            entidad: this.getDatos()
-        })    */  
     }
-
-   /* getDatos() {
-        return {
-            idEntidad: this.idEntidad,
-            xInicial: this.xInicial,
-            yInicial: this.yInicial,
-            velocidad: this.velocidad,
-            velocidadMaxima: this.velocidadMaxima,
-            anguloInicial: this.anguloInicial,
-            aceleracion: this.aceleracion,
-            combustible: this.combustible
-        };
-    }*/
 
     calcularCombustible() {
         // Calcular la distancia recorrida usando las velocidades

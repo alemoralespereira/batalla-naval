@@ -31,14 +31,6 @@ class Avion extends Entidad {
     init(escena) {
         this.escena = escena;
 
-       // Cargar el sonido del motor del avión
-        this.sonidoMotor = this.escena.sound.add('motoravion', { loop: true, volume: 0.5 });
-
-        if (!this.sonidoMotor.isPlaying) {
-            this.sonidoMotor.play(); // Inicia el sonido del motor al despegar
-        }
-
-
         this.arma = new Arma({
             nombre: "Torpedo avion",
             rango: 500,
@@ -49,8 +41,6 @@ class Avion extends Entidad {
             escena: this.escena
         });
 
-        //this.torpedo = true;  // Cada avión obtiene un torpedo al despegar
-       // console.log(`Inicializando avion_${this.numeroAvion} con x=${this.xInicial}, y=${this.yInicial}`);
         if (this.objeto) {
             // Si el sprite ya existe, actualiza su posición
             this.objeto.x = this.escena.entidades.portaaviones.objeto.x;
@@ -59,7 +49,6 @@ class Avion extends Entidad {
 
         } else {
             this.objeto = escena.physics.add.sprite(this.xInicial, this.yInicial, "avion").setScale(0.2).setOrigin(0.5, 0.5);
-            //this.objeto.setVisible(true);
             if(this.velocidad > 0) {
                 // Calcular nueva velocidad
                 const angle = this.anguloInicial;
@@ -72,13 +61,9 @@ class Avion extends Entidad {
                 this.objeto.angle = this.anguloInicial;
             }
             
-
-            //console.log(`Sprite creado para avion_${this.numeroAvion} en x=${this.objeto.x}, y=${this.objeto.y}`);
             this.rangoVision = escena.add.zone(this.xInicial, this.yInicial, 250, 250).setOrigin(0.5, 0.5);
             this.objeto.rangoVision = this.rangoVision;
             
-            // this.graphics = escena.add.graphics();
-            // this.dibujarRangoVision();
             this.indicadorCombustible = escena.add.text(10, (460 + (this.numeroAvion * 30)), `COMBUSTIBLE:  ${this.combustible}`,{
                 fontSize: '20px',
                 fill: '#ffffff'
@@ -89,7 +74,6 @@ class Avion extends Entidad {
         }      
 
         super.init(escena);
-
     }
 
     disparar(){
@@ -97,11 +81,10 @@ class Avion extends Entidad {
         const destinoX = this.objeto.x + Math.cos(anguloRad) * this.arma.rango;
         const destinoY = this.objeto.y + Math.sin(anguloRad) * this.arma.rango;
 
-        console.log(`Avión ${this.numeroAvion} disparando torpedo.`);
-        this.escena.sound.play('disparoAvion'); // Reproducir sonido de disparo
+        this.escena.sound.play('disparoAvion');
         this.arma.dispararArma(this.objeto.x, this.objeto.y, this.objeto.angle, destinoX, destinoY);
 
-        this.torpedo = false; // Torpedo agotado hasta recargar
+        this.torpedo = false;
     }
 
     recibirDaño(daño) {
@@ -120,7 +103,6 @@ class Avion extends Entidad {
             if (this.escena.rol === "portaaviones") {
                 this.escena.botonesAviones[this.numeroAvion - 1].setBackgroundColor('rgba(195, 19, 19, 0.9)');
                 this.escena.botonesAviones[this.numeroAvion - 1].disableInteractive();
-                //this.avion.indicadorCombustible.setVisible(false);
             }
 
             delete this.escena.entidades[nombreEntidad];
@@ -137,7 +119,7 @@ class Avion extends Entidad {
 
     calcularRangoVision() {
         if (this.observador) {
-            this.rangoVision.width = 500; // el doble de cuando se crea la "zone"
+            this.rangoVision.width = 500;
             this.rangoVision.height = 500;
         }
     }
@@ -205,7 +187,7 @@ class Avion extends Entidad {
             }
         }
         
-        //Si la diferencia entre la posicion del avion y la posicion del portaaviones sobre el eje de las X, es mayor a 150, es porque despegó.
+        //Si la diferencia entre la posicion del avion y la posicion del portaaviones sobre el eje de las X, es mayor a 250, es porque despegó.
         const distanciaAvionAPortaaviones = Phaser.Math.Distance.Between(
             this.objeto.x,
             this.objeto.y,
@@ -217,6 +199,12 @@ class Avion extends Entidad {
         }     
        
         if(this.piloto && this.escena.rol === "portaaviones") {
+            
+            this.sonidoMotor = this.escena.sound.add('motoravion', { loop: true, volume: 0.2 });
+            if (!this.sonidoMotor.isPlaying) {
+                this.sonidoMotor.play();
+            }
+
             const datosMovimiento = {
                 nombreUsuario: this.escena.nombreUsuario,
                 rol: this.escena.rol,
