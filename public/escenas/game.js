@@ -54,9 +54,11 @@ class EscenaPrincipal extends Phaser.Scene {
         //*********************************************************************************/
         // MAPA PRINCIPAL, CAMARA Y LIMITES DEL MUNDO
         this.mapa = this.add.image(0, 0, "mapa").setOrigin(0, 0);
-        //this.puerto = this.add.image(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
-        this.puerto = this.physics.add.sprite(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0, 0);
-        console.log(this.puerto);
+
+        this.puerto = this.physics.add.sprite(this.estadoJuego.puerto.x, this.estadoJuego.puerto.y, "puerto").setOrigin(0.5, 0.5);
+        this.puerto.body.setSize(50,50);
+        this.puerto.setAngle(this.estadoJuego.puerto.angulo);
+
         this.physics.world.setBounds(0, 0, 3200, 3200);
         this.physics.world.setBoundsCollision(true, true, true, true);
 
@@ -91,6 +93,7 @@ class EscenaPrincipal extends Phaser.Scene {
             const nombreAvion = `avion_${i}`;
             if(this.entidades[nombreAvion]) {
                 this.puntosAviones[nombreAvion] = this.add.circle(0,0,50,0x0000ff);
+                this.puntosAviones[nombreAvion].setVisible(false);
                 this.puntosEntidades.add(this.puntosAviones[nombreAvion]);
                 this.cameras.main.ignore(this.puntosAviones[nombreAvion]);
             }
@@ -346,7 +349,8 @@ class EscenaPrincipal extends Phaser.Scene {
 
             this.estadoJuego.puerto = {
                 x: this.puerto.x,
-                y: this.puerto.y
+                y: this.puerto.y,
+                angulo: this.estadoJuego.puerto.angulo
             };
 
             const datosGuardar = {

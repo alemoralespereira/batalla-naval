@@ -1,7 +1,8 @@
 class Puerto {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+    constructor(x, y, angulo) {
+        this.x = Number(x);
+        this.y = Number(y);
+        this.angulo = Number(angulo);
     }
 
     getX() {
@@ -10,6 +11,10 @@ class Puerto {
 
     getY() {
         return this.y;
+    }
+
+    getAngulo() {
+        return this.angulo;
     }
 }
 

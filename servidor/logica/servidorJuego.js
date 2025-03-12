@@ -251,76 +251,6 @@ class ServidorJuego {
         });
     }
 
-    // actualizarDatosEntidades(socket, data) {
-    //     // Verificar si la sala existe
-    //     if (!this.salas[data.sala]) {
-    //         console.error(`❌ Sala ${data.sala} no encontrada.`);
-    //         return;
-    //     }
-
-    //     // Obtener el idEntidad desde data.entidad
-    //     const entidadData = data.entidad;
-    //     if (!entidadData) {
-    //         console.error(`❌ No se encontró información de la entidad en los datos recibidos para la sala ${data.sala}`);
-    //         return;
-    //     }
-
-    //     const idEntidad = entidadData.datosBase?.idEntidad || entidadData.idEntidad;
-    //     if (!idEntidad) {
-    //         console.error(`❌ No se encontró idEntidad en los datos de la entidad para la sala ${data.sala}`);
-    //         return;
-    //     }
-
-    //     // Acceder al objeto de entidades de la sala
-    //     const entidades = this.salas[data.sala].estadoJuego.entidades;
-
-    //     // Obtener la entidad específica usando el idEntidad
-    //     const entidad = entidades[idEntidad];
-
-    //     if (entidad) {
-    //         // Actualizar atributos básicos de la entidad
-    //         if (entidadData.xInicial !== undefined) entidad.setX(entidadData.xInicial);
-    //         if (entidadData.yInicial !== undefined) entidad.setY(entidadData.yInicial);
-    //         if (entidadData.velocidad !== undefined) entidad.setVelocidad(entidadData.velocidad);
-    //         if (entidadData.velocidadMaxima !== undefined) entidad.setVelocidadMaxima(entidadData.velocidadMaxima);
-    //         if (entidadData.anguloInicial !== undefined) entidad.setAngulo(entidadData.anguloInicial);
-    //         if (entidadData.aceleracion !== undefined) entidad.setAceleracion(entidadData.aceleracion);
-    //         if (entidadData.combustible !== undefined) entidad.setCombustible(entidadData.combustible);
-    //         console.log("Entidad", entidad, "combustible", entidadData.combustible);
-
-    //         // Actualizar atributos específicos de las clases hijas
-    //         if (entidadData.salud !== undefined && typeof entidad.setSalud === 'function') {
-    //             entidad.setSalud(entidadData.salud);
-    //         }
-    //         if (entidadData.piloto !== undefined && typeof entidad.setPiloto === 'function') {
-    //             entidad.setPiloto(entidadData.piloto);
-    //         }
-    //         if (entidadData.observador !== undefined && typeof entidad.setObservador === 'function') {
-    //             entidad.setObservador(entidadData.observador);
-    //         }
-    //         if (entidadData.operador !== undefined && typeof entidad.setOperador === 'function') {
-    //             entidad.setOperador(entidadData.operador);
-    //         }
-    //         if (entidadData.numeroAvion !== undefined && typeof entidad.setNumeroAvion === 'function') {
-    //             entidad.setNumeroAvion(entidadData.numeroAvion);
-    //         }
-    //         if (entidadData.torpedo !== undefined && typeof entidad.setTorpedo === 'function') {
-    //             entidad.setTorpedo(entidadData.torpedo);
-    //         }
-    //         if (entidadData.multiplicadorCombustible !== undefined && typeof entidad.setMultiplicadorCombustible === 'function') {
-    //             entidad.setMultiplicadorCombustible(entidadData.multiplicadorCombustible);
-    //         }
-    //         if (entidadData.despego !== undefined && typeof entidad.setDespego === 'function') {
-    //             entidad.setDespego(entidadData.despego);
-    //         }
-    //         if (entidadData.seleccionado !== undefined && typeof entidad.setSeleccionado === 'function') {
-    //             entidad.setSeleccionado(entidadData.seleccionado);
-    //         }
-    //     } else {
-    //         console.error(`❌ Entidad ${idEntidad} no encontrada en sala ${data.sala}`);
-    //     }
-    // }
-
     actualizarCombustible(socket, data) {
         // Verificar si la sala existe
         if (!this.validarSala(data.sala)) {
@@ -442,7 +372,7 @@ class ServidorJuego {
                                         seleccionado: false
                                     }));
                                 } else if (resultado.idEntidad === "puerto") {
-                                    estadoJuego.setPuerto(new Puerto(resultado.posX, resultado.posY));
+                                    estadoJuego.setPuerto(new Puerto(resultado.posX, resultado.posY, resultado.angulo));
                                 } else {
                                     estadoJuego.agregarEntidad(resultado.idEntidad, new Avion({
                                         idEntidad: resultado.idEntidad,
@@ -536,34 +466,7 @@ class ServidorJuego {
                             }
                         });
                 }
-                /*for(let key in this.salas[data.sala].estadoJuego.entidades) {
-                     const entidadServidor = this.salas[data.sala].estadoJuego.entidades[key];
-                     this.query.actualizarDatosEntidades(
-                         data.sala,
-                         entidadServidor.idEntidad, 
-                         entidadServidor.x, 
-                         entidadServidor.y, 
-                         entidadServidor.angulo, 
-                         entidadServidor.velocidad, 
-                         entidadServidor.velocidadMaxima, 
-                         entidadServidor.aceleracion, 
-                         entidadServidor.combustible, 
-                         entidadServidor.piloto, 
-                         entidadServidor.observador, 
-                         entidadServidor.operador, 
-                         entidadServidor.salud, 
-                         entidadServidor.numeroAvion, 
-                         entidadServidor.torpedo, 
-                         entidadServidor.multiplicadorCombustible, 
-                         entidadServidor.despego, (error, resultados) => {
-                         
-                             if(error) {
-                             console.error('Error al insertar entidad:', error);
-                             return;
-                         }
-                     });
-                }*/
-                this.query.actualizarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
+                this.query.actualizarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, data.estadoJuego.puerto.angulo, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
                     if (error) {
                         console.error('Error al insertar entidad:', error);
                         return;
@@ -589,7 +492,7 @@ class ServidorJuego {
                         }
                     });
                 }
-                this.query.insertarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, null, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
+                this.query.insertarDatosEntidades(data.sala, 'puerto', data.estadoJuego.puerto.x, data.estadoJuego.puerto.y, data.estadoJuego.puerto.angulo, null, null, null, null, null, null, null, null, null, null, null, null, (error, resultados) => {
                     if (error) {
                         console.error('Error al insertar entidad:', error);
                         return;
@@ -620,14 +523,14 @@ class ServidorJuego {
 
     crearPuerto() {
         const esquinas = [
-            { x: 0, y: 0 },
-            { x: 2800, y: 0 },
-            { x: 0, y: 2800 },
-            { x: 2800, y: 2800 }
+            { x: 140, y: 130, angulo: 90},      // Arriba izquierda 
+            { x: 3060, y: 130, angulo: 180},    // Arriba derecha 
+            { x: 140, y: 3100, angulo: 0 },     // Abajo izquierda
+            { x: 3060, y: 3100, angulo: -90 }   // Abajo derecha
         ];
         const posicion = esquinas[Math.floor(Math.random() * 4)];
 
-        return new Puerto(posicion.x, posicion.y);
+        return new Puerto(posicion.x, posicion.y, posicion.angulo);
     }
 
     generarPosicionBismarck(puerto) {
