@@ -48,7 +48,7 @@ try {
     
 } catch (error) {
     console.error('❌ Failed to initialize database:', error.message);
-}
+    }
 
 function posicionRandomPuerto() {
     const esquinas = [
@@ -61,7 +61,7 @@ function posicionRandomPuerto() {
     return esquinas[Math.floor(Math.random() * 4)];
 }
 
-function posicionRandomBismarck(posicionPuerto){    
+function posicionRandomBismarck(posicionPuerto) {    
     const distanciaMinPuerto = 2000;
     let posicionBismarck;
     let distancia;
@@ -82,7 +82,7 @@ function posicionRandomBismarck(posicionPuerto){
     return posicionBismarck;
 }
 
-function posicionRandomPortaaviones(posicionBismarck, posicionPuerto){
+function posicionRandomPortaaviones(posicionBismarck, posicionPuerto) {
     const distanciaMinBismarck = 2000;
     const distanciaMinPuerto = 1500;
     let posicionPortaaviones;
@@ -119,18 +119,18 @@ io.on("connection", (socket) => {
             salas[sala] = { jugadores: [], estadoJuego: { entidades: {} }, estadoPartida: "iniciando" };
         } // Si existe sala pero ya hay dos jugadores jugando, salgo.
             else if (salas[sala].jugadores.length === 2) { 
-                socket.emit("errorUnirse", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
+                socket.emit("error", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
                 return;
             } // Si existe sala, hay 1 jugador esperando pero esta recuperando partida, salgo.
                 else if (salas[sala].estadoPartida === "recuperando") {
-                    socket.emit("errorUnirse", { mensaje: `Un jugador esta recuperando la partida de la ${sala}. Por favor elige otra sala o ingrese en la opcion de recuperar partida.`});
+                    socket.emit("error", { mensaje: `Un jugador esta recuperando la partida de la ${sala}. Por favor elige otra sala o ingrese en la opcion de recuperar partida.`});
                     return;
                 }
 
         // Verificar si el rol ya está ocupado
         const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
         if (rolOcupado) {
-            socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
+            socket.emit("error", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
             return; // No permite que el jugador se una si el rol ya está ocupado
         }
 
@@ -316,7 +316,7 @@ io.on("connection", (socket) => {
             sala: data.sala,
             nombreEntidad: data.nombreEntidad,
         });
-    })
+    });
 
     socket.on("actualizarCombustible", (data) => {
         // Verificar si la sala existe
@@ -333,7 +333,7 @@ io.on("connection", (socket) => {
             console.error(`❌ Entidad ${data.idEntidad} no encontrada en sala ${data.sala}`);
         }
         
-    })
+    });
 
         /*socket.on("actualizarDatosEntidad", (data) => {
             // Verificar si la sala existe
@@ -407,157 +407,171 @@ io.on("connection", (socket) => {
 
 
     socket.on("recuperarPartida", ({ sala, rol }) => {
-        query.obtenerDatosDeSala(sala, (error, resultados) => {
+
+        query.existeSala(sala, (error, resultados) => {
             if(error) {
-                //alert('Error al recuperar datos sala:', error);
-                console.error('Error al recuperar datos sala:', error);
+                console.log('Error:', error);
                 return;
             }
-            let nombreUsuario = null;
-            resultados.forEach(resultado => {
-                if(resultado.idSala === sala && resultado.rol === rol)
-                {
-                    console.log("Nombre Usuario BD:", resultado.nombreJugador);
-                    nombreUsuario = resultado.nombreJugador;
-                }
-            })
+     
+            if(resultados.length > 0) {
 
-            //Si no existe la sala, la inicializo con estado "recuperando". 
-            if (!salas[sala]) {
-                salas[sala] = { jugadores: [], estadoJuego: { entidades: {} }, estadoPartida: "recuperando" };
-            } // Si existe sala pero ya hay dos jugadores jugando, salgo.
-                else if (salas[sala].jugadores.length === 2) {
-                    socket.emit("errorUnirse", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
-                    return;
-                } // Si existe sala, hay 1 jugador esperando pero esta iniciando partida, salgo.
-                    else if (salas[sala].estadoPartida === "iniciando") {
-                        socket.emit("errorUnirse", { mensaje: `Un jugador esta iniciando nueva partida en ${sala}. Por favor intente mas tarde o ingrese en la opcion de iniciar partida.`});
-                        return;
-                    }
-            
-            // Verificar si el rol ya está ocupado
-            const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
-            if (rolOcupado) {
-                socket.emit("errorUnirse", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
-                return; // No permite que el jugador se una si el rol ya está ocupado
-            }
-
-             // Agregar jugador a la sala
-            salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
-            socket.join(sala);
-
-            console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
-            console.log("Detalles del jugador:", {
-                socketId: socket.id,
-                nombreUsuario,
-                rol,
-                sala,
-            });
-
-            // Notificar a todos en la sala
-            io.to(sala).emit("jugadorConectado", {
-                mensaje: `${nombreUsuario} se unió como ${rol}`,
-                jugadores: salas[sala].jugadores.map(j => ({ nombreUsuario: j.nombreUsuario, rol: j.rol }))
-            });
-
-            // Si solo hay un jugador, enviar evento de espera
-            if (salas[sala].jugadores.length === 1) {
-                io.to(sala).emit("esperandoJugadores");
-            }
-
-            // Recuperar juego cuando hay dos jugadores
-            if (salas[sala].jugadores.length === 2) {
-                // Inicializar el estado del juego con el ultimo estado guardado
-            
-              
-                query.obtenerDatosEntidades(sala, (error, resultados) => {
+                query.obtenerDatosDeSala(sala, (error, resultados) => {
                     if(error) {
-                        console.error('Error al recuperar datos entidades:', error);
+                        //alert('Error al recuperar datos sala:', error);
+                        console.error('Error al recuperar datos sala:', error);
                         return;
                     }
-                    //try - catch
-                
-            
-                    const entidades = {};
-                    let puerto = null;
-                    
+                    let nombreUsuario = null;
                     resultados.forEach(resultado => {
-                        //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
-                        console.log("Entidad", resultado);
-                        if(resultado.idEntidad === "bismarck") {
-                            entidades.bismarck = new Bismarck({
-                                idEntidad: resultado.idEntidad,
-                                x: resultado.posX,
-                                y: resultado.posY,
-                                velocidad: resultado.velocidad,
-                                velocidadMaxima: resultado.velocidadMaxima,
-                                angulo: resultado.angulo,
-                                aceleracion: resultado.aceleracion,
-                                salud: resultado.salud,
-                                objeto: null,
-                                combustible: resultado.combustible
-                            });
-                        } else if(resultado.idEntidad === "portaaviones") {
-                                entidades.portaaviones = new Portaaviones({
-                                    idEntidad: resultado.idEntidad,
-                                    x: resultado.posX,
-                                    y: resultado.posY,
-                                    velocidad: resultado.velocidad,
-                                    velocidadMaxima: resultado.velocidadMaxima,
-                                    angulo: resultado.angulo,
-                                    aceleracion: resultado.aceleracion,
-                                    salud: resultado.salud,
-                                    objeto: null,
-                                    combustible: resultado.combustible,
-                                    seleccionado: false
-                                });
-                            } else if (resultado.idEntidad === "puerto"){
-                                puerto = {
-                                    x: resultado.posX,
-                                    y: resultado.posY
-                                }
-                            } else {
-                                entidades[resultado.idEntidad] = new Avion({
-                                    idEntidad: resultado.idEntidad,
-                                    x: resultado.posX,
-                                    y: resultado.posY,
-                                    velocidad: resultado.velocidad,
-                                    velocidadMaxima: resultado.velocidadMaxima,
-                                    angulo: resultado.angulo,
-                                    aceleracion: resultado.aceleracion,
-                                    objeto: null,
-                                    combustible: resultado.combustible,
-                                    piloto: resultado.piloto,
-                                    observador: resultado.observador,
-                                    operador: resultado.operador,
-                                    salud: resultado.salud,
-                                    numeroAvion: resultado.numeroAvion,
-                                    torpedo: resultado.torpedo,
-                                    multiplicadorCombustible: resultado.multiplicadorCombustible,
-                                    despego: resultado.despego,
-                                    seleccionado: false
-                                });
-                            }
+                        if(resultado.idSala === sala && resultado.rol === rol)
+                        {
+                            console.log("Nombre Usuario BD:", resultado.nombreJugador);
+                            nombreUsuario = resultado.nombreJugador;
+                        }
                     })
 
-                    salas[sala].estadoJuego.entidades = entidades;
-                    salas[sala].estadoJuego.puerto = puerto;
+                    //Si no existe la sala, la inicializo con estado "recuperando". 
+                    if (!salas[sala]) {
+                        salas[sala] = { jugadores: [], estadoJuego: { entidades: {} }, estadoPartida: "recuperando" };
+                    } // Si existe sala pero ya hay dos jugadores jugando, salgo.
+                        else if (salas[sala].jugadores.length === 2) {
+                            socket.emit("error", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
+                            return;
+                        } // Si existe sala, hay 1 jugador esperando pero esta iniciando partida, salgo.
+                            else if (salas[sala].estadoPartida === "iniciando") {
+                                socket.emit("error", { mensaje: `Un jugador esta iniciando nueva partida en ${sala}. Por favor intente mas tarde o ingrese en la opcion de iniciar partida.`});
+                                return;
+                            }
+                    
+                    // Verificar si el rol ya está ocupado
+                    const rolOcupado = salas[sala].jugadores.some(jugador => jugador.rol === rol);
+                    if (rolOcupado) {
+                        socket.emit("error", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
+                        return; // No permite que el jugador se una si el rol ya está ocupado
+                    }
 
-                    io.to(sala).emit("juegoIniciado", {
-                        mensaje: "El juego se ha restaurado",
-                        jugadores: salas[sala].jugadores,
-                        estadoJuego: salas[sala].estadoJuego,
-                    });
+                    // Agregar jugador a la sala
+                    salas[sala].jugadores.push({ id: socket.id, nombreUsuario, rol });
+                    socket.join(sala);
 
-                    console.log(`🎮 Juego recuperado en ${sala}`);
-                    console.log("Detalles del juego:", {
+                    console.log(`📌 ${nombreUsuario} se unió a la sala ${sala} como ${rol}`);
+                    console.log("Detalles del jugador:", {
+                        socketId: socket.id,
+                        nombreUsuario,
+                        rol,
                         sala,
-                        jugadores: salas[sala].jugadores,
-                        estadoJuego: salas[sala].estadoJuego,
                     });
+
+                    // Notificar a todos en la sala
+                    io.to(sala).emit("jugadorConectado", {
+                        mensaje: `${nombreUsuario} se unió como ${rol}`,
+                        jugadores: salas[sala].jugadores.map(j => ({ nombreUsuario: j.nombreUsuario, rol: j.rol }))
+                    });
+
+                    // Si solo hay un jugador, enviar evento de espera
+                    if (salas[sala].jugadores.length === 1) {
+                        io.to(sala).emit("esperandoJugadores");
+                    }
+
+                    // Recuperar juego cuando hay dos jugadores
+                    if (salas[sala].jugadores.length === 2) {
+                        // Inicializar el estado del juego con el ultimo estado guardado
+                    
+                    
+                        query.obtenerDatosEntidades(sala, (error, resultados) => {
+                            if(error) {
+                                console.error('Error al recuperar datos entidades:', error);
+                                return;
+                            }
+                            //try - catch
+                        
+                    
+                            const entidades = {};
+                            let puerto = null;
+                            
+                            resultados.forEach(resultado => {
+                                //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
+                                console.log("Entidad", resultado);
+                                if(resultado.idEntidad === "bismarck") {
+                                    entidades.bismarck = new Bismarck({
+                                        idEntidad: resultado.idEntidad,
+                                        x: resultado.posX,
+                                        y: resultado.posY,
+                                        velocidad: resultado.velocidad,
+                                        velocidadMaxima: resultado.velocidadMaxima,
+                                        angulo: resultado.angulo,
+                                        aceleracion: resultado.aceleracion,
+                                        salud: resultado.salud,
+                                        objeto: null,
+                                        combustible: resultado.combustible
+                                    });
+                                } else if(resultado.idEntidad === "portaaviones") {
+                                        entidades.portaaviones = new Portaaviones({
+                                            idEntidad: resultado.idEntidad,
+                                            x: resultado.posX,
+                                            y: resultado.posY,
+                                            velocidad: resultado.velocidad,
+                                            velocidadMaxima: resultado.velocidadMaxima,
+                                            angulo: resultado.angulo,
+                                            aceleracion: resultado.aceleracion,
+                                            salud: resultado.salud,
+                                            objeto: null,
+                                            combustible: resultado.combustible,
+                                            seleccionado: false
+                                        });
+                                    } else if (resultado.idEntidad === "puerto"){
+                                        puerto = {
+                                            x: resultado.posX,
+                                            y: resultado.posY
+                                        }
+                                    } else {
+                                        entidades[resultado.idEntidad] = new Avion({
+                                            idEntidad: resultado.idEntidad,
+                                            x: resultado.posX,
+                                            y: resultado.posY,
+                                            velocidad: resultado.velocidad,
+                                            velocidadMaxima: resultado.velocidadMaxima,
+                                            angulo: resultado.angulo,
+                                            aceleracion: resultado.aceleracion,
+                                            objeto: null,
+                                            combustible: resultado.combustible,
+                                            piloto: resultado.piloto,
+                                            observador: resultado.observador,
+                                            operador: resultado.operador,
+                                            salud: resultado.salud,
+                                            numeroAvion: resultado.numeroAvion,
+                                            torpedo: resultado.torpedo,
+                                            multiplicadorCombustible: resultado.multiplicadorCombustible,
+                                            despego: resultado.despego,
+                                            seleccionado: false
+                                        });
+                                    }
+                            })
+
+                            salas[sala].estadoJuego.entidades = entidades;
+                            salas[sala].estadoJuego.puerto = puerto;
+
+                            io.to(sala).emit("juegoIniciado", {
+                                mensaje: "El juego se ha restaurado",
+                                jugadores: salas[sala].jugadores,
+                                estadoJuego: salas[sala].estadoJuego,
+                            });
+
+                            console.log(`🎮 Juego recuperado en ${sala}`);
+                            console.log("Detalles del juego:", {
+                                sala,
+                                jugadores: salas[sala].jugadores,
+                                estadoJuego: salas[sala].estadoJuego,
+                            });
+                        });
+                    }
                 });
+            } else {
+                socket.emit("error", { mensaje: `${sala} no contiene datos guardados. Por favor elige otra sala o inicie una nueva partida.`});
+                return;
             }
-        });
+        })
     });
 
     socket.on("guardarPartida", (data) => {
