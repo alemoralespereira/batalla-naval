@@ -12,6 +12,12 @@ class EstadoJuego {
         return this.entidades[idEntidad];
     }
 
+    setEntidades(entidades) {
+        this.entidades = entidades;
+
+        return this;
+    }
+
     setPuerto(puerto) {
         this.puerto = puerto;
 

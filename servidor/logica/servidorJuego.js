@@ -366,13 +366,13 @@ class ServidorJuego {
                         socket.emit("error", { mensaje: `El juego ya esta iniciado en ${sala}. Por favor elige otra sala.` });
                         return;
                     } // Si existe sala, hay 1 jugador esperando pero esta iniciando partida, salgo.
-                    else if (this.salas[sala].estadoPartida === "iniciando") {
+                    else if (this.salas[sala].getEstadoPartida() === "iniciando") {
                         socket.emit("error", { mensaje: `Un jugador esta iniciando nueva partida en ${sala}. Por favor intente mas tarde o ingrese en la opcion de iniciar partida.` });
                         return;
                     }
 
                     // Verificar si el rol ya está ocupado
-                    const rolOcupado = this.salas[sala].jugadores.some(jugador => jugador.rol === rol);
+                    const rolOcupado = this.salas[sala].getJugadores().some(jugador => jugador.getRol() === rol);
                     if (rolOcupado) {
                         socket.emit("error", { mensaje: `El rol ${rol} ya está ocupado. Elige otro.` });
                         return; // No permite que el jugador se una si el rol ya está ocupado
@@ -411,7 +411,7 @@ class ServidorJuego {
                             }
                             //try - catch
 
-                            const estadoJuego = this.salas[sala].getEstadoJuego();
+                            const estadoJuego = this.salas[sala].getEstadoJuego().setEntidades({});
 
                             resultados.forEach(resultado => {
                                 //console.log(`Entidad ${resultado.idEntidad}: x=${resultado.posX}, y=${resultado.posY}`);
@@ -444,7 +444,7 @@ class ServidorJuego {
                                 } else if (resultado.idEntidad === "puerto") {
                                     estadoJuego.setPuerto(new Puerto(resultado.posX, resultado.posY));
                                 } else {
-                                    estadoJuego.agregarEntidad(`avion_${i}`, new Avion({
+                                    estadoJuego.agregarEntidad(resultado.idEntidad, new Avion({
                                         idEntidad: resultado.idEntidad,
                                         x: resultado.posX,
                                         y: resultado.posY,
