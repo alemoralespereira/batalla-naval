@@ -1,10 +1,9 @@
 const mysql = require('mysql2');
 const config = require('../config.js');
 
-class mainDB {
-
+class BaseDeDatos {
     constructor() {
-        this.connection = mysql.createConnection({
+        this.conexion = mysql.createConnection({
             host: config.DB_HOST,// || 'mysql-aba0.railway.internal',
             port: config.DB_PORT,// || 3306,
             database: config.DB_NAME,// ||'railway',
@@ -12,9 +11,9 @@ class mainDB {
             password: config.DB_PASSWORD// || 'aIrDMWaeYaHFpVaQwxrkhWgGqSoITrcn'
         })
     }
-    
-    connect() {
-        this.connection.connect((error) =>{
+
+    conectar() {
+        this.conexion.connect((error) => {
             if (error) {
                 console.error('Error al conectar a la base de datos:', error.stack);
                 return;
@@ -24,14 +23,14 @@ class mainDB {
         });
     }
 
-    getConnection() {
-        return this.connection;
+    getConexion() {
+        return this.conexion;
     }
 
     cerrarConexion() {
-        this.connection.end(); 
+        this.conexion.end();
     }
 
 }
 
-module.exports = mainDB;
+module.exports = BaseDeDatos;

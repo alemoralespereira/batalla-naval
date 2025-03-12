@@ -1,4 +1,4 @@
-class consultas {
+class Consultas {
     constructor(connection) {
         this.connection = connection;
     }
@@ -80,4 +80,4 @@ class consultas {
     
 }
 
-module.exports = consultas;
+module.exports = Consultas;
