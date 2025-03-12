@@ -124,6 +124,7 @@ class Avion extends Entidad {
             }
 
             delete this.escena.entidades[nombreEntidad];
+            this.escena.puntosAviones[`avion_${this.numeroAvion}`].setVisible(false);
         }
     }
    

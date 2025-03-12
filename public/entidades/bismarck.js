@@ -92,12 +92,14 @@ class Bismarck extends Entidad {
             })
         ];
 
+        
         this.indicadorSalud = this.escena.add.text(this.objeto.x, this.objeto.y - 30, `Vida: ${this.salud}`, {
             fontSize: "16px",
             fill: "#ff0000",
             fontWeight: "bold",
             backgroundColor: "#ffffff"
         }).setOrigin(0.5);
+        this.escena.camaraMinimapa.ignore(this.indicadorSalud);
     }
 
     updateHitboxes() {

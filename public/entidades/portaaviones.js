@@ -140,13 +140,14 @@ class Portaaviones extends Entidad {
                 this.escena.botonOperador.setVisible(false);
                 this.escena.botonObservador.setVisible(false);
                 this.escena.cambiarObjetivoCamara(this.escena.nombreEntidadSeleccionada);
+                this.escena.puntosAviones[`avion_${avion.numeroAvion}`].setVisible(true);
             }
         });
 
         //BISMARCK NO VISIBLE PARA EL EQUIPO AZUL.
         this.escena.entidades.bismarck.objeto.setVisible(false);
-        //this.escena.camaraMinimapa.ignore(this.escena.puntoBismarck);
         this.escena.puntoBismarck.setVisible(false);
+        this.escena.entidades.bismarck.indicadorSalud.setVisible(false);
     }
     
     
