@@ -299,6 +299,10 @@ io.on("connection", (socket) => {
         io.to(data.sala).emit("finJuego", {
             mensaje: data.mensaje
         });
+
+        // Eliminar la sala del objeto salas
+        delete salas[data.sala];
+        console.log(`🗑️ Sala ${data.sala} eliminada tras finalizar el juego.`);
     });
 
     socket.on("hundirAvion", (data) => {
